@@ -198,6 +198,8 @@ const HC_POR_PRATOS = {50:3, 75:5, 100:7};
 const MESES_PT = {janeiro:1,fevereiro:2,"março":3,marco:3,abril:4,maio:5,junho:6,julho:7,
   agosto:8,setembro:9,outubro:10,novembro:11,dezembro:12,jan:1,fev:2,mar:3,abr:4,mai:5,
   jun:6,jul:7,ago:8,set:9,out:10,nov:11,dez:12};
+const MES_NOME = ["","Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho",
+  "Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 /* ══════════════════════════════════════════════════════════════════════════
    HELPERS
@@ -207,6 +209,13 @@ const round2 = v => Math.round((v + Number.EPSILON) * 100) / 100;
 const titleCase = s => String(s).toLowerCase().split(" ")
   .map(w => w ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+// "julho.26" → "Julho/2026" (nome bonito do turno)
+function fmtTurno(aba){
+  const [ano, mes] = ordemMes(aba);
+  if(mes >= 1 && mes <= 12 && ano) return `${MES_NOME[mes]}/${ano}`;
+  if(mes >= 1 && mes <= 12) return MES_NOME[mes];
+  return String(aba);
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    MOTOR DE CÁLCULO (fiel ao regulamento — porte do ponhadas_clay.py)
@@ -350,6 +359,55 @@ function svgLine(labels, values){
   const poly = n>1 ? `<polyline points="${pts}" fill="none" stroke="#2f9e5f" stroke-width="3"/>` : "";
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${grid}${poly}${dots}${axis}${xlab}</svg>`;
 }
+function svgStations(postosMax, series){
+  // barras verticais por posto: fundo cinza = máximo do posto; barras coloridas = séries
+  const n = postosMax.length;
+  if(!n) return "";
+  const W = Math.max(360, n*72), H = 210, padL = 14, padR = 10, padT = 26, padB = 34;
+  const maxY = Math.max(...postosMax, 1);
+  const slot = (W-padL-padR)/n;
+  const base = H - padB;
+  const sy = v => padT + (1 - v/maxY)*(base-padT);
+  let g = "";
+  for(let i=0;i<n;i++){
+    const x0 = padL + i*slot, gw = slot*0.72, gx = x0 + (slot-gw)/2;
+    g += `<rect x="${gx}" y="${sy(postosMax[i])}" width="${gw}" height="${base-sy(postosMax[i])}" fill="#232a22" rx="3"/>`;
+    const bwi = gw/series.length;
+    series.forEach((s,si)=>{
+      const v = s.values[i]||0, bx = gx + si*bwi;
+      g += `<rect x="${bx+bwi*0.08}" y="${sy(v)}" width="${bwi*0.84}" height="${base-sy(v)}" fill="${s.color}" rx="2"/>`;
+      g += `<text x="${bx+bwi/2}" y="${sy(v)-3}" text-anchor="middle" fill="#9aa596" font-size="9">${(+v).toFixed(v%1?1:0)}</text>`;
+    });
+    g += `<text x="${x0+slot/2}" y="${base+15}" text-anchor="middle" fill="#9aa596" font-size="10">P${i+1}</text>`;
+    g += `<text x="${x0+slot/2}" y="${base+26}" text-anchor="middle" fill="#5f6a5a" font-size="9">/${postosMax[i]}</text>`;
+  }
+  let lg = "";
+  series.forEach((s,si)=>{ lg += `<rect x="${padL+si*128}" y="4" width="11" height="11" fill="${s.color}" rx="2"/><text x="${padL+si*128+16}" y="14" fill="#9aa596" font-size="11">${s.name}</text>`; });
+  lg += `<rect x="${padL+series.length*128}" y="4" width="11" height="11" fill="#232a22" rx="2"/><text x="${padL+series.length*128+16}" y="14" fill="#9aa596" font-size="11">máx. do posto</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${lg}${g}</svg>`;
+}
+function svgTotals(totals, pratos){
+  // uma barra por passada (na ordem em que ocorreram); melhor em verde; linha da média
+  const n = totals.length;
+  if(!n) return "";
+  const W = Math.max(300, n*34), H = 176, padL = 28, padR = 10, padT = 18, padB = 28;
+  const maxY = Math.max(pratos||0, ...totals, 1);
+  const base = H - padB, bw = (W-padL-padR)/n;
+  const sy = v => padT + (1 - v/maxY)*(base-padT);
+  const bestV = Math.max(...totals);
+  const media = totals.reduce((a,b)=>a+b,0)/n;
+  let g = "";
+  totals.forEach((v,i)=>{
+    const x = padL + i*bw, col = v===bestV ? "#2f9e5f" : "#e4572e";
+    g += `<rect x="${x+bw*0.15}" y="${sy(v)}" width="${bw*0.7}" height="${base-sy(v)}" fill="${col}" rx="2"/>`;
+    if(n<=30) g += `<text x="${x+bw/2}" y="${sy(v)-3}" text-anchor="middle" fill="#9aa596" font-size="9">${v}</text>`;
+    if(n<=30) g += `<text x="${x+bw/2}" y="${base+14}" text-anchor="middle" fill="#5f6a5a" font-size="9">${i+1}ª</text>`;
+  });
+  const ym = sy(media);
+  g += `<line x1="${padL}" y1="${ym}" x2="${W-padR}" y2="${ym}" stroke="#e0b83c" stroke-dasharray="4 3" stroke-width="1"/>`;
+  g += `<text x="${W-padR}" y="${ym-3}" text-anchor="end" fill="#e0b83c" font-size="9">média ${media.toFixed(1)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    RENDER
@@ -362,7 +420,7 @@ function renderTurno(){
   const el = document.getElementById("view-turno");
   const turnos = DADOS.turnos;
   if(turnoIdx >= turnos.length) turnoIdx = turnos.length - 1;
-  const options = turnos.map((t,i)=>`<option value="${i}" ${i===turnoIdx?"selected":""}>${esc(t.aba)}</option>`).join("");
+  const options = turnos.map((t,i)=>`<option value="${i}" ${i===turnoIdx?"selected":""}>${esc(fmtTurno(t.aba))}</option>`).join("");
   const turno = turnos[turnoIdx];
   const rk = rankingDoTurno(DADOS, turnoIdx);
   const lider = rk.length ? titleCase(rk[0].atirador) : "—";
@@ -465,22 +523,115 @@ function renderAtir(){
     const vit = hist.filter(h=>h.col===1).length;
     const melhorCol = Math.min(...hist.map(h=>h.col));
     const rows = hist.map(h=>`<tr>
-      <td>${esc(h.turno)}</td><td><span class="rankbubble">${h.col}</span></td>
+      <td>${esc(fmtTurno(h.turno))}</td><td><span class="rankbubble">${h.col}</span></td>
       <td>${h.total}</td><td>${h.pct_base.toFixed(2)}%</td>
       <td>${h.handicap?`<span class="tag hc">+${h.handicap}</span>`:`<span class="tag zero">—</span>`}</td>
       <td><b>${h.pct_final.toFixed(2)}%</b></td></tr>`).join("");
+
+    // todas as passadas (tentativas) do atirador, marcando a oficial (a que vale)
+    const passadas = [];
+    for(let k=0;k<DADOS.turnos.length;k++){
+      const turno = DADOS.turnos[k], pm = turno.postos_max;
+      const regs = turno.registros.filter(r=>r.atirador===atiradorSel);
+      if(!regs.length) continue;
+      const best = melhorPorAtirador(turno)[atiradorSel];
+      // ordena as passadas do turno da melhor para a pior (aguenta 20+ tentativas)
+      const comPf = regs.map(r=>{
+        let pf = 0;
+        if(pm){ for(let i=0;i<r.stations.length;i++){ if(pm[i] && r.stations[i] >= pm[i]) pf++; } }
+        return {r, pf};
+      }).sort((a,b)=> b.r.total - a.r.total || b.pf - a.pf);
+      let marcada = false;
+      comPf.forEach(({r,pf})=>{
+        const oficial = !marcada && best && r.total === best.total && pf === best.postos_fechados;
+        if(oficial) marcada = true;
+        passadas.push({turno:turno.aba, data:r.data||"", stations:r.stations, total:r.total, pf, oficial});
+      });
+    }
+    const passRows = passadas.map(pa=>`<tr class="${pa.oficial?"lead":""}">
+      <td>${esc(fmtTurno(pa.turno))}</td>
+      <td>${esc(pa.data)||"—"}</td>
+      <td style="color:var(--muted)">${pa.stations.join(" · ")}</td>
+      <td><b>${pa.total}</b></td>
+      <td>${pa.pf}</td>
+      <td>${pa.oficial?`<span class="tag hc">✓ OFICIAL</span>`:`<span class="tag zero">—</span>`}</td>
+    </tr>`).join("");
+
     body = `
       <div class="kpis">
         <div class="kpi"><div class="v">${hist.length}</div><div class="l">Turnos disputados</div></div>
         <div class="kpi accent"><div class="v">${melhorCol}º</div><div class="l">Melhor colocação</div></div>
         <div class="kpi field"><div class="v">${vit}</div><div class="l">Vitórias</div></div>
+        <div class="kpi"><div class="v">${passadas.length}</div><div class="l">Passadas (tentativas)</div></div>
       </div>
       <h3 class="sec">Evolução na temporada</h3>
-      <div class="card chartwrap">${svgLine(hist.map(h=>h.turno), hist.map(h=>h.pct_final))}</div>
-      <h3 class="sec">Histórico</h3>
+      <div class="card chartwrap">${svgLine(hist.map(h=>fmtTurno(h.turno)), hist.map(h=>h.pct_final))}</div>
+      <h3 class="sec">Histórico (resultado oficial por turno)</h3>
       <div class="tablewrap"><table>
         <thead><tr><th>Turno</th><th>Col.</th><th>Pratos</th><th>% base</th><th>HC</th><th>Pontuação</th></tr></thead>
-        <tbody>${rows}</tbody></table></div>`;
+        <tbody>${rows}</tbody></table></div>
+      <h3 class="sec">Todas as passadas</h3>
+      <p class="note" style="margin-top:0">Cada atirador pode atirar quantas vezes quiser no turno (Art. 7º).
+        Vale a de <b>maior pontuação</b> — marcada como <span class="tag hc">✓ OFICIAL</span>.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Turno</th><th>Data</th><th>Postos (por estação)</th><th>Pratos</th><th>Postos fech.</th><th>Vale?</th></tr></thead>
+        <tbody>${passRows}</tbody></table></div>
+      ${comparativos()}`;
+  }
+
+  // ── comparativos do último turno do atirador ──────────────────────────────
+  function comparativos(){
+    let kLast = -1;
+    for(let k=DADOS.turnos.length-1;k>=0;k--)
+      if(DADOS.turnos[k].registros.some(r=>r.atirador===atiradorSel)){ kLast=k; break; }
+    if(kLast < 0) return "";
+    const turno = DADOS.turnos[kLast];
+    const pm = turno.postos_max || [];
+    const rk = rankingDoTurno(DADOS, kLast);
+    const me = rk.find(x=>x.atirador===atiradorSel);
+    const best = melhorPorAtirador(turno);
+    const campo = Object.values(best);
+    const liderTotal = Math.max(...campo.map(b=>b.total));
+    const mediaLiga = campo.reduce((s,b)=>s+b.total,0)/campo.length;
+    const meBest = best[atiradorSel];
+    const fieldAvg = pm.map((_,i)=> campo.reduce((s,b)=>s+(b.stations[i]||0),0)/campo.length);
+    const regs = turno.registros.filter(r=>r.atirador===atiradorSel);
+    const totals = regs.map(r=>r.total);
+    const melhor = Math.max(...totals), pior = Math.min(...totals);
+    const media = totals.reduce((a,b)=>a+b,0)/totals.length;
+    const amplitude = melhor - pior;
+    const aproveit = turno.pratos ? melhor/turno.pratos*100 : 0;
+    const dLiga = meBest.total - mediaLiga;
+
+    const chartCmp = pm.length ? `<div class="card chartwrap">${svgStations(pm,
+      [{name:"Você", values:meBest.stations, color:"#e4572e"},
+       {name:"Média da liga", values:fieldAvg, color:"#e0b83c"}])}</div>` : "";
+    const chartOwn = pm.length ? `<div class="card chartwrap">${svgStations(pm,
+      [{name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>
+      <p class="note">Barras = seus acertos por posto; cinza = o máximo do posto. Quanto mais cheia, mais perto de <b>fechar</b> o posto.</p>` : "";
+    const chartTotals = `<h3 class="sec" style="font-size:13.5px;color:var(--muted)">Pontuação de cada passada (na ordem)</h3>
+      <div class="card chartwrap">${svgTotals(totals, turno.pratos)}</div>`;
+
+    return `
+      <h3 class="sec">📊 Comparação com os demais — último turno (${esc(fmtTurno(turno.aba))})</h3>
+      <div class="kpis">
+        <div class="kpi accent"><div class="v">${me?me.col:"—"}º</div><div class="l">Posição no turno</div></div>
+        <div class="kpi"><div class="v">${me?me.pct_base.toFixed(1):"—"}%</div><div class="l">% do líder</div></div>
+        <div class="kpi"><div class="v">${liderTotal-meBest.total}</div><div class="l">Pratos até o líder</div></div>
+        <div class="kpi field"><div class="v">${dLiga>=0?"+":""}${dLiga.toFixed(1)}</div><div class="l">vs média da liga</div></div>
+      </div>
+      ${chartCmp}
+      <h3 class="sec">🎯 Análise das suas passadas — ${esc(fmtTurno(turno.aba))}</h3>
+      <div class="kpis">
+        <div class="kpi"><div class="v">${regs.length}</div><div class="l">Passadas</div></div>
+        <div class="kpi field"><div class="v">${melhor}</div><div class="l">Melhor (pratos)</div></div>
+        <div class="kpi"><div class="v">${pior}</div><div class="l">Pior (pratos)</div></div>
+        <div class="kpi"><div class="v">${media.toFixed(1)}</div><div class="l">Média das passadas</div></div>
+        <div class="kpi accent"><div class="v">${aproveit.toFixed(0)}%</div><div class="l">Aproveitamento</div></div>
+        <div class="kpi"><div class="v">${amplitude}</div><div class="l">Amplitude (consistência)</div></div>
+      </div>
+      ${chartTotals}
+      ${chartOwn}`;
   }
   el.innerHTML = `
     <div class="controls">
