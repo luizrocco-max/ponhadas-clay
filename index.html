@@ -1,0 +1,682 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponhada's Clay League CCTSP — Ranking Oficial</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<style>
+  :root{
+    --bg:#0f1210; --panel:#161b16; --panel2:#1e241d; --line:#2b332a;
+    --txt:#e9ece6; --muted:#9aa596;
+    --accent:#e4572e;      /* terracota / clay */
+    --accent2:#e0b83c;     /* brass / dourado */
+    --field:#2f9e5f;       /* verde-campo */
+    --good:#36c46f;
+    --gold:#f5c518; --silver:#c7ccd1; --bronze:#c77b3b;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  html,body{margin:0}
+  body{font-family:"Segoe UI",system-ui,Arial,sans-serif;background:
+       radial-gradient(1200px 600px at 80% -10%, #16221a 0%, transparent 60%),
+       var(--bg);color:var(--txt);font-size:14px;-webkit-font-smoothing:antialiased}
+  a{color:var(--accent2)}
+  .wrap{max-width:1200px;margin:0 auto;padding:18px}
+
+  /* ---------- header ---------- */
+  header.top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+    background:linear-gradient(135deg,#12160f 0%,#134e31 60%,#1f6f43 100%);
+    border:1px solid var(--line);border-radius:18px;padding:20px 26px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  header.top .logo{width:64px;height:64px;flex:none}
+  .htext h1{margin:0;font-size:23px;letter-spacing:.3px;color:#fff;font-weight:800}
+  .htext h1 span{color:var(--accent2)}
+  .htext p{margin:5px 0 0;color:#cfe3d6;font-size:12.5px}
+  .badge{display:inline-block;background:var(--accent);color:#fff;font-weight:800;
+    font-size:11px;padding:4px 10px;border-radius:6px;letter-spacing:1.2px;margin-left:auto}
+
+  /* ---------- tabs ---------- */
+  nav.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}
+  .tab{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+    padding:9px 16px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;
+    transition:.15s}
+  .tab:hover{border-color:var(--accent2);color:var(--txt)}
+  .tab.active{background:linear-gradient(135deg,var(--accent),#b8431f);color:#fff;
+    border-color:transparent;box-shadow:0 4px 14px rgba(228,87,46,.35)}
+
+  /* ---------- controls ---------- */
+  .controls{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin:14px 0}
+  .ctl{display:flex;flex-direction:column;gap:5px}
+  .ctl label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  input,select{background:var(--panel2);border:1px solid var(--line);color:var(--txt);
+    padding:9px 11px;border-radius:8px;font-size:13px;outline:none;min-width:170px}
+  input:focus,select:focus{border-color:var(--accent2)}
+  button.btn{background:var(--accent);border:0;color:#fff;padding:10px 16px;border-radius:8px;
+    font-weight:700;font-size:13px;cursor:pointer}
+  button.btn:hover{filter:brightness(1.08)}
+  button.btn.ghost{background:var(--panel2);border:1px solid var(--line);color:var(--txt)}
+
+  /* ---------- kpis ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .v{font-size:25px;font-weight:800;line-height:1}
+  .kpi .l{color:var(--muted);font-size:11px;margin-top:6px;text-transform:uppercase;letter-spacing:.5px}
+  .kpi.accent .v{color:var(--accent2)}
+  .kpi.field .v{color:var(--good)}
+
+  /* ---------- podium ---------- */
+  h3.sec{margin:22px 0 10px;font-size:15px;letter-spacing:.3px}
+  .podium{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .pod{border-radius:16px;padding:18px 12px;text-align:center;position:relative;overflow:hidden;
+    border:1px solid var(--line);box-shadow:0 8px 22px rgba(0,0,0,.35)}
+  .pod.g1{background:linear-gradient(160deg,#5a4a12,#2a2410);border-color:#7a6417}
+  .pod.g2{background:linear-gradient(160deg,#3a3f45,#20242a);border-color:#4a515a}
+  .pod.g3{background:linear-gradient(160deg,#4a2f18,#241810);border-color:#6b452a}
+  .pod .medal{font-size:32px}
+  .pod .nm{font-weight:800;font-size:15px;margin-top:6px;line-height:1.2}
+  .pod .pt{font-size:26px;font-weight:800;margin-top:6px}
+  .pod.g1 .pt{color:var(--gold)} .pod.g2 .pt{color:var(--silver)} .pod.g3 .pt{color:var(--bronze)}
+  .pod .sb{font-size:11.5px;color:var(--muted);margin-top:3px}
+
+  /* ---------- chart / table ---------- */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .chartwrap{overflow-x:auto}
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+  thead th{background:var(--panel2);color:var(--muted);text-align:left;padding:10px 12px;
+    font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+    position:sticky;top:0;white-space:nowrap}
+  tbody td{padding:9px 12px;border-top:1px solid var(--line);white-space:nowrap}
+  tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
+  tbody tr.lead{background:linear-gradient(90deg,rgba(224,184,60,.12),transparent)}
+  .rankbubble{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+    border-radius:50%;background:var(--panel2);border:1px solid var(--line);font-weight:800;font-size:12px}
+  tr.lead .rankbubble{background:var(--accent2);color:#12160f;border-color:transparent}
+  .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+  .tag.hc{background:rgba(224,184,60,.16);color:var(--accent2)}
+  .tag.zero{color:var(--muted)}
+  .note{color:var(--muted);font-size:12px;margin:12px 2px;line-height:1.6}
+
+  /* ---------- admin ---------- */
+  .adminfab{position:fixed;right:18px;bottom:18px;width:48px;height:48px;border-radius:50%;
+    background:var(--panel);border:1px solid var(--line);color:var(--muted);font-size:20px;
+    cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.4);z-index:40}
+  .adminfab:hover{color:var(--accent2);border-color:var(--accent2)}
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;
+    justify-content:center;padding:18px;z-index:50}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;
+    width:100%;max-width:520px;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  .modal h2{margin:0 0 4px;font-size:18px}
+  .modal .close{float:right;cursor:pointer;color:var(--muted);font-size:20px;line-height:1}
+  .modal label{display:block;font-size:12px;color:var(--muted);margin:14px 0 5px;
+    text-transform:uppercase;letter-spacing:.5px}
+  .modal input{width:100%}
+  .msg{margin-top:12px;font-size:13px;padding:10px 12px;border-radius:8px;display:none}
+  .msg.ok{background:rgba(54,196,111,.14);color:var(--good);display:block}
+  .msg.err{background:rgba(228,87,46,.14);color:var(--accent);display:block}
+  .msg.info{background:var(--panel2);color:var(--txt);display:block}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+
+  .regras{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;line-height:1.7}
+  .regras li{margin:6px 0}
+  .foot{color:var(--muted);font-size:11.5px;text-align:center;margin:26px 0 8px}
+  @media(max-width:560px){.podium{grid-template-columns:1fr}.badge{margin:8px 0 0}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <svg class="logo" viewBox="0 0 100 100" aria-hidden="true">
+      <circle cx="50" cy="50" r="46" fill="#0f1210" stroke="#e0b83c" stroke-width="3"/>
+      <circle cx="50" cy="50" r="34" fill="none" stroke="#e4572e" stroke-width="6"/>
+      <circle cx="50" cy="50" r="20" fill="none" stroke="#e0b83c" stroke-width="6"/>
+      <circle cx="50" cy="50" r="7" fill="#e4572e"/>
+    </svg>
+    <div class="htext">
+      <h1>Ponhada's Clay League <span>CCTSP</span></h1>
+      <p>Ranking oficial da temporada · percentual + sistema de handicap</p>
+    </div>
+    <span class="badge">REGULAMENTO OFICIAL</span>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-view="turno">🏆 Ranking do Turno</button>
+    <button class="tab" data-view="temp">🏛️ Temporada · Hall of Fame</button>
+    <button class="tab" data-view="atir">👤 Por Atirador</button>
+    <button class="tab" data-view="regras">📜 Regras</button>
+  </nav>
+  <div id="updated" class="note"></div>
+
+  <section id="view-turno"></section>
+  <section id="view-temp" hidden></section>
+  <section id="view-atir" hidden></section>
+  <section id="view-regras" hidden></section>
+
+  <div class="foot">Baseado no Regulamento Oficial da Ponhada's Clay League CCTSP · dashboard estático (GitHub Pages)</div>
+</div>
+
+<button class="adminfab" id="adminBtn" title="Área do organizador">⚙️</button>
+
+<div class="overlay" id="adminModal" hidden>
+  <div class="modal">
+    <span class="close" id="adminClose">✕</span>
+    <h2>🔐 Área do organizador</h2>
+    <p class="hint">Suba a planilha <b>.xlsx</b> para recalcular o ranking. Para publicar
+      para todos, informe um <b>token do GitHub</b> (fica só no seu navegador; nunca é salvo no site).</p>
+
+    <label>Planilha de resultados (.xlsx)</label>
+    <input type="file" id="fileInput" accept=".xlsx">
+
+    <label>GitHub token (fine-grained · Contents: Read and write)</label>
+    <input type="password" id="tokenInput" placeholder="github_pat_… (opcional para publicar)">
+    <div class="hint">Sem token, o upload vale só nesta sessão do navegador (não publica para todos).</div>
+
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn" id="processBtn">Processar planilha</button>
+      <button class="btn ghost" id="publishBtn" disabled>💾 Publicar no GitHub</button>
+    </div>
+    <div class="msg" id="adminMsg"></div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════════════════════════════════════ */
+const GITHUB_REPO = "luizrocco-max/ponhadas-clay";   // dono/repo
+const DATA_PATH   = "data/ranking_data.json";
+const LIMITE_PCT  = 93.0;                              // >=93% do líder não recebe handicap (Art.14)
+const HC_POR_PRATOS = {50:3, 75:5, 100:7};
+const MESES_PT = {janeiro:1,fevereiro:2,"março":3,marco:3,abril:4,maio:5,junho:6,julho:7,
+  agosto:8,setembro:9,outubro:10,novembro:11,dezembro:12,jan:1,fev:2,mar:3,abr:4,mai:5,
+  jun:6,jul:7,ago:8,set:9,out:10,nov:11,dez:12};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════════════════════════════ */
+const isNum = v => typeof v === "number" && isFinite(v);
+const round2 = v => Math.round((v + Number.EPSILON) * 100) / 100;
+const titleCase = s => String(s).toLowerCase().split(" ")
+  .map(w => w ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOTOR DE CÁLCULO (fiel ao regulamento — porte do ponhadas_clay.py)
+══════════════════════════════════════════════════════════════════════════ */
+function melhorPorAtirador(turno){
+  const best = {};
+  const pm = turno.postos_max;
+  for(const r of turno.registros){
+    let pf = 0;
+    if(pm){ for(let i=0;i<r.stations.length;i++){ const m=pm[i]; if(m && r.stations[i] >= m) pf++; } }
+    const cand = Object.assign({}, r, {postos_fechados: pf});
+    const cur = best[r.atirador];
+    if(cur == null || cand.total > cur.total ||
+       (cand.total === cur.total && pf > cur.postos_fechados)){
+      best[r.atirador] = cand;
+    }
+  }
+  return best;
+}
+function pctBase(turno){
+  const best = melhorPorAtirador(turno);
+  let lider = 0;
+  for(const b of Object.values(best)) if(b.total > lider) lider = b.total;
+  const pcts = {};
+  for(const a in best) pcts[a] = lider ? best[a].total / lider * 100 : 0;
+  return {pcts, best, lider};
+}
+function rankingDoTurno(dados, k){
+  const turnos = dados.turnos;
+  const turno = turnos[k];
+  const histPcts = [];
+  for(let i=0;i<=k;i++) histPcts.push(pctBase(turnos[i]).pcts);
+  const pb = pctBase(turno), bestK = pb.best, liderK = pb.lider;
+  const hc = turno.hc;
+  const linhas = [];
+  for(const atir in bestK){
+    const b = bestK[atir];
+    const historico = [];
+    for(const pc of histPcts) if(atir in pc) historico.push(pc[atir]);
+    const hist3 = historico.slice(-3);
+    const media = hist3.reduce((s,v)=>s+v,0) / hist3.length;
+    const handicap = media >= LIMITE_PCT ? 0 : Math.floor((100 - media) / 10 * hc);
+    const pratosHc = b.total + handicap;
+    const pctFinal = liderK ? pratosHc / liderK * 100 : 0;
+    linhas.push({
+      atirador: atir,
+      total: Math.trunc(b.total),
+      pct_base: liderK ? round2(b.total / liderK * 100) : 0,
+      media_3t: round2(media),
+      handicap: handicap,
+      pratos_hc: Math.trunc(pratosHc),
+      pct_final: round2(pctFinal),
+      postos_fechados: b.postos_fechados,
+      ult_posto: b.stations.length ? b.stations[b.stations.length-1] : 0,
+      passadas: turno.registros.filter(r => r.atirador === atir).length,
+    });
+  }
+  linhas.sort((a,b) => b.pct_final - a.pct_final ||
+                        b.postos_fechados - a.postos_fechados ||
+                        b.ult_posto - a.ult_posto);
+  linhas.forEach((l,i) => l.col = i + 1);
+  return linhas;
+}
+function tabelaTemporada(dados){
+  const map = {};
+  for(let k=0;k<dados.turnos.length;k++){
+    const rk = rankingDoTurno(dados, k);
+    if(!rk.length) continue;
+    for(const r of rk){
+      const m = map[r.atirador] ||
+        (map[r.atirador] = {atirador:r.atirador, vitorias:0, podios:0, turnos:new Set(), melhor_pct:0});
+      if(r.col === 1) m.vitorias++;
+      if(r.col <= 3) m.podios++;
+      m.turnos.add(dados.turnos[k].aba);
+      if(r.pct_final > m.melhor_pct) m.melhor_pct = r.pct_final;
+    }
+  }
+  const agg = Object.values(map).map(m => ({
+    atirador:m.atirador, vitorias:m.vitorias, podios:m.podios,
+    participacoes:m.turnos.size, melhor_pct:m.melhor_pct
+  }));
+  agg.sort((a,b) => b.vitorias - a.vitorias || b.podios - a.podios || b.melhor_pct - a.melhor_pct);
+  agg.forEach((a,i) => a.col = i + 1);
+  return agg;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   GRÁFICOS (SVG feitos à mão)
+══════════════════════════════════════════════════════════════════════════ */
+function svgStackedBars(rows){
+  const W=760, padL=150, padR=54, rowH=26, gap=10, top=8;
+  const H = top + rows.length*(rowH+gap);
+  const maxV = Math.max(100, ...rows.map(r=>r.pct_final));
+  const sx = v => (v/maxV)*(W-padL-padR);
+  let g="";
+  rows.forEach((r,i)=>{
+    const y = top + i*(rowH+gap);
+    const wb = sx(r.pct_base), we = sx(Math.max(0, r.pct_final - r.pct_base));
+    g += `<text x="${padL-10}" y="${y+rowH/2+4}" text-anchor="end" fill="#e9ece6" font-size="12" font-weight="600">${esc(titleCase(r.atirador))}</text>`;
+    g += `<rect x="${padL}" y="${y}" width="${wb}" height="${rowH}" rx="4" fill="#2f9e5f"/>`;
+    if(we>0) g += `<rect x="${padL+wb}" y="${y}" width="${we}" height="${rowH}" rx="4" fill="#e0b83c"/>`;
+    g += `<text x="${padL+wb+we+8}" y="${y+rowH/2+4}" fill="#9aa596" font-size="12" font-weight="700">${r.pct_final.toFixed(1)}%</text>`;
+    if(r.handicap) g += `<text x="${padL+wb+we/2}" y="${y+rowH/2+4}" text-anchor="middle" fill="#12160f" font-size="11" font-weight="800">+${r.handicap}</text>`;
+  });
+  const legend = `<rect x="${padL}" y="${H+6}" width="12" height="12" rx="2" fill="#2f9e5f"/><text x="${padL+18}" y="${H+16}" fill="#9aa596" font-size="11">% base</text>`+
+                 `<rect x="${padL+80}" y="${H+6}" width="12" height="12" rx="2" fill="#e0b83c"/><text x="${padL+98}" y="${H+16}" fill="#9aa596" font-size="11">handicap</text>`;
+  return `<svg viewBox="0 0 ${W} ${H+26}" width="100%" preserveAspectRatio="xMidYMid meet">${g}${legend}</svg>`;
+}
+function svgWinsBars(rows){
+  const W=760, padL=150, padR=40, rowH=26, gap=10, top=8;
+  const H = top + rows.length*(rowH+gap);
+  const maxV = Math.max(1, ...rows.map(r=>r.vitorias));
+  const sx = v => (v/maxV)*(W-padL-padR);
+  let g="";
+  rows.forEach((r,i)=>{
+    const y = top + i*(rowH+gap), w = sx(r.vitorias);
+    g += `<text x="${padL-10}" y="${y+rowH/2+4}" text-anchor="end" fill="#e9ece6" font-size="12" font-weight="600">${esc(titleCase(r.atirador))}</text>`;
+    g += `<rect x="${padL}" y="${y}" width="${Math.max(w,2)}" height="${rowH}" rx="4" fill="#e0b83c"/>`;
+    g += `<text x="${padL+Math.max(w,2)+8}" y="${y+rowH/2+4}" fill="#9aa596" font-size="12" font-weight="700">${r.vitorias}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H+6}" width="100%" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
+}
+function svgLine(labels, values){
+  const W=760, H=300, padL=46, padR=20, padT=18, padB=44;
+  const maxV = Math.max(100, ...values), minV = Math.min(0, ...values);
+  const n = values.length;
+  const sx = i => padL + (n<=1 ? (W-padL-padR)/2 : i/(n-1)*(W-padL-padR));
+  const sy = v => padT + (1 - (v-minV)/(maxV-minV || 1))*(H-padT-padB);
+  let grid="", axis="";
+  for(let t=0;t<=4;t++){
+    const val = minV + (maxV-minV)*t/4, y = sy(val);
+    grid += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#2b332a" stroke-width="1"/>`;
+    axis += `<text x="${padL-8}" y="${y+4}" text-anchor="end" fill="#9aa596" font-size="10">${val.toFixed(0)}%</text>`;
+  }
+  let pts = values.map((v,i)=>`${sx(i)},${sy(v)}`).join(" ");
+  let dots="", xlab="";
+  values.forEach((v,i)=>{
+    dots += `<circle cx="${sx(i)}" cy="${sy(v)}" r="5" fill="#e0b83c" stroke="#12160f" stroke-width="2"/>`;
+    xlab += `<text x="${sx(i)}" y="${H-padB+18}" text-anchor="middle" fill="#9aa596" font-size="10">${esc(labels[i])}</text>`;
+  });
+  const poly = n>1 ? `<polyline points="${pts}" fill="none" stroke="#2f9e5f" stroke-width="3"/>` : "";
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${grid}${poly}${dots}${axis}${xlab}</svg>`;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RENDER
+══════════════════════════════════════════════════════════════════════════ */
+let DADOS = null;
+let turnoIdx = 0;
+let atiradorSel = null;
+
+function renderTurno(){
+  const el = document.getElementById("view-turno");
+  const turnos = DADOS.turnos;
+  if(turnoIdx >= turnos.length) turnoIdx = turnos.length - 1;
+  const options = turnos.map((t,i)=>`<option value="${i}" ${i===turnoIdx?"selected":""}>${esc(t.aba)}</option>`).join("");
+  const turno = turnos[turnoIdx];
+  const rk = rankingDoTurno(DADOS, turnoIdx);
+  const lider = rk.length ? titleCase(rk[0].atirador) : "—";
+
+  const kpis = `<div class="kpis">
+    <div class="kpi"><div class="v">${turno.pratos}</div><div class="l">Pratos do turno</div></div>
+    <div class="kpi accent"><div class="v">${turno.hc}</div><div class="l">Handicap / 10 p.p.</div></div>
+    <div class="kpi field"><div class="v">${rk.length}</div><div class="l">Atiradores</div></div>
+    <div class="kpi"><div class="v" style="font-size:18px">${esc(lider)}</div><div class="l">Líder do turno</div></div>
+  </div>`;
+
+  const medals=["🥇","🥈","🥉"], gcls=["g1","g2","g3"];
+  let pod="";
+  for(let i=0;i<Math.min(3,rk.length);i++){
+    const r=rk[i];
+    let sb = `${r.total} pratos` + (r.handicap ? ` · +${r.handicap} HC` : "");
+    pod += `<div class="pod ${gcls[i]}">
+      <div class="medal">${medals[i]}</div>
+      <div class="nm">${esc(titleCase(r.atirador))}</div>
+      <div class="pt">${r.pct_final.toFixed(2)}%</div>
+      <div class="sb">${sb}</div></div>`;
+  }
+
+  const rows = rk.map(r=>`<tr class="${r.col===1?"lead":""}">
+    <td><span class="rankbubble">${r.col}</span></td>
+    <td>${esc(titleCase(r.atirador))}</td>
+    <td>${r.total}</td>
+    <td>${r.pct_base.toFixed(2)}%</td>
+    <td>${r.media_3t.toFixed(2)}%</td>
+    <td>${r.handicap ? `<span class="tag hc">+${r.handicap}</span>` : `<span class="tag zero">—</span>`}</td>
+    <td><b>${r.pct_final.toFixed(2)}%</b></td>
+    <td>${r.postos_fechados}</td></tr>`).join("");
+
+  el.innerHTML = `
+    <div class="controls">
+      <div class="ctl"><label>Turno (mês)</label>
+        <select id="turnoSel">${options}</select></div>
+    </div>
+    ${kpis}
+    <h3 class="sec">Pódio</h3>
+    <div class="podium">${pod}</div>
+    <h3 class="sec">Pontuação final (percentual com handicap)</h3>
+    <div class="card chartwrap">${svgStackedBars(rk)}</div>
+    <h3 class="sec">Classificação completa</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Col.</th><th>Atirador</th><th>Pratos</th><th>% base</th>
+        <th>Média 3T</th><th>HC</th><th>Pontuação</th><th>Postos fech.</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <p class="note">Pontuação = percentual com handicap (Art. 11). Handicap só para quem está
+      &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17).
+      Desempate por postos fechados (Art. 22).</p>`;
+
+  document.getElementById("turnoSel").addEventListener("change", e=>{
+    turnoIdx = +e.target.value; renderTurno();
+  });
+}
+
+function renderTemp(){
+  const el = document.getElementById("view-temp");
+  const temp = tabelaTemporada(DADOS);
+  if(!temp.length){ el.innerHTML = `<p class="note">Sem dados suficientes para a temporada.</p>`; return; }
+  const c = temp[0];
+  const rows = temp.map(r=>`<tr class="${r.col===1?"lead":""}">
+    <td><span class="rankbubble">${r.col}</span></td>
+    <td>${esc(titleCase(r.atirador))}</td>
+    <td>${r.vitorias}</td><td>${r.podios}</td><td>${r.participacoes}</td>
+    <td>${r.melhor_pct.toFixed(2)}%</td></tr>`).join("");
+  el.innerHTML = `
+    <div class="card" style="border-left:5px solid var(--accent2);margin:14px 0">
+      <div style="font-size:12px;color:var(--muted)">🏛️ LÍDER DA TEMPORADA · rumo ao Hall of Fame (Atirador do Ano)</div>
+      <div style="font-size:22px;font-weight:800;margin-top:4px">${esc(titleCase(c.atirador))}
+        <span style="color:var(--accent2)"> · ${c.vitorias} vitória(s), ${c.podios} pódio(s)</span></div>
+    </div>
+    <h3 class="sec">Vitórias de turno no ano</h3>
+    <div class="card chartwrap">${svgWinsBars(temp)}</div>
+    <h3 class="sec">Classificação da temporada</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Pos.</th><th>Atirador</th><th>Vitórias</th><th>Pódios</th>
+        <th>Turnos</th><th>Melhor pontuação</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <p class="note">Atirador do Ano = mais vitórias; empate → mais pódios (top 3). Art. 26 e 30.</p>`;
+}
+
+function renderAtir(){
+  const el = document.getElementById("view-atir");
+  const todos = [...new Set(DADOS.turnos.flatMap(t=>t.registros.map(r=>r.atirador)))].sort();
+  if(!todos.length){ el.innerHTML = `<p class="note">Sem atiradores.</p>`; return; }
+  if(!atiradorSel || !todos.includes(atiradorSel)) atiradorSel = todos[0];
+  const opts = todos.map(a=>`<option value="${esc(a)}" ${a===atiradorSel?"selected":""}>${esc(titleCase(a))}</option>`).join("");
+
+  const hist = [];
+  for(let k=0;k<DADOS.turnos.length;k++){
+    const r = rankingDoTurno(DADOS,k).find(x=>x.atirador===atiradorSel);
+    if(r) hist.push({turno:DADOS.turnos[k].aba, col:r.col, total:r.total,
+                     pct_base:r.pct_base, handicap:r.handicap, pct_final:r.pct_final});
+  }
+  let body;
+  if(!hist.length){ body = `<p class="note">Sem registros para este atirador.</p>`; }
+  else{
+    const vit = hist.filter(h=>h.col===1).length;
+    const melhorCol = Math.min(...hist.map(h=>h.col));
+    const rows = hist.map(h=>`<tr>
+      <td>${esc(h.turno)}</td><td><span class="rankbubble">${h.col}</span></td>
+      <td>${h.total}</td><td>${h.pct_base.toFixed(2)}%</td>
+      <td>${h.handicap?`<span class="tag hc">+${h.handicap}</span>`:`<span class="tag zero">—</span>`}</td>
+      <td><b>${h.pct_final.toFixed(2)}%</b></td></tr>`).join("");
+    body = `
+      <div class="kpis">
+        <div class="kpi"><div class="v">${hist.length}</div><div class="l">Turnos disputados</div></div>
+        <div class="kpi accent"><div class="v">${melhorCol}º</div><div class="l">Melhor colocação</div></div>
+        <div class="kpi field"><div class="v">${vit}</div><div class="l">Vitórias</div></div>
+      </div>
+      <h3 class="sec">Evolução na temporada</h3>
+      <div class="card chartwrap">${svgLine(hist.map(h=>h.turno), hist.map(h=>h.pct_final))}</div>
+      <h3 class="sec">Histórico</h3>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Turno</th><th>Col.</th><th>Pratos</th><th>% base</th><th>HC</th><th>Pontuação</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`;
+  }
+  el.innerHTML = `
+    <div class="controls">
+      <div class="ctl"><label>Atirador</label><select id="atirSel">${opts}</select></div>
+    </div>${body}`;
+  document.getElementById("atirSel").addEventListener("change", e=>{
+    atiradorSel = e.target.value; renderAtir();
+  });
+}
+
+function renderRegras(){
+  document.getElementById("view-regras").innerHTML = `
+  <div class="regras">
+    <h3 class="sec" style="margin-top:4px">📜 Como funciona a pontuação</h3>
+    <ul>
+      <li><b>Turnos mensais.</b> Vale a <b>maior passada</b> de cada atirador no mês (sem limite de tentativas).</li>
+      <li><b>Pontuação base</b> = percentual de acerto = <code>seus pratos ÷ pratos do líder × 100</code> (o líder faz 100%).</li>
+      <li><b>Handicap</b> (nivelamento): só para quem está <b>abaixo de 93%</b> do líder.
+        <ul>
+          <li>Bônus em pratos = <code>(diferença em p.p. até 100%) ÷ 10 × HC</code>, com <b>HC = 3 / 5 / 7</b> para provas de <b>50 / 75 / 100</b> pratos.</li>
+          <li>A diferença usa a <b>média dos últimos 3 turnos</b> do atirador (1º turno = só ele; 2º = média de 2; 3º+ = média de 3).</li>
+          <li>Os pratos de handicap somam ao resultado e recalcula-se o percentual → essa é a <b>pontuação final</b>.</li>
+        </ul>
+      </li>
+      <li><b>Desempate no turno:</b> mais <b>postos fechados</b>; depois melhor no último posto.</li>
+      <li><b>Hall of Fame (Atirador do Ano):</b> quem vence <b>mais turnos</b>; empate → mais <b>pódios (top 3)</b>.</li>
+    </ul>
+  </div>`;
+}
+
+function renderAll(){
+  document.getElementById("updated").textContent =
+    DADOS && DADOS.gerado_em ? `Atualizado em: ${DADOS.gerado_em}` : "";
+  if(!DADOS || !DADOS.turnos || !DADOS.turnos.length){
+    document.getElementById("view-turno").innerHTML =
+      `<p class="note">🎯 Aguardando o organizador publicar os resultados.</p>`;
+    return;
+  }
+  renderTurno(); renderTemp(); renderAtir(); renderRegras();
+}
+
+/* ---------- tabs ---------- */
+document.getElementById("tabs").addEventListener("click", e=>{
+  const b = e.target.closest(".tab"); if(!b) return;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+  b.classList.add("active");
+  ["turno","temp","atir","regras"].forEach(v=>{
+    document.getElementById("view-"+v).hidden = (v !== b.dataset.view);
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PARSER DE PLANILHA (porte do parse_planilha do ponhadas_clay.py)
+══════════════════════════════════════════════════════════════════════════ */
+function ordemMes(nome){
+  let txt = String(nome).trim().toLowerCase().replace(/[-_/]/g,".");
+  const partes = txt.split(".").filter(Boolean);
+  let mes=null, ano=null;
+  for(const p of partes){
+    if(MESES_PT[p]!=null) mes = MESES_PT[p];
+    else if(/^\d+$/.test(p)){
+      const n = parseInt(p,10);
+      if(n<=12 && mes==null) mes = n;
+      else ano = n>100 ? n : 2000+n;
+    }
+  }
+  return [ano||0, mes||0];
+}
+function parsePlanilha(arraybuf){
+  const wb = XLSX.read(arraybuf, {type:"array", cellDates:true});
+  const turnos = [];
+  for(const aba of wb.SheetNames){
+    const df = XLSX.utils.sheet_to_json(wb.Sheets[aba], {header:1, raw:true, defval:null, blankrows:true});
+    if(!df.length) continue;
+    const cell = (i,j)=> (df[i] && df[i][j]!==undefined) ? df[i][j] : null;
+    const ncols = i => df[i] ? df[i].length : 0;
+
+    let headerRow = null;
+    for(let i=0;i<Math.min(df.length,20);i++){
+      const linha = (df[i]||[]).map(x=>String(x==null?"":x).trim().toUpperCase());
+      if(linha.includes("ATIRADOR")){ headerRow = i; break; }
+    }
+    if(headerRow==null) continue;
+
+    const cols = (df[headerRow]||[]).map(x=>String(x==null?"":x).trim().toUpperCase());
+    const c_at = cols.indexOf("ATIRADOR");
+    const c_tot = cols.includes("TOTAL") ? cols.indexOf("TOTAL") : null;
+    const c_data = c_at - 1;
+    const postos_idx = [];
+    if(c_tot!=null) for(let j=c_at+1;j<c_tot;j++) postos_idx.push(j);
+
+    let postos_max = null;
+    for(let i=headerRow+1;i<Math.min(headerRow+4,df.length);i++){
+      const vals = postos_idx.length ? postos_idx.map(j=>cell(i,j)) : [];
+      const nome_cel = cell(i,c_at);
+      if(vals.length && vals.every(v=> v!=null && isNum(v)) && typeof nome_cel!=="string"){
+        postos_max = vals.map(v=>Math.trunc(v)); break;
+      }
+    }
+
+    let pratos=null, hc=null;
+    for(let i=0;i<Math.min(df.length,12);i++){
+      for(let j=0;j<ncols(i);j++){
+        const v = cell(i,j);
+        if(typeof v==="string" && v.toLowerCase().includes("qtde")){
+          const seq=[];
+          for(let k=j+1;k<ncols(i);k++){ const c=cell(i,k); if(c!=null && isNum(c)) seq.push(c); }
+          if(seq.length){ pratos=Math.trunc(seq[0]); if(seq.length>1) hc=Math.trunc(seq[1]); }
+        }
+      }
+    }
+    if(pratos==null && postos_max) pratos = postos_max.reduce((s,v)=>s+v,0);
+    pratos = pratos || 75;
+    hc = hc || HC_POR_PRATOS[pratos] || 5;
+
+    const registros = [];
+    for(let i=headerRow+1;i<df.length;i++){
+      const nome = cell(i,c_at);
+      if(typeof nome!=="string" || !nome.trim()) continue;
+      const tot = c_tot!=null ? cell(i,c_tot) : null;
+      if(tot==null) continue;
+      const totf = Number(tot);
+      if(!isFinite(totf)) continue;
+      const stations = postos_idx.map(j=>{ const c=cell(i,j); return (c!=null && isNum(c)) ? Math.trunc(c) : 0; });
+      let dv = c_data>=0 ? cell(i,c_data) : null, dataStr="";
+      if(dv!=null) dataStr = (dv instanceof Date) ? dv.toISOString().slice(0,10) : String(dv).slice(0,10);
+      registros.push({atirador:nome.trim().toUpperCase(), total:totf, stations, data:dataStr});
+    }
+    if(registros.length)
+      turnos.push({aba:String(aba), ordem:ordemMes(aba), pratos, hc, postos_max, registros});
+  }
+  turnos.sort((a,b)=> (a.ordem[0]-b.ordem[0]) || (a.ordem[1]-b.ordem[1]));
+  const n=new Date(), p=x=>String(x).padStart(2,"0");
+  const gerado = `${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()} ${p(n.getHours())}:${p(n.getMinutes())}`;
+  return {gerado_em:gerado, turnos};
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ADMIN
+══════════════════════════════════════════════════════════════════════════ */
+const modal = document.getElementById("adminModal");
+const admMsg = document.getElementById("adminMsg");
+let pendente = null;
+function setMsg(t, cls){ admMsg.className = "msg " + cls; admMsg.innerHTML = t; }
+
+document.getElementById("adminBtn").onclick = ()=>{ modal.hidden=false; };
+document.getElementById("adminClose").onclick = ()=>{ modal.hidden=true; };
+modal.addEventListener("click", e=>{ if(e.target===modal) modal.hidden=true; });
+
+async function ensureXLSX(){
+  if(window.XLSX) return;
+  setMsg("Carregando leitor de planilhas…", "info");
+  await new Promise((res,rej)=>{
+    const s=document.createElement("script");
+    s.src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+    s.onload=res; s.onerror=()=>rej(new Error("Falha ao carregar o leitor de planilhas."));
+    document.head.appendChild(s);
+  });
+}
+
+document.getElementById("processBtn").onclick = async ()=>{
+  const f = document.getElementById("fileInput").files[0];
+  if(!f){ setMsg("Selecione uma planilha .xlsx primeiro.", "err"); return; }
+  try{
+    await ensureXLSX();
+    const buf = await f.arrayBuffer();
+    const dados = parsePlanilha(buf);
+    const nt = dados.turnos.length;
+    const nr = dados.turnos.reduce((s,t)=>s+t.registros.length,0);
+    if(!nt){ setMsg("Não encontrei turnos válidos na planilha (procuro a coluna “ATIRADOR”).", "err"); return; }
+    pendente = dados;
+    DADOS = dados; turnoIdx = nt-1; renderAll();
+    document.getElementById("publishBtn").disabled = false;
+    setMsg(`Lido: <b>${nt}</b> turno(s), <b>${nr}</b> passada(s). Ranking atualizado nesta sessão.<br>
+            Para publicar para todos, informe o token e clique em “Publicar no GitHub”.`, "ok");
+  }catch(err){ setMsg("Erro ao ler a planilha: " + err.message, "err"); }
+};
+
+async function githubSave(dados, token){
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_PATH}`;
+  const headers = {Authorization:`token ${token}`, Accept:"application/vnd.github+json"};
+  let sha = null;
+  try{ const r=await fetch(url,{headers}); if(r.ok){ sha=(await r.json()).sha; } }catch(e){}
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(dados,null,2))));
+  const body = {message:`update: ranking ${dados.gerado_em||""}`, content};
+  if(sha) body.sha = sha;
+  const r2 = await fetch(url,{method:"PUT", headers, body:JSON.stringify(body)});
+  if(!r2.ok){ let d=""; try{ d=(await r2.json()).message||""; }catch(e){} throw new Error(`${r2.status} ${d}`); }
+}
+
+document.getElementById("publishBtn").onclick = async ()=>{
+  const token = document.getElementById("tokenInput").value.trim();
+  if(!pendente){ setMsg("Processe uma planilha antes de publicar.", "err"); return; }
+  if(!token){ setMsg("Informe um GitHub token (Contents: Read and write) para publicar.", "err"); return; }
+  try{
+    setMsg("Publicando no GitHub…", "info");
+    await githubSave(pendente, token);
+    setMsg("✅ Publicado! Em ~1 minuto o site reflete os dados novos para todos.", "ok");
+  }catch(err){ setMsg("Falha ao publicar: " + err.message + ". Confira token/permissões.", "err"); }
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════════════════════════════════ */
+fetch(DATA_PATH, {cache:"no-store"})
+  .then(r=> r.ok ? r.json() : null)
+  .then(d=>{ DADOS=d; if(DADOS && DADOS.turnos) turnoIdx=DADOS.turnos.length-1; renderAll(); })
+  .catch(()=>{ DADOS=null; renderAll(); });
+</script>
