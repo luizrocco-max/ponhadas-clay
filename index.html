@@ -23,13 +23,13 @@
 
   /* ---------- header ---------- */
   header.top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;
-    background:linear-gradient(135deg,#12160f 0%,#134e31 60%,#1f6f43 100%);
-    border:1px solid var(--line);border-radius:18px;padding:20px 26px;
-    box-shadow:0 10px 30px rgba(0,0,0,.45)}
-  header.top .logo{width:64px;height:64px;flex:none}
-  .htext h1{margin:0;font-size:23px;letter-spacing:.3px;color:#fff;font-weight:800}
-  .htext h1 span{color:var(--accent2)}
-  .htext p{margin:5px 0 0;color:#cfe3d6;font-size:12.5px}
+    background:linear-gradient(135deg,#f6f4ec,#e6e8e2);
+    border:1px solid #cfd3ca;border-radius:18px;padding:16px 24px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  header.top .logo{height:82px;width:auto;flex:none;border-radius:10px}
+  .htext h1{margin:0;font-size:23px;letter-spacing:.3px;color:#12160f;font-weight:800}
+  .htext h1 span{color:var(--accent)}
+  .htext p{margin:5px 0 0;color:#4a4f45;font-size:12.5px}
   .badge{display:inline-block;background:var(--accent);color:#fff;font-weight:800;
     font-size:11px;padding:4px 10px;border-radius:6px;letter-spacing:1.2px;margin-left:auto}
 
@@ -124,12 +124,7 @@
 
 <div class="wrap">
   <header class="top">
-    <svg class="logo" viewBox="0 0 100 100" aria-hidden="true">
-      <circle cx="50" cy="50" r="46" fill="#0f1210" stroke="#e0b83c" stroke-width="3"/>
-      <circle cx="50" cy="50" r="34" fill="none" stroke="#e4572e" stroke-width="6"/>
-      <circle cx="50" cy="50" r="20" fill="none" stroke="#e0b83c" stroke-width="6"/>
-      <circle cx="50" cy="50" r="7" fill="#e4572e"/>
-    </svg>
+    <img class="logo" src="logo.jpg" alt="Ponhada's Clay League CCTSP">
     <div class="htext">
       <h1>Ponhada's Clay League <span>CCTSP</span></h1>
       <p>Ranking oficial da temporada · percentual + sistema de handicap</p>
@@ -168,6 +163,10 @@
     <label>GitHub token (fine-grained · Contents: Read and write)</label>
     <input type="password" id="tokenInput" placeholder="github_pat_… (opcional para publicar)">
     <div class="hint">Sem token, o upload vale só nesta sessão do navegador (não publica para todos).</div>
+    <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;margin-top:10px;cursor:pointer">
+      <input type="checkbox" id="rememberTok" style="width:auto;min-width:0"> Lembrar token neste aparelho
+    </label>
+    <div class="hint">Guarda o token só neste navegador/celular, para publicar sem colar de novo. Use apenas no seu aparelho.</div>
 
     <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
       <button class="btn" id="processBtn">Processar planilha</button>
@@ -616,6 +615,15 @@ const admMsg = document.getElementById("adminMsg");
 let pendente = null;
 function setMsg(t, cls){ admMsg.className = "msg " + cls; admMsg.innerHTML = t; }
 
+// lembra o token neste aparelho (opcional, opt-in)
+try{
+  const savedTok = localStorage.getItem("pcl_token");
+  if(savedTok){
+    document.getElementById("tokenInput").value = savedTok;
+    document.getElementById("rememberTok").checked = true;
+  }
+}catch(e){}
+
 document.getElementById("adminBtn").onclick = ()=>{ modal.hidden=false; };
 document.getElementById("adminClose").onclick = ()=>{ modal.hidden=true; };
 modal.addEventListener("click", e=>{ if(e.target===modal) modal.hidden=true; });
@@ -665,6 +673,10 @@ document.getElementById("publishBtn").onclick = async ()=>{
   const token = document.getElementById("tokenInput").value.trim();
   if(!pendente){ setMsg("Processe uma planilha antes de publicar.", "err"); return; }
   if(!token){ setMsg("Informe um GitHub token (Contents: Read and write) para publicar.", "err"); return; }
+  try{ // persiste (ou limpa) o token conforme a opção "lembrar"
+    if(document.getElementById("rememberTok").checked) localStorage.setItem("pcl_token", token);
+    else localStorage.removeItem("pcl_token");
+  }catch(e){}
   try{
     setMsg("Publicando no GitHub…", "info");
     await githubSave(pendente, token);
