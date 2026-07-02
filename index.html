@@ -139,14 +139,14 @@
       <h1>Ponhada's Clay League <span>CCTSP</span></h1>
       <p>Ranking oficial da temporada · percentual + sistema de handicap</p>
     </div>
-    <span class="badge">REGULAMENTO OFICIAL</span>
   </header>
 
   <nav class="tabs" id="tabs">
     <button class="tab active" data-view="turno">🏆 Ranking do Turno</button>
     <button class="tab" data-view="temp">🏛️ Temporada · Hall of Fame</button>
     <button class="tab" data-view="atir">👤 Por Atirador</button>
-    <button class="tab" data-view="regras">📜 Regras</button>
+    <button class="tab" data-view="regras">📋 Regras</button>
+    <button class="tab" data-view="regulamento">📜 Regulamento</button>
   </nav>
   <div id="updated" class="note"></div>
 
@@ -154,6 +154,7 @@
   <section id="view-temp" hidden></section>
   <section id="view-atir" hidden></section>
   <section id="view-regras" hidden></section>
+  <section id="view-regulamento" hidden></section>
 
   <div class="foot">Baseado no Regulamento Oficial da Ponhada's Clay League CCTSP · dashboard estático (GitHub Pages)</div>
 </div>
@@ -507,7 +508,13 @@ function renderRegras(){
       <li><b>Desempate no turno:</b> mais <b>postos fechados</b>; depois melhor no último posto.</li>
       <li><b>Hall of Fame (Atirador do Ano):</b> quem vence <b>mais turnos</b>; empate → mais <b>pódios (top 3)</b>.</li>
     </ul>
+    <p class="regintro">Quer o texto completo? Veja a aba <b>📜 Regulamento</b> (com download do PDF oficial).</p>
+  </div>`;
+}
 
+function renderRegulamento(){
+  document.getElementById("view-regulamento").innerHTML = `
+  <div class="regras">
     <a class="dlbtn" href="regulamento.pdf" download>📄 Baixar Regulamento Oficial (PDF)</a>
 
     <h2 style="font-size:19px;margin:18px 0 2px">🏆 Regulamento Oficial — Ponhada's Clay League CCTSP</h2>
@@ -574,7 +581,7 @@ function renderAll(){
       `<p class="note">🎯 Aguardando o organizador publicar os resultados.</p>`;
     return;
   }
-  renderTurno(); renderTemp(); renderAtir(); renderRegras();
+  renderTurno(); renderTemp(); renderAtir(); renderRegras(); renderRegulamento();
 }
 
 /* ---------- tabs ---------- */
@@ -582,7 +589,7 @@ document.getElementById("tabs").addEventListener("click", e=>{
   const b = e.target.closest(".tab"); if(!b) return;
   document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
   b.classList.add("active");
-  ["turno","temp","atir","regras"].forEach(v=>{
+  ["turno","temp","atir","regras","regulamento"].forEach(v=>{
     document.getElementById("view-"+v).hidden = (v !== b.dataset.view);
   });
 });
