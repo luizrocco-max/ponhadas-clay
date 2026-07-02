@@ -85,6 +85,8 @@ python3 -m http.server 8000
 ```
 index.html               # o app inteiro (interface + cálculo do ranking, em JS)
 data/ranking_data.json   # dados publicados (gerados pelo upload da planilha)
+logo.png                 # logo da liga (cabeçalho), fundo transparente
+regulamento.pdf          # regulamento oficial (download na aba Regras)
 .nojekyll                # serve o site sem processamento Jekyll
 .gitignore               # ignora planilhas locais e arquivos temporários
 ```
