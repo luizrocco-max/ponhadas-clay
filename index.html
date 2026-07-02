@@ -94,6 +94,9 @@
   .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
   .tag.hc{background:rgba(224,184,60,.16);color:var(--accent2)}
   .tag.zero{color:var(--muted)}
+  .atlink{cursor:pointer;border-bottom:1px dashed transparent;transition:.12s}
+  .atlink:hover{color:var(--accent2);border-bottom-color:var(--accent2)}
+  tbody td .atlink::after{content:" ›";color:var(--muted);font-weight:700}
   .note{color:var(--muted);font-size:12px;margin:12px 2px;line-height:1.6}
 
   /* ---------- admin ---------- */
@@ -209,6 +212,8 @@ const round2 = v => Math.round((v + Number.EPSILON) * 100) / 100;
 const titleCase = s => String(s).toLowerCase().split(" ")
   .map(w => w ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+// nome de atirador clicável → leva à aba "Por Atirador"
+const atLink = nome => `<span class="atlink" data-atirador="${esc(nome)}">${esc(titleCase(nome))}</span>`;
 // "julho.26" → "Julho/2026" (nome bonito do turno)
 function fmtTurno(aba){
   const [ano, mes] = ordemMes(aba);
@@ -439,14 +444,14 @@ function renderTurno(){
     let sb = `${r.total} pratos` + (r.handicap ? ` · +${r.handicap} HC` : "");
     pod += `<div class="pod ${gcls[i]}">
       <div class="medal">${medals[i]}</div>
-      <div class="nm">${esc(titleCase(r.atirador))}</div>
+      <div class="nm">${atLink(r.atirador)}</div>
       <div class="pt">${r.pct_final.toFixed(2)}%</div>
       <div class="sb">${sb}</div></div>`;
   }
 
   const rows = rk.map(r=>`<tr class="${r.col===1?"lead":""}">
     <td><span class="rankbubble">${r.col}</span></td>
-    <td>${esc(titleCase(r.atirador))}</td>
+    <td>${atLink(r.atirador)}</td>
     <td>${r.total}</td>
     <td>${r.pct_base.toFixed(2)}%</td>
     <td>${r.media_3t.toFixed(2)}%</td>
@@ -485,7 +490,7 @@ function renderTemp(){
   const c = temp[0];
   const rows = temp.map(r=>`<tr class="${r.col===1?"lead":""}">
     <td><span class="rankbubble">${r.col}</span></td>
-    <td>${esc(titleCase(r.atirador))}</td>
+    <td>${atLink(r.atirador)}</td>
     <td>${r.vitorias}</td><td>${r.podios}</td><td>${r.participacoes}</td>
     <td>${r.melhor_pct.toFixed(2)}%</td></tr>`).join("");
   el.innerHTML = `
@@ -735,14 +740,27 @@ function renderAll(){
   renderTurno(); renderTemp(); renderAtir(); renderRegras(); renderRegulamento();
 }
 
-/* ---------- tabs ---------- */
-document.getElementById("tabs").addEventListener("click", e=>{
-  const b = e.target.closest(".tab"); if(!b) return;
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  b.classList.add("active");
+/* ---------- tabs / navegação ---------- */
+function setView(view){
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===view));
   ["turno","temp","atir","regras","regulamento"].forEach(v=>{
-    document.getElementById("view-"+v).hidden = (v !== b.dataset.view);
+    document.getElementById("view-"+v).hidden = (v !== view);
   });
+}
+document.getElementById("tabs").addEventListener("click", e=>{
+  const b = e.target.closest(".tab"); if(b) setView(b.dataset.view);
+});
+
+// clique no nome de um atirador → abre a página dele
+function abrirAtirador(nome){
+  atiradorSel = nome;
+  renderAtir();
+  setView("atir");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+document.addEventListener("click", e=>{
+  const el = e.target.closest("[data-atirador]");
+  if(el) abrirAtirador(el.getAttribute("data-atirador"));
 });
 
 /* ══════════════════════════════════════════════════════════════════════════
