@@ -185,23 +185,22 @@
   <div class="modal">
     <span class="close" id="adminClose">✕</span>
     <h2>🔐 Área do organizador</h2>
-    <p class="hint">Suba a planilha <b>.xlsx</b> para recalcular o ranking. Para publicar
-      para todos, informe um <b>token do GitHub</b> (fica só no seu navegador; nunca é salvo no site).</p>
+    <p class="hint">Entre com a <b>senha do organizador</b>, suba a planilha <b>.xlsx</b> e publique.
+      A senha é conferida no servidor (Cloudflare); a chave do GitHub nunca fica no site.</p>
 
-    <label>Planilha de resultados (.xlsx)</label>
-    <input type="file" id="fileInput" accept=".xlsx">
-
-    <label>GitHub token (fine-grained · Contents: Read and write)</label>
-    <input type="password" id="tokenInput" placeholder="github_pat_… (opcional para publicar)">
-    <div class="hint">Sem token, o upload vale só nesta sessão do navegador (não publica para todos).</div>
+    <label>Senha do organizador</label>
+    <input type="password" id="senhaInput" placeholder="••••••••">
     <label style="display:flex;align-items:center;gap:8px;text-transform:none;letter-spacing:0;margin-top:10px;cursor:pointer">
-      <input type="checkbox" id="rememberTok" style="width:auto;min-width:0"> Lembrar token neste aparelho
+      <input type="checkbox" id="rememberPwd" style="width:auto;min-width:0"> Lembrar a senha neste aparelho
     </label>
-    <div class="hint">Guarda o token só neste navegador/celular, para publicar sem colar de novo. Use apenas no seu aparelho.</div>
+
+    <label style="margin-top:16px">Planilha de resultados (.xlsx)</label>
+    <input type="file" id="fileInput" accept=".xlsx">
+    <div class="hint">“Processar” mostra o resultado só na sua tela. “Publicar” envia para todos (precisa da senha).</div>
 
     <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
       <button class="btn" id="processBtn">Processar planilha</button>
-      <button class="btn ghost" id="publishBtn" disabled>💾 Publicar no GitHub</button>
+      <button class="btn ghost" id="publishBtn" disabled>💾 Publicar para todos</button>
     </div>
     <div class="msg" id="adminMsg"></div>
   </div>
@@ -213,6 +212,8 @@
 ══════════════════════════════════════════════════════════════════════════ */
 const GITHUB_REPO = "luizrocco-max/ponhadas-clay";   // dono/repo
 const DATA_PATH   = "data/ranking_data.json";
+// Cloudflare Worker que confere a senha e publica no GitHub (login do organizador)
+const PUBLISH_URL = "https://ponhadas-publish.luiz-rocco.workers.dev";
 const LIMITE_PCT  = 93.0;                              // >=93% do líder não recebe handicap (Art.14)
 const HC_POR_PRATOS = {50:3, 75:5, 100:7};
 const MESES_PT = {janeiro:1,fevereiro:2,"março":3,marco:3,abril:4,maio:5,junho:6,julho:7,
@@ -898,12 +899,12 @@ const admMsg = document.getElementById("adminMsg");
 let pendente = null;
 function setMsg(t, cls){ admMsg.className = "msg " + cls; admMsg.innerHTML = t; }
 
-// lembra o token neste aparelho (opcional, opt-in)
+// lembra a senha neste aparelho (opcional, opt-in)
 try{
-  const savedTok = localStorage.getItem("pcl_token");
-  if(savedTok){
-    document.getElementById("tokenInput").value = savedTok;
-    document.getElementById("rememberTok").checked = true;
+  const savedPwd = localStorage.getItem("pcl_pwd");
+  if(savedPwd){
+    document.getElementById("senhaInput").value = savedPwd;
+    document.getElementById("rememberPwd").checked = true;
   }
 }catch(e){}
 
@@ -936,35 +937,35 @@ document.getElementById("processBtn").onclick = async ()=>{
     DADOS = dados; turnoIdx = nt-1; renderAll();
     document.getElementById("publishBtn").disabled = false;
     setMsg(`Lido: <b>${nt}</b> turno(s), <b>${nr}</b> passada(s). Ranking atualizado nesta sessão.<br>
-            Para publicar para todos, informe o token e clique em “Publicar no GitHub”.`, "ok");
+            Para publicar para todos, digite a senha e clique em “Publicar para todos”.`, "ok");
   }catch(err){ setMsg("Erro ao ler a planilha: " + err.message, "err"); }
 };
 
-async function githubSave(dados, token){
-  const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${DATA_PATH}`;
-  const headers = {Authorization:`token ${token}`, Accept:"application/vnd.github+json"};
-  let sha = null;
-  try{ const r=await fetch(url,{headers}); if(r.ok){ sha=(await r.json()).sha; } }catch(e){}
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(dados,null,2))));
-  const body = {message:`update: ranking ${dados.gerado_em||""}`, content};
-  if(sha) body.sha = sha;
-  const r2 = await fetch(url,{method:"PUT", headers, body:JSON.stringify(body)});
-  if(!r2.ok){ let d=""; try{ d=(await r2.json()).message||""; }catch(e){} throw new Error(`${r2.status} ${d}`); }
+// publica via Cloudflare Worker (a senha é conferida lá; o token do GitHub fica no Worker)
+async function publicar(dados, senha){
+  const r = await fetch(PUBLISH_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: senha, dados }),
+  });
+  let out = {};
+  try{ out = await r.json(); }catch(e){}
+  if(!r.ok || !out.ok) throw new Error(out.error || `HTTP ${r.status}`);
 }
 
 document.getElementById("publishBtn").onclick = async ()=>{
-  const token = document.getElementById("tokenInput").value.trim();
+  const senha = document.getElementById("senhaInput").value.trim();
   if(!pendente){ setMsg("Processe uma planilha antes de publicar.", "err"); return; }
-  if(!token){ setMsg("Informe um GitHub token (Contents: Read and write) para publicar.", "err"); return; }
-  try{ // persiste (ou limpa) o token conforme a opção "lembrar"
-    if(document.getElementById("rememberTok").checked) localStorage.setItem("pcl_token", token);
-    else localStorage.removeItem("pcl_token");
+  if(!senha){ setMsg("Digite a senha do organizador para publicar.", "err"); return; }
+  try{ // guarda (ou limpa) a senha conforme a opção "lembrar"
+    if(document.getElementById("rememberPwd").checked) localStorage.setItem("pcl_pwd", senha);
+    else localStorage.removeItem("pcl_pwd");
   }catch(e){}
   try{
-    setMsg("Publicando no GitHub…", "info");
-    await githubSave(pendente, token);
-    setMsg("✅ Publicado! Em ~1 minuto o site reflete os dados novos para todos.", "ok");
-  }catch(err){ setMsg("Falha ao publicar: " + err.message + ". Confira token/permissões.", "err"); }
+    setMsg("Publicando…", "info");
+    await publicar(pendente, senha);
+    setMsg("✅ Publicado! Em ~1–2 minutos o site reflete os dados novos para todos.", "ok");
+  }catch(err){ setMsg("Falha ao publicar: " + err.message, "err"); }
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
