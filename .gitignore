@@ -1,0 +1,29 @@
+# Segredos do Streamlit (senha admin, token do GitHub) — NUNCA versionar
+.streamlit/secrets.toml
+secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+ENV/
+
+# Planilhas locais de teste
+*.xlsx
+*.xls
+~$*
+
+# Sistema operacional / editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

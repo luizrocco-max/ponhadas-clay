@@ -1,8 +1,12 @@
 # 🎯 Ponhada's Clay League CCTSP — Ranking oficial
 
-Dashboard interativo do ranking da liga. O **organizador** faz upload da planilha
-e publica; **qualquer pessoa com o link** vê o ranking do turno, a temporada e o
-Hall of Fame — de qualquer celular ou computador, sem instalar nada.
+Dashboard **estático** do ranking da liga, publicado no **GitHub Pages**.
+Qualquer pessoa com o link vê o ranking do turno, a temporada e o Hall of Fame —
+de qualquer celular ou computador, sem instalar nada. O **organizador** sobe a
+planilha e publica direto pelo próprio site.
+
+É um único arquivo (`index.html`) com HTML + CSS + JavaScript: o cálculo do
+ranking roda no navegador, então não precisa de servidor.
 
 ---
 
@@ -19,57 +23,59 @@ Hall of Fame — de qualquer celular ou computador, sem instalar nada.
 
 ---
 
-## 📋 Passo a passo para publicar (uma vez só)
+## 📋 Publicar no GitHub Pages (uma vez só)
 
-### 1. Criar o repositório no GitHub
-1. Acesse **https://github.com/new**
-2. Nome: `ponhadas-clay` (pode ser **Private**) → **Create repository**
-3. Suba **todos os arquivos desta pasta** (botão *Add file → Upload files*, ou via Git).
+1. Suba os arquivos deste repositório para o GitHub (branch `main`).
+2. No repositório, vá em **Settings → Pages**.
+3. Em **Source**, escolha **Deploy from a branch** → Branch **`main`** / pasta **`/ (root)`** → **Save**.
+4. Em ~1 min o GitHub gera a URL pública, ex.:
+   `https://SEU-USUARIO.github.io/ponhadas-clay/`.
 
-### 2. Publicar no Streamlit Community Cloud (grátis)
-1. Acesse **https://share.streamlit.io** e entre com sua conta do GitHub.
-2. **Create app → Deploy a public app from GitHub**.
-3. Preencha:
-   - **Repository:** `seu-usuario/ponhadas-clay`
-   - **Branch:** `main`
-   - **Main file path:** `ponhadas_clay.py`
-4. Clique em **Advanced settings → Secrets** e cole (troque os valores):
-   ```toml
-   ADMIN_PASSWORD = "sua-senha-secreta"
-   GITHUB_TOKEN = "ghp_xxxxxxxx"
-   GITHUB_REPO  = "seu-usuario/ponhadas-clay"
-   ```
-5. **Deploy!** Em ~1 min você recebe a **URL pública** (ex.:
-   `https://ponhadas-clay.streamlit.app`). É esse link que você compartilha.
+### Domínio próprio (opcional)
 
-### 3. Criar o token do GitHub (para o botão "Salvar e publicar")
+Ainda em **Settings → Pages → Custom domain**, digite `ponhadasclay.com.br` e
+salve. Depois, no seu registrador, aponte o DNS para o GitHub Pages:
+
+- Um registro **CNAME** de `www` → `SEU-USUARIO.github.io`, **ou**
+- Registros **A** do apex para os IPs do GitHub Pages
+  (`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`).
+
+O GitHub cria e mantém o certificado HTTPS automaticamente.
+
+---
+
+## 🔄 Atualizar o ranking (toda semana/mês)
+
+1. Abra a URL do site.
+2. Clique no botão **⚙️** (canto inferior direito) → **Área do organizador**.
+3. **Suba a planilha** `.xlsx` atualizada e clique em **Processar planilha**
+   (o ranking já atualiza na sua tela).
+4. Para publicar **para todos**, cole um **GitHub token** e clique em
+   **💾 Publicar no GitHub**. Em ~1 min o Pages reflete os números novos.
+
+Cada **aba da planilha é um turno mensal** (ex.: `julho.26`, `agosto.26`). É só
+ir adicionando abas conforme a temporada avança.
+
+### Criar o token do GitHub (para publicar)
+
 1. **https://github.com/settings/tokens?type=beta** → *Generate new token (fine-grained)*.
 2. **Repository access:** *Only select repositories* → escolha `ponhadas-clay`.
 3. **Permissions → Repository → Contents:** **Read and write**.
-4. Gere, copie o token (`ghp_...`) e cole no campo `GITHUB_TOKEN` dos Secrets.
+4. Gere e copie o token — você o cola no campo da área do organizador na hora de publicar.
 
-> Sem o token, o app funciona, mas o upload vale só na sua sessão (não publica pra todos).
-
----
-
-## 🔄 Para atualizar o ranking (toda semana/mês)
-
-1. Abra a URL do app.
-2. Na barra lateral, digite a **senha admin**.
-3. **Suba a planilha** `.xlsx` atualizada.
-4. Clique em **💾 Salvar e publicar**. Pronto — todos já veem os números novos.
-
-Cada **aba da planilha é um turno mensal** (ex.: `julho.26`, `agosto.26`). É só ir
-adicionando abas conforme a temporada avança.
+> O token **não** fica salvo no site: vive só no seu navegador, durante a publicação.
+> Sem token, o upload vale só na sua sessão (não publica pra todos).
 
 ---
 
-## 🖥️ Rodar no seu computador (opcional, para testar)
+## 🖥️ Testar no seu computador (opcional)
+
+Como o site lê `data/ranking_data.json` via `fetch`, abra por um servidor local
+(não por `file://`):
 
 ```bash
-pip install -r requirements.txt
-# crie .streamlit/secrets.toml a partir do secrets.toml.example
-streamlit run ponhadas_clay.py
+python3 -m http.server 8000
+# depois acesse http://localhost:8000
 ```
 
 ---
@@ -77,9 +83,8 @@ streamlit run ponhadas_clay.py
 ## Estrutura
 
 ```
-ponhadas_clay.py            # o app (interface + cálculo do ranking)
-requirements.txt             # dependências
-data/ranking_data.json       # dados publicados (gerados pelo upload)
-.streamlit/config.toml       # tema visual
-.streamlit/secrets.toml      # senhas/token (NÃO versionar — veja o .example)
+index.html               # o app inteiro (interface + cálculo do ranking, em JS)
+data/ranking_data.json   # dados publicados (gerados pelo upload da planilha)
+.nojekyll                # serve o site sem processamento Jekyll
+.gitignore               # ignora planilhas locais e arquivos temporários
 ```
