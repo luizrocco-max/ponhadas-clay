@@ -103,6 +103,15 @@
   .atlink:hover{color:var(--accent2);border-bottom-color:var(--accent2)}
   tbody td .atlink::after{content:" ›";color:var(--muted);font-weight:700}
   .note{color:var(--muted);font-size:12px;margin:12px 2px;line-height:1.6}
+  .help{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;
+    border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--muted);
+    font-size:10px;font-weight:700;cursor:pointer;position:relative;vertical-align:middle;margin-left:4px}
+  .help:hover{color:var(--accent2);border-color:var(--accent2)}
+  .help .tip{position:absolute;top:150%;right:-6px;width:230px;background:#0f1210;border:1px solid var(--line);
+    border-radius:8px;padding:9px 11px;font-size:11.5px;font-weight:400;color:var(--txt);line-height:1.5;
+    text-align:left;text-transform:none;letter-spacing:0;box-shadow:0 8px 24px rgba(0,0,0,.55);
+    z-index:60;display:none;white-space:normal}
+  .help:hover .tip, .help.open .tip{display:block}
 
   /* ---------- admin ---------- */
   .adminfab{position:fixed;right:18px;bottom:18px;width:48px;height:48px;border-radius:50%;
@@ -221,6 +230,8 @@ const titleCase = s => String(s).toLowerCase().split(" ")
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 // nome de atirador clicável → leva à aba "Por Atirador"
 const atLink = nome => `<span class="atlink" data-atirador="${esc(nome)}">${esc(titleCase(nome))}</span>`;
+// "?" com explicação (aparece no hover ou no toque)
+const help = txt => `<span class="help" role="button" tabindex="0">?<span class="tip">${txt}</span></span>`;
 // "julho.26" → "Julho/2026" (nome bonito do turno)
 function fmtTurno(aba){
   const [ano, mes] = ordemMes(aba);
@@ -494,7 +505,7 @@ function renderTurno(){
     <h3 class="sec">Classificação completa (oficial · com handicap)</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Col.</th><th>Atirador</th><th>Pratos</th><th>% base</th>
-        <th>Média 3T</th><th>HC</th><th>Pontuação</th><th>Postos fech.</th></tr></thead>
+        <th>Média 3T ${help("Média dos seus percentuais nos últimos 3 turnos — usada só para calcular o handicap (Art. 15 e 17). No 1º turno é igual ao % base, pois ainda não há histórico.")}</th><th>HC</th><th>Pontuação</th><th>Postos fech.</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     <p class="note">Pontuação = percentual com handicap (Art. 11). Handicap só para quem está
       &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17).
@@ -785,7 +796,11 @@ function abrirAtirador(nome){
 }
 document.addEventListener("click", e=>{
   const el = e.target.closest("[data-atirador]");
-  if(el) abrirAtirador(el.getAttribute("data-atirador"));
+  if(el){ abrirAtirador(el.getAttribute("data-atirador")); return; }
+  // "?" ajuda: alterna no toque (celular) e fecha os outros
+  const h = e.target.closest(".help");
+  document.querySelectorAll(".help.open").forEach(x=>{ if(x!==h) x.classList.remove("open"); });
+  if(h) h.classList.toggle("open");
 });
 
 /* ══════════════════════════════════════════════════════════════════════════
