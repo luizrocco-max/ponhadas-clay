@@ -118,6 +118,16 @@
 
   .regras{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 22px;line-height:1.7}
   .regras li{margin:6px 0}
+  .regintro{color:var(--muted);font-size:13px;margin:2px 0 6px}
+  .dlbtn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;text-decoration:none;
+    padding:11px 18px;border-radius:10px;font-weight:700;font-size:14px;margin:12px 0;
+    box-shadow:0 4px 14px rgba(228,87,46,.3)}
+  .dlbtn:hover{filter:brightness(1.08)}
+  .regsec{margin:22px 0 8px;font-size:15px;color:var(--accent2);border-bottom:1px solid var(--line);
+    padding-bottom:6px;letter-spacing:.3px}
+  .art{margin:9px 0;line-height:1.65;color:var(--txt);font-size:13.5px}
+  .artnum{color:var(--accent2);font-weight:800;margin-right:5px;white-space:nowrap}
+  .regclose{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
   .foot{color:var(--muted);font-size:11.5px;text-align:center;margin:26px 0 8px}
   @media(max-width:560px){.podium{grid-template-columns:1fr}.badge{margin:8px 0 0}}
 </style>
@@ -483,7 +493,7 @@ function renderAtir(){
 function renderRegras(){
   document.getElementById("view-regras").innerHTML = `
   <div class="regras">
-    <h3 class="sec" style="margin-top:4px">📜 Como funciona a pontuação</h3>
+    <h3 class="sec" style="margin-top:4px">📜 Como funciona a pontuação (resumo)</h3>
     <ul>
       <li><b>Turnos mensais.</b> Vale a <b>maior passada</b> de cada atirador no mês (sem limite de tentativas).</li>
       <li><b>Pontuação base</b> = percentual de acerto = <code>seus pratos ÷ pratos do líder × 100</code> (o líder faz 100%).</li>
@@ -497,6 +507,62 @@ function renderRegras(){
       <li><b>Desempate no turno:</b> mais <b>postos fechados</b>; depois melhor no último posto.</li>
       <li><b>Hall of Fame (Atirador do Ano):</b> quem vence <b>mais turnos</b>; empate → mais <b>pódios (top 3)</b>.</li>
     </ul>
+
+    <a class="dlbtn" href="regulamento.pdf" download>📄 Baixar Regulamento Oficial (PDF)</a>
+
+    <h2 style="font-size:19px;margin:18px 0 2px">🏆 Regulamento Oficial — Ponhada's Clay League CCTSP</h2>
+    <div class="regintro"><i>Regulamento Geral e Sistema de Handicap · Um ambiente de competição saudável, amizade e de muita pontaria!</i></div>
+
+    <h3 class="regsec">1. Disposições Gerais</h3>
+    <div class="art"><span class="artnum">Art. 1º —</span>A Ponhada's Clay League CCTSP (doravante denominada "Ponhada") é uma competição recreativa organizada pelo clube, com o objetivo de promover a integração social entre os sócios praticantes da modalidade.</div>
+    <div class="art"><span class="artnum">Art. 2º —</span>A participação na "Ponhada" é restrita a sócios do Clube de Caça e Tiro de São Paulo. Não haverá cobrança de taxa de inscrição, e serão permitidos todos os calibres (ex.: 28Ga, 20Ga e 12Ga de 24, 28 e até 32 grs).</div>
+    <div class="art"><span class="artnum">Art. 3º —</span>As disputas ocorrerão preferencialmente aos sábados, na sede social do clube, seguindo o calendário de cada Turno divulgado pela organização, mas é facultado aos participantes realizar o percurso em dias de semana e registrar a pontuação na secretaria.</div>
+    <div class="art"><span class="artnum">Art. 4º —</span>O espírito da "Ponhada" é de camaradagem e fair play. A competição saudável e as brincadeiras entre amigos são incentivadas. Atitudes antidesportivas poderão resultar em advertência ou desclassificação, a critério da diretoria.</div>
+
+    <h3 class="regsec">2. Estrutura da "Ponhada"</h3>
+    <div class="art"><span class="artnum">Art. 5º —</span>A "Ponhada" é organizada em Turnos mensais.</div>
+    <div class="art"><span class="artnum">Art. 6º —</span>Ao longo de 12 meses serão realizados 12 Turnos consecutivos, compondo o Ciclo Anual da "Ponhada".</div>
+    <div class="art"><span class="artnum">Art. 7º —</span>Será validada e registrada a maior pontuação obtida por cada participante durante o turno sem limite de participações dentro do turno, desde que a pontuação tenha sido registrada em súmula para tal, e que cada participante atire primeiro os pratos de cada posto, anotando seu resultado diretamente (sem "treinar" os pratos antes). Caso queira, poderá "treinar" os pratos após o registro de sua pontuação naquele posto.</div>
+    <div class="art"><span class="artnum">Art. 8º —</span>Excepcionalmente no ano de 2026, o ciclo anual da "Ponhada" será composto pelo número de turnos que sejam possíveis de estabelecer, com previsão de início em Julho/2026.</div>
+
+    <h3 class="regsec">3. Rodadas e Pontuação</h3>
+    <div class="art"><span class="artnum">Art. 9º —</span>Cada rodada semanal poderá ter percursos de 50, 75 ou 100 pratos distribuídos em 7, 8 ou até 11 postos, conforme definido pela organização no início de cada Turno. O formato disponível do percurso será comunicado com antecedência.</div>
+    <div class="art"><span class="artnum">Art. 10º —</span>A pontuação base de cada turno é o percentual de acerto do atirador (pratos quebrados ÷ total de pratos do atirador que acertou mais pratos no respectivo turno × 100), arredondado para duas casas decimais. O uso de percentual garante comparabilidade entre rodadas com número diferentes de pratos.</div>
+    <div class="art"><span class="artnum">Art. 11º —</span>A pontuação final de turno é dada por: Percentual de Acerto + Bônus de Handicap (conforme Seção 4). O resultado é o valor que entra para a disputa do Turno.</div>
+
+    <h3 class="regsec">4. Sistema de Handicap</h3>
+    <div class="art"><span class="artnum">Art. 12º —</span>O bônus de handicap tem por objetivo equilibrar as chances de competição entre atiradores de diferentes níveis, permitindo que todos participem de forma justa e motivadora.</div>
+    <div class="art"><span class="artnum">Art. 13º —</span>O bônus de handicap é definido pela fórmula determinada e divulgada pela organização da "Ponhada" e somado ao percentual de acerto dos atiradores em cada turno.</div>
+    <div class="art"><span class="artnum">Art. 14º —</span>Atiradores que obtenham resultados entre 100% e 93% do melhor resultado do turno, não farão jus ao bônus de handicap. Atiradores cujos resultados sejam inferiores a 93% utilizarão o bônus de handicap seguindo a fórmula no artigo a seguir:</div>
+    <div class="art"><span class="artnum">Art. 15º —</span>A fórmula para determinar o bônus de handicap se baseia na diferença em pontos percentuais que o atirador obtiver em relação ao melhor atirador do turno, na média dos percentuais dos últimos 3 turnos. Em uma prova de 75 pratos, a cada 10 pontos percentuais de diferença serão concedidos a título de bônus de handicap 5 pratos ao participante (para diferenças não múltiplos de 10 será utilizada proporção aritmética "regra de 3" para determinar o número de pratos de handicap). Para provas de 100 pratos, 7 pratos a cada 10 pontos percentuais e numa prova de 50 pratos, 3 pratos a cada 10 pontos percentuais. Esse número de pratos será então somado ao resultado que o atirador obteve e com este número se calculará o seu percentual de acerto.</div>
+    <div class="art"><span class="artnum">Art. 16º —</span>O bônus é aplicado proporcionalmente a rodadas de 100 e de 50 pratos, da seguinte forma: Para provas de 100 pratos, 7 pratos a cada 10 pontos percentuais e para provas de 50 pratos, 3 pratos a cada 10 pontos percentuais.</div>
+    <div class="art"><span class="artnum">Art. 17º —</span>O handicap é dinâmico entre Turnos e por ser calculado com base na média dos últimos 3 turnos evitará distorções ao longo do tempo. Com o passar dos turnos o atirador passa a receber o bônus correspondente ao seu novo nível de acertos, refletindo sua evolução real. No primeiro turno de cada participante o handicap será calculado com base nos dados daquele turno somente, no segundo turno o cálculo utilizará a média dos dois turnos nos quais participou e a partir do terceiro turno sempre a média dos últimos três turnos.</div>
+
+    <h3 class="regsec">6. Ranking e Divulgação dos Resultados</h3>
+    <div class="art"><span class="artnum">Art. 18º —</span>Às terças-feiras, a organização apurará e publicará no mural do clube o ranking atualizado do Turno em curso, com os resultados da rodada e o melhor resultado de cada atirador.</div>
+    <div class="art"><span class="artnum">Art. 19º —</span>O ranking exibirá: posição, nome do atirador e pontuação.</div>
+    <div class="art"><span class="artnum">Art. 20º —</span>A divulgação visa estimular a rivalidade saudável e o engajamento. Comentários, apostas de charutos e boas brincadeiras são parte da cultura da "Ponhada".</div>
+
+    <h3 class="regsec">7. Premiação por Turno</h3>
+    <div class="art"><span class="artnum">Art. 21º —</span>Ao final de cada Turno, o atirador com a maior pontuação será declarado Campeão do Turno.</div>
+    <div class="art"><span class="artnum">Art. 22º —</span>Em caso de empate no primeiro lugar, será declarado vencedor o atirador que obteve o maior número de postos com pontuação máxima ("postos fechados"). Caso o empate persista, o vencedor será o que tiver o melhor resultado no último posto, e assim subsequentemente até que haja um desempate, desde que observado o disposto no artigo 38º deste Regulamento.</div>
+    <div class="art"><span class="artnum">Art. 23º —</span>O primeiro colocado de cada Turno receberá um prêmio simbólico oferecido pelo clube, a critério da diretoria — como uma garrafa de bebida, um charuto ou uma caixa de cartuchos.</div>
+    <div class="art"><span class="artnum">Art. 24º —</span>A fotografia do Campeão do Turno será exibida com destaque no mural do clube pelo período do Turno seguinte, até que um novo campeão seja coroado.</div>
+
+    <h3 class="regsec">8. Hall of Fame — Ciclo Anual</h3>
+    <div class="art"><span class="artnum">Art. 25º —</span>Ao final de 12 Turnos (Ciclo Anual de 12 meses), será apurado o desempenho histórico de cada sócio no período.</div>
+    <div class="art"><span class="artnum">Art. 26º —</span>O sócio que acumular o maior número de primeiros lugares nos Turnos do Ciclo será consagrado Atirador do Ano. Em caso de empate, considera-se o maior número de pódios (top 3) no período.</div>
+    <div class="art"><span class="artnum">Art. 27º —</span>O Atirador do Ano terá seu nome inscrito permanentemente no Hall of Fame do clube, em placa ou painel fixado em local de destaque na sede social.</div>
+    <div class="art"><span class="artnum">Art. 28º —</span>Além da inscrição no Hall of Fame, o Atirador do Ano receberá um prêmio especial a ser definido pela diretoria do clube, de valor simbólico e comemorativo.</div>
+    <div class="art"><span class="artnum">Art. 29º —</span>Um quadro com o histórico de todos os Atiradores do Ano será mantido no mural do clube, celebrando a trajetória da "Ponhada" ao longo dos anos.</div>
+    <div class="art"><span class="artnum">Art. 30º —</span>Conforme já mencionado no Art. 8º o campeão do ciclo anual do ano de 2026 e que será o primeiro participante a ter seu nome no "Hall of Fame" será o vencedor do maior número de turnos que forem realizados em 2026, pois neste ano excepcionalmente não serão realizados 12 turnos.</div>
+
+    <h3 class="regsec">9. Organização e Disposições Regulamentares</h3>
+    <div class="art"><span class="artnum">Art. 33º —</span>A "Ponhada" será coordenada por um responsável indicado pela diretoria do clube, que ficará encarregado de: (i) apurar e divulgar os resultados; (ii) manter o ranking atualizado; (iii) controlar a classificação por categoria; e (iv) organizar a cerimônia de premiação ao fim de cada Turno.</div>
+    <div class="art"><span class="artnum">Art. 34º —</span>Casos omissos serão resolvidos pelo coordenador da "Ponhada" em conjunto com a diretoria do clube, tendo sempre como norte o espírito do regulamento: diversão, integração e competição saudável.</div>
+    <div class="art"><span class="artnum">Art. 35º —</span>Este regulamento poderá ser alterado pela diretoria do clube a qualquer tempo, sendo comunicadas as alterações com antecedência mínima de um Turno.</div>
+
+    <div class="regclose">Boa pontaria, boas risadas e que vença o melhor! 🎯<br>Regulamento aprovado pela diretoria do clube.</div>
   </div>`;
 }
 
