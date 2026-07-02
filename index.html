@@ -30,6 +30,11 @@
   .htext h1{margin:0;font-size:23px;letter-spacing:.3px;color:#12160f;font-weight:800}
   .htext h1 span{color:var(--accent)}
   .htext p{margin:5px 0 0;color:#4a4f45;font-size:12.5px}
+  .hdocs{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+  .docbtn{background:#fff;border:1px solid #cfd3ca;color:#12160f;border-radius:999px;
+    padding:7px 13px;font-size:12.5px;font-weight:600;cursor:pointer;transition:.12s}
+  .docbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .docbtn.active{background:var(--accent);color:#fff;border-color:transparent}
   .badge{display:inline-block;background:var(--accent);color:#fff;font-weight:800;
     font-size:11px;padding:4px 10px;border-radius:6px;letter-spacing:1.2px;margin-left:auto}
 
@@ -142,14 +147,16 @@
       <h1>Ponhada's Clay League <span>CCTSP</span></h1>
       <p>Ranking oficial da temporada · percentual + sistema de handicap</p>
     </div>
+    <div class="hdocs" id="hdocs">
+      <button class="docbtn" data-view="regras">📋 Regras</button>
+      <button class="docbtn" data-view="regulamento">📜 Regulamento</button>
+    </div>
   </header>
 
   <nav class="tabs" id="tabs">
     <button class="tab active" data-view="turno">🏆 Ranking do Turno</button>
     <button class="tab" data-view="temp">🏛️ Temporada · Hall of Fame</button>
     <button class="tab" data-view="atir">👤 Por Atirador</button>
-    <button class="tab" data-view="regras">📋 Regras</button>
-    <button class="tab" data-view="regulamento">📜 Regulamento</button>
   </nav>
   <div id="updated" class="note"></div>
 
@@ -459,6 +466,15 @@ function renderTurno(){
     <td><b>${r.pct_final.toFixed(2)}%</b></td>
     <td>${r.postos_fechados}</td></tr>`).join("");
 
+  // classificação por pratos (bruto — sem handicap)
+  const porPratos = [...rk].sort((a,b)=> b.total - a.total || b.postos_fechados - a.postos_fechados);
+  const pratosRows = porPratos.map((r,i)=>`<tr class="${i===0?"lead":""}">
+    <td><span class="rankbubble">${i+1}</span></td>
+    <td>${atLink(r.atirador)}</td>
+    <td><b>${r.total}</b></td>
+    <td>${turno.pratos ? (r.total/turno.pratos*100).toFixed(1) : "0.0"}%</td>
+    <td>${r.postos_fechados}</td></tr>`).join("");
+
   el.innerHTML = `
     <div class="controls">
       <div class="ctl"><label>Turno (mês)</label>
@@ -469,7 +485,13 @@ function renderTurno(){
     <div class="podium">${pod}</div>
     <h3 class="sec">Pontuação final (percentual com handicap)</h3>
     <div class="card chartwrap">${svgStackedBars(rk)}</div>
-    <h3 class="sec">Classificação completa</h3>
+    <h3 class="sec">🎯 Classificação por pratos (bruto — quem quebrou mais)</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Col.</th><th>Atirador</th><th>Pratos</th><th>% acerto</th><th>Postos fech.</th></tr></thead>
+      <tbody>${pratosRows}</tbody></table></div>
+    <p class="note" style="margin-bottom:20px">Ranking pela <b>quantidade de pratos quebrados</b> (sem handicap).
+      O campeão oficial do turno é pela <b>pontuação com handicap</b> — tabela abaixo.</p>
+    <h3 class="sec">Classificação completa (oficial · com handicap)</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Col.</th><th>Atirador</th><th>Pratos</th><th>% base</th>
         <th>Média 3T</th><th>HC</th><th>Pontuação</th><th>Postos fech.</th></tr></thead>
@@ -742,13 +764,16 @@ function renderAll(){
 
 /* ---------- tabs / navegação ---------- */
 function setView(view){
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===view));
+  document.querySelectorAll(".tab, .docbtn").forEach(t=>t.classList.toggle("active", t.dataset.view===view));
   ["turno","temp","atir","regras","regulamento"].forEach(v=>{
     document.getElementById("view-"+v).hidden = (v !== view);
   });
 }
 document.getElementById("tabs").addEventListener("click", e=>{
   const b = e.target.closest(".tab"); if(b) setView(b.dataset.view);
+});
+document.getElementById("hdocs").addEventListener("click", e=>{
+  const b = e.target.closest(".docbtn"); if(b) setView(b.dataset.view);
 });
 
 // clique no nome de um atirador → abre a página dele
