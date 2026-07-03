@@ -1,11 +1,11 @@
 {
-  "gerado_em": "02/07/2026 17:39",
+  "gerado_em": "02/07/2026 21:34",
   "turnos": [
     {
-      "aba": "julho.26",
+      "aba": "Planilha1",
       "ordem": [
-        2026,
-        7
+        0,
+        0
       ],
       "pratos": 75,
       "hc": 5,
@@ -22,7 +22,7 @@
       "registros": [
         {
           "atirador": "GUILHERME VALLERINI",
-          "total": 56.0,
+          "total": 56,
           "stations": [
             7,
             3,
@@ -37,7 +37,7 @@
         },
         {
           "atirador": "RENATO POLIZZI",
-          "total": 54.0,
+          "total": 54,
           "stations": [
             7,
             6,
@@ -52,7 +52,7 @@
         },
         {
           "atirador": "RICARDO LANDSKRON",
-          "total": 53.0,
+          "total": 53,
           "stations": [
             6,
             6,
@@ -66,8 +66,8 @@
           "data": "2026-07-01"
         },
         {
-          "atirador": "FELIPE POTTHOFF",
-          "total": 51.0,
+          "atirador": "FELIPE POTTOFF",
+          "total": 51,
           "stations": [
             9,
             5,
@@ -82,7 +82,7 @@
         },
         {
           "atirador": "LUIZ H. COKE",
-          "total": 50.0,
+          "total": 50,
           "stations": [
             7,
             3,
@@ -97,7 +97,7 @@
         },
         {
           "atirador": "RICARDO LANDSKRON",
-          "total": 49.0,
+          "total": 49,
           "stations": [
             4,
             7,
@@ -112,7 +112,7 @@
         },
         {
           "atirador": "LUIS H. NEVES",
-          "total": 36.0,
+          "total": 36,
           "stations": [
             4,
             2,
