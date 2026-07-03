@@ -465,7 +465,7 @@ function renderTurno(){
 
   const kpis = `<div class="kpis">
     <div class="kpi"><div class="v">${turno.pratos}</div><div class="l">Pratos do turno</div></div>
-    <div class="kpi accent"><div class="v">${turno.hc}</div><div class="l">Handicap / 10 p.p.</div></div>
+    <div class="kpi accent"><div class="v">${turno.hc}</div><div class="l">Handicap / 10 p.p. ${help("Pratos de bônus a cada 10 pontos percentuais de diferença para o líder (só para quem está abaixo de 93%). Depende da prova: 3 para 50 pratos, 5 para 75 e 7 para 100 (Art. 15 e 16).")}</div></div>
     <div class="kpi field"><div class="v">${rk.length}</div><div class="l">Atiradores</div></div>
     <div class="kpi"><div class="v" style="font-size:18px">${esc(lider)}</div><div class="l">Líder do turno</div></div>
   </div>`;
