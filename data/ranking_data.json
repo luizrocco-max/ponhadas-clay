@@ -1,11 +1,11 @@
 {
-  "gerado_em": "02/07/2026 21:43",
+  "gerado_em": "15/07/2026 10:49",
   "turnos": [
     {
-      "aba": "Julho.2026",
+      "aba": "Planilha1",
       "ordem": [
-        2026,
-        7
+        0,
+        0
       ],
       "pratos": 75,
       "hc": 5,
@@ -34,6 +34,21 @@
             6
           ],
           "data": "2026-07-01"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 56,
+          "stations": [
+            8,
+            6,
+            10,
+            9,
+            8,
+            8,
+            3,
+            4
+          ],
+          "data": "2026-07-09"
         },
         {
           "atirador": "RENATO POLIZZI",
@@ -67,6 +82,36 @@
         },
         {
           "atirador": "FELIPE POTTOFF",
+          "total": 53,
+          "stations": [
+            7,
+            7,
+            8,
+            7,
+            7,
+            8,
+            4,
+            5
+          ],
+          "data": "2026-07-09"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 53,
+          "stations": [
+            9,
+            4,
+            10,
+            8,
+            7,
+            5,
+            6,
+            4
+          ],
+          "data": "2026-07-09"
+        },
+        {
+          "atirador": "FELIPE POTTOFF",
           "total": 51,
           "stations": [
             9,
@@ -79,6 +124,21 @@
             7
           ],
           "data": "2026-07-01"
+        },
+        {
+          "atirador": "GUILHERMO ORLANDO",
+          "total": 51,
+          "stations": [
+            9,
+            4,
+            8,
+            7,
+            9,
+            3,
+            5,
+            6
+          ],
+          "data": "2026-07-09"
         },
         {
           "atirador": "LUIZ H. COKE",
@@ -109,6 +169,36 @@
             4
           ],
           "data": "2026-07-01"
+        },
+        {
+          "atirador": "BRUNO VERCIANI",
+          "total": 48,
+          "stations": [
+            9,
+            5,
+            8,
+            6,
+            4,
+            7,
+            5,
+            4
+          ],
+          "data": "2026-07-09"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 43,
+          "stations": [
+            3,
+            2,
+            8,
+            6,
+            9,
+            5,
+            5,
+            5
+          ],
+          "data": "2026-07-09"
         },
         {
           "atirador": "LUIS H. NEVES",
