@@ -119,11 +119,15 @@
     border-radius:50%;background:var(--panel2);border:1px solid var(--line);color:var(--muted);
     font-size:10px;font-weight:700;cursor:pointer;position:relative;vertical-align:middle;margin-left:4px}
   .help:hover{color:var(--accent2);border-color:var(--accent2)}
-  .help .tip{position:absolute;top:150%;right:-6px;width:230px;background:#0f1210;border:1px solid var(--line);
-    border-radius:8px;padding:9px 11px;font-size:11.5px;font-weight:400;color:var(--txt);line-height:1.5;
-    text-align:left;text-transform:none;letter-spacing:0;box-shadow:0 8px 24px rgba(0,0,0,.55);
-    z-index:60;display:none;white-space:normal}
-  .help:hover .tip, .help.open .tip{display:block}
+  .help.open{background:var(--accent2);color:#12160f;border-color:transparent}
+  /* caixinha flutuante da explicação (não é cortada pela tabela) */
+  #tiptoast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(8px);
+    max-width:min(92vw,360px);background:#0f1210;border:1px solid var(--accent2);border-radius:12px;
+    padding:13px 40px 13px 15px;font-size:13px;color:var(--txt);line-height:1.55;text-align:left;
+    box-shadow:0 16px 40px rgba(0,0,0,.6);z-index:9998;opacity:0;visibility:hidden;transition:.16s}
+  #tiptoast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+  #tiptoast .x{position:absolute;top:8px;right:11px;cursor:pointer;color:var(--muted);font-weight:700;font-size:15px}
+  #tiptoast .x:hover{color:var(--txt)}
 
   /* ---------- admin ---------- */
   .adminfab{position:fixed;right:18px;bottom:18px;width:48px;height:48px;border-radius:50%;
@@ -162,6 +166,7 @@
 </style>
 
 <div id="splash"><img src="logo.png" alt="Ponhada's Clay League CCTSP"></div>
+<div id="tiptoast"><span class="x" id="tiptoastX">✕</span><span id="tiptoastText"></span></div>
 
 <div class="wrap">
   <header class="top">
@@ -249,7 +254,7 @@ const fmtDataCurta = s => { const m=String(s||"").slice(0,10).match(/^(\d{4})-(\
 // nome de atirador clicável → leva à aba "Por Atirador"
 const atLink = nome => `<span class="atlink" data-atirador="${esc(nome)}">${esc(titleCase(nome))}</span>`;
 // "?" com explicação (aparece no hover ou no toque)
-const help = txt => `<span class="help" role="button" tabindex="0">?<span class="tip">${txt}</span></span>`;
+const help = txt => `<span class="help" role="button" tabindex="0" data-tip="${esc(txt)}">?</span>`;
 // "julho.26" → "Julho/2026" (nome bonito do turno)
 function fmtTurno(aba){
   const [ano, mes] = ordemMes(aba);
@@ -815,13 +820,25 @@ function abrirAtirador(nome){
   setView("atir");
   window.scrollTo({top:0, behavior:"smooth"});
 }
+function fecharTip(){
+  document.getElementById("tiptoast").classList.remove("show");
+  document.querySelectorAll(".help.open").forEach(x=>x.classList.remove("open"));
+}
+document.getElementById("tiptoastX").onclick = fecharTip;
 document.addEventListener("click", e=>{
   const el = e.target.closest("[data-atirador]");
   if(el){ abrirAtirador(el.getAttribute("data-atirador")); return; }
-  // "?" ajuda: alterna no toque (celular) e fecha os outros
+  // "?" ajuda: abre a caixinha flutuante embaixo (não é cortada pela tabela)
   const h = e.target.closest(".help");
-  document.querySelectorAll(".help.open").forEach(x=>{ if(x!==h) x.classList.remove("open"); });
-  if(h) h.classList.toggle("open");
+  if(h){
+    fecharTip();
+    document.getElementById("tiptoastText").textContent = h.getAttribute("data-tip") || "";
+    document.getElementById("tiptoast").classList.add("show");
+    h.classList.add("open");
+    e.stopPropagation();
+    return;
+  }
+  if(!e.target.closest("#tiptoast")) fecharTip();  // clicar fora fecha
 });
 
 /* ══════════════════════════════════════════════════════════════════════════
