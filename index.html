@@ -243,6 +243,9 @@ const round2 = v => Math.round((v + Number.EPSILON) * 100) / 100;
 const titleCase = s => String(s).toLowerCase().split(" ")
   .map(w => w ? w[0].toUpperCase() + w.slice(1) : w).join(" ");
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+// data ISO "2026-07-09" → "09/07/2026" (e versão curta "09/07")
+const fmtData = s => { const m=String(s||"").slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m?`${m[3]}/${m[2]}/${m[1]}`:(s||""); };
+const fmtDataCurta = s => { const m=String(s||"").slice(0,10).match(/^(\d{4})-(\d{2})-(\d{2})$/); return m?`${m[3]}/${m[2]}`:String(s||"").slice(0,5); };
 // nome de atirador clicável → leva à aba "Por Atirador"
 const atLink = nome => `<span class="atlink" data-atirador="${esc(nome)}">${esc(titleCase(nome))}</span>`;
 // "?" com explicação (aparece no hover ou no toque)
@@ -424,11 +427,11 @@ function svgStations(postosMax, series){
   lg += `<rect x="${padL+series.length*128}" y="4" width="11" height="11" fill="#232a22" rx="2"/><text x="${padL+series.length*128+16}" y="14" fill="#9aa596" font-size="11">máx. do posto</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${lg}${g}</svg>`;
 }
-function svgTotals(totals, pratos){
-  // uma barra por passada (na ordem em que ocorreram); melhor em verde; linha da média
+function svgTotals(totals, labels, pratos){
+  // uma barra por passada; rótulo = data (dd/mm); melhor em verde; linha da média
   const n = totals.length;
   if(!n) return "";
-  const W = Math.max(300, n*34), H = 176, padL = 28, padR = 10, padT = 18, padB = 28;
+  const W = Math.max(320, n*44), H = 184, padL = 28, padR = 10, padT = 18, padB = 34;
   const maxY = Math.max(pratos||0, ...totals, 1);
   const base = H - padB, bw = (W-padL-padR)/n;
   const sy = v => padT + (1 - v/maxY)*(base-padT);
@@ -438,8 +441,9 @@ function svgTotals(totals, pratos){
   totals.forEach((v,i)=>{
     const x = padL + i*bw, col = v===bestV ? "#2f9e5f" : "#e4572e";
     g += `<rect x="${x+bw*0.15}" y="${sy(v)}" width="${bw*0.7}" height="${base-sy(v)}" fill="${col}" rx="2"/>`;
-    if(n<=30) g += `<text x="${x+bw/2}" y="${sy(v)-3}" text-anchor="middle" fill="#9aa596" font-size="9">${v}</text>`;
-    if(n<=30) g += `<text x="${x+bw/2}" y="${base+14}" text-anchor="middle" fill="#5f6a5a" font-size="9">${i+1}ª</text>`;
+    if(n<=40) g += `<text x="${x+bw/2}" y="${sy(v)-3}" text-anchor="middle" fill="#9aa596" font-size="9">${v}</text>`;
+    if(n<=24){ const lab = (labels && labels[i]) ? labels[i] : (i+1)+"ª";
+      g += `<text x="${x+bw/2}" y="${base+15}" text-anchor="middle" fill="#5f6a5a" font-size="9">${lab}</text>`; }
   });
   const ym = sy(media);
   g += `<line x1="${padL}" y1="${ym}" x2="${W-padR}" y2="${ym}" stroke="#e0b83c" stroke-dasharray="4 3" stroke-width="1"/>`;
@@ -520,7 +524,7 @@ function renderTurno(){
     <h3 class="sec">Classificação completa (oficial · com handicap)</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Col.</th><th>Atirador</th><th>Pratos</th><th>% base</th>
-        <th>Média 3T ${help("Média dos seus percentuais nos últimos 3 turnos — usada só para calcular o handicap (Art. 15 e 17). No 1º turno é igual ao % base, pois ainda não há histórico.")}</th><th>HC</th><th>Pontuação</th><th>Postos fech.</th></tr></thead>
+        <th>Média 3T ${help("Média dos seus percentuais nos últimos 3 turnos — usada só para calcular o handicap (Art. 15 e 17). No 1º turno é igual ao % base, pois ainda não há histórico.")}</th><th>HC</th><th>Pontuação ${help("Pontuação final do turno = % do líder + bônus de handicap. Pode passar de 100%: quem recebe handicap soma pratos de bônus e pode ultrapassar o líder de pratos. É ela que decide a colocação (Art. 11).")}</th><th>Postos fech.</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     <p class="note">Pontuação = percentual com handicap (Art. 11). Handicap só para quem está
       &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17).
@@ -603,7 +607,7 @@ function renderAtir(){
     }
     const passRows = passadas.map(pa=>`<tr class="${pa.oficial?"lead":""}">
       <td>${esc(fmtTurno(pa.turno))}</td>
-      <td>${esc(pa.data)||"—"}</td>
+      <td>${esc(fmtData(pa.data))||"—"}</td>
       <td style="color:var(--muted)">${pa.stations.join(" · ")}</td>
       <td><b>${pa.total}</b></td>
       <td>${pa.pf}</td>
@@ -621,7 +625,7 @@ function renderAtir(){
       <div class="card chartwrap">${svgLine(hist.map(h=>fmtTurno(h.turno)), hist.map(h=>h.pct_final))}</div>
       <h3 class="sec">Histórico (resultado oficial por turno)</h3>
       <div class="tablewrap"><table>
-        <thead><tr><th>Turno</th><th>Col.</th><th>Pratos</th><th>% base</th><th>HC</th><th>Pontuação</th></tr></thead>
+        <thead><tr><th>Turno</th><th>Col.</th><th>Pratos</th><th>% base</th><th>HC</th><th>Pontuação ${help("Pontuação final do turno = % do líder + bônus de handicap. Pode passar de 100%: quem recebe handicap soma pratos de bônus e pode ultrapassar o líder de pratos. É ela que decide a colocação (Art. 11).")}</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
       <h3 class="sec">Todas as passadas</h3>
       <p class="note" style="margin-top:0">Cada atirador pode atirar quantas vezes quiser no turno (Art. 7º).
@@ -662,8 +666,10 @@ function renderAtir(){
     const chartOwn = pm.length ? `<div class="card chartwrap">${svgStations(pm,
       [{name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>
       <p class="note">Barras = seus acertos por posto; cinza = o máximo do posto. Quanto mais cheia, mais perto de <b>fechar</b> o posto.</p>` : "";
-    const chartTotals = `<h3 class="sec" style="font-size:13.5px;color:var(--muted)">Pontuação de cada passada (na ordem)</h3>
-      <div class="card chartwrap">${svgTotals(totals, turno.pratos)}</div>`;
+    const passOrd = [...regs].sort((a,b)=> String(a.data||"").localeCompare(String(b.data||"")));
+    const chartTotals = `<h3 class="sec" style="font-size:13.5px;color:var(--muted)">Pontuação de cada passada (por data)</h3>
+      <div class="card chartwrap">${svgTotals(passOrd.map(r=>r.total), passOrd.map(r=>fmtDataCurta(r.data)), turno.pratos)}</div>
+      <p class="note" style="margin-top:0">Cada barra é uma passada, na data em que ocorreu — dá pra comparar quantas vezes atirou no mês e a evolução. Verde = a que valeu.</p>`;
 
     return `
       <h3 class="sec">📊 Comparação com os demais — último turno (${esc(fmtTurno(turno.aba))})</h3>
