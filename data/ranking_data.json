@@ -1,8 +1,8 @@
 {
-  "gerado_em": "15/07/2026 11:06",
+  "gerado_em": "16/07/2026 15:46",
   "turnos": [
     {
-      "aba": "Junho de 2026",
+      "aba": "Planilha1",
       "ordem": [
         0,
         0
@@ -214,6 +214,36 @@
             1
           ],
           "data": "2026-07-01"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 61,
+          "stations": [
+            7,
+            9,
+            11,
+            9,
+            6,
+            8,
+            5,
+            6
+          ],
+          "data": "2026-07-16"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 42,
+          "stations": [
+            2,
+            5,
+            8,
+            8,
+            6,
+            6,
+            4,
+            3
+          ],
+          "data": "2026-07-16"
         }
       ]
     }
