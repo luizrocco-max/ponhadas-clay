@@ -1,5 +1,5 @@
 {
-  "gerado_em": "17/07/2026 11:02",
+  "gerado_em": "17/07/2026 17:52",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -259,6 +259,36 @@
             6
           ],
           "data": "2026-07-09"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 46,
+          "stations": [
+            3,
+            5,
+            10,
+            8,
+            7,
+            5,
+            6,
+            2
+          ],
+          "data": "2026-07-17"
+        },
+        {
+          "atirador": "VINICIUS PINHEIRO",
+          "total": 51,
+          "stations": [
+            7,
+            5,
+            9,
+            6,
+            6,
+            8,
+            7,
+            3
+          ],
+          "data": "2026-07-17"
         }
       ]
     }
