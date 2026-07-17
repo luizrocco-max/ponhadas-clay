@@ -1,5 +1,5 @@
 {
-  "gerado_em": "16/07/2026 15:48",
+  "gerado_em": "17/07/2026 11:02",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -244,6 +244,21 @@
             3
           ],
           "data": "2026-07-16"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 48,
+          "stations": [
+            7,
+            3,
+            9,
+            7,
+            6,
+            6,
+            4,
+            6
+          ],
+          "data": "2026-07-09"
         }
       ]
     }
