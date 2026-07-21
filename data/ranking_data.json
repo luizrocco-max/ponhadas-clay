@@ -1,5 +1,5 @@
 {
-  "gerado_em": "17/07/2026 17:52",
+  "gerado_em": "21/07/2026 11:31",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -289,6 +289,201 @@
             3
           ],
           "data": "2026-07-17"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 45,
+          "stations": [
+            8,
+            6,
+            6,
+            8,
+            2,
+            5,
+            4,
+            6
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "GUILHERMO ORLANDO",
+          "total": 55,
+          "stations": [
+            9,
+            3,
+            10,
+            8,
+            8,
+            7,
+            6,
+            4
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 58,
+          "stations": [
+            9,
+            6,
+            11,
+            7,
+            6,
+            7,
+            6,
+            6
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 45,
+          "stations": [
+            7,
+            6,
+            7,
+            7,
+            7,
+            3,
+            5,
+            3
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 53,
+          "stations": [
+            9,
+            6,
+            8,
+            10,
+            7,
+            4,
+            3,
+            6
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "GUILHERME JR.",
+          "total": 44,
+          "stations": [
+            6,
+            3,
+            5,
+            9,
+            3,
+            8,
+            6,
+            4
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "VINICIUS PINHEIRO",
+          "total": 58,
+          "stations": [
+            9,
+            7,
+            7,
+            11,
+            7,
+            5,
+            7,
+            5
+          ],
+          "data": "2026-07-19"
+        },
+        {
+          "atirador": "GUILHERME JR.",
+          "total": 41,
+          "stations": [
+            3,
+            4,
+            7,
+            6,
+            8,
+            4,
+            6,
+            3
+          ],
+          "data": "2026-07-19"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 61,
+          "stations": [
+            8,
+            8,
+            11,
+            9,
+            7,
+            7,
+            5,
+            6
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "GUILHERME JR.",
+          "total": 41,
+          "stations": [
+            3,
+            2,
+            7,
+            8,
+            6,
+            6,
+            5,
+            4
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "VINICIUS PINHEIRO",
+          "total": 52,
+          "stations": [
+            8,
+            9,
+            7,
+            7,
+            3,
+            8,
+            6,
+            4
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "LAMBERTO RAMENZONI",
+          "total": 57,
+          "stations": [
+            9,
+            7,
+            10,
+            7,
+            5,
+            7,
+            7,
+            5
+          ],
+          "data": "2026-07-18"
+        },
+        {
+          "atirador": "FERNÃO LARA MESQUITA",
+          "total": 44,
+          "stations": [
+            6,
+            5,
+            6,
+            5,
+            4,
+            7,
+            6,
+            5
+          ],
+          "data": "2026-07-18"
         }
       ]
     }
