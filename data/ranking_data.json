@@ -1,5 +1,5 @@
 {
-  "gerado_em": "21/07/2026 11:31",
+  "gerado_em": "21/07/2026 13:53",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -484,6 +484,66 @@
             5
           ],
           "data": "2026-07-18"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 63,
+          "stations": [
+            9,
+            6,
+            9,
+            7,
+            10,
+            9,
+            7,
+            6
+          ],
+          "data": "2026-07-21"
+        },
+        {
+          "atirador": "VINICIUS PINHEIRO",
+          "total": 57,
+          "stations": [
+            9,
+            7,
+            8,
+            6,
+            7,
+            9,
+            6,
+            5
+          ],
+          "data": "2026-07-21"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 55,
+          "stations": [
+            8,
+            8,
+            7,
+            5,
+            6,
+            8,
+            7,
+            6
+          ],
+          "data": "2026-07-21"
+        },
+        {
+          "atirador": "GUILHERME JR.",
+          "total": 47,
+          "stations": [
+            8,
+            4,
+            8,
+            8,
+            6,
+            5,
+            4,
+            4
+          ],
+          "data": "2026-07-21"
         }
       ]
     }
