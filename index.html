@@ -724,6 +724,16 @@ function renderAtir(){
       <div class="card chartwrap">${svgTotals(passOrd.map(r=>r.total), passOrd.map(r=>fmtDataCurta(r.data)), turno.pratos)}</div>
       <p class="note" style="margin-top:0">Cada barra é uma passada, na data em que ocorreu — dá pra comparar quantas vezes atirou no mês e a evolução. Verde = a que valeu.</p>`;
 
+    // The Perfect Stride: melhor resultado de cada posto entre TODAS as passadas do turno
+    const nPostos = pm.length || (regs[0] ? regs[0].stations.length : 0);
+    const perfect = [];
+    for(let i=0;i<nPostos;i++) perfect.push(Math.max(0, ...regs.map(r => r.stations[i]||0)));
+    const perfectTotal = perfect.reduce((s,v)=>s+v,0);
+    const perfectFechados = pm.length ? perfect.filter((v,i)=> pm[i] && v>=pm[i]).length : 0;
+    const chartPerfect = pm.length ? `<div class="card chartwrap">${svgStations(pm,
+      [{name:"Perfect Stride", values:perfect, color:"#e0b83c"},
+       {name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>` : "";
+
     return `
       <h3 class="sec">📊 Comparação com os demais — último turno (${esc(fmtTurno(turno.aba))})</h3>
       <div class="kpis">
@@ -743,7 +753,16 @@ function renderAtir(){
         <div class="kpi"><div class="v">${amplitude}</div><div class="l">Amplitude (consistência)</div></div>
       </div>
       ${chartTotals}
-      ${chartOwn}`;
+      ${chartOwn}
+      <h3 class="sec">🏹 The Perfect Stride — ${esc(fmtTurno(turno.aba))}</h3>
+      <div class="kpis">
+        <div class="kpi accent"><div class="v">${perfectTotal}</div><div class="l">Perfect Stride (pratos)</div></div>
+        <div class="kpi field"><div class="v">${melhor}</div><div class="l">Sua melhor passada</div></div>
+        <div class="kpi"><div class="v">+${perfectTotal - melhor}</div><div class="l">Potencial a mais</div></div>
+        <div class="kpi"><div class="v">${perfectFechados}</div><div class="l">Postos fechados (perfect)</div></div>
+      </div>
+      <p class="note" style="margin-top:0">Somando o seu <b>melhor resultado em cada posto</b> entre todas as passadas do turno — o seu "melhor eu" combinado. É o teto do seu potencial no dia.</p>
+      ${chartPerfect}`;
   }
   el.innerHTML = `
     <div class="controls">
