@@ -234,6 +234,12 @@ const DATA_PATH   = "data/ranking_data.json";
 const PUBLISH_URL = "https://ponhadas-publish.luiz-rocco.workers.dev";
 const LIMITE_PCT  = 93.0;                              // >=93% do líder não recebe handicap (Art.14)
 const HC_POR_PRATOS = {50:3, 75:5, 100:7};
+// modo de handicap: "atual" (Regulamento) ou "inclusao" (teste) — padrão é o atual
+let modoHC = "atual";
+const RAMPA = { base:0.60, max:0.82, graca:2, tau:5, teto:105 };
+// fator da rampa conforme nº de passadas já feitas (0.82 → 0.60)
+function fatorRampa(n){ return n <= RAMPA.graca ? RAMPA.max
+  : RAMPA.base + (RAMPA.max - RAMPA.base) * Math.exp(-(n - RAMPA.graca) / RAMPA.tau); }
 const MESES_PT = {janeiro:1,fevereiro:2,"março":3,marco:3,abril:4,maio:5,junho:6,julho:7,
   agosto:8,setembro:9,outubro:10,novembro:11,dezembro:12,jan:1,fev:2,mar:3,abr:4,mai:5,
   jun:6,jul:7,ago:8,set:9,out:10,nov:11,dez:12};
@@ -292,28 +298,53 @@ function pctBase(turno){
 function rankingDoTurno(dados, k){
   const turnos = dados.turnos;
   const turno = turnos[k];
-  const histPcts = [];
-  for(let i=0;i<=k;i++) histPcts.push(pctBase(turnos[i]).pcts);
   const pb = pctBase(turno), bestK = pb.best, liderK = pb.lider;
-  const hc = turno.hc;
+
+  let calc;
+  if(modoHC === "inclusao"){
+    // % de acerto de cada passada, e nº de passadas anteriores (para a rampa)
+    const ate = {}, antes = {};
+    for(let i=0;i<=k;i++){ const t=turnos[i]; for(const r of t.registros){
+      (ate[r.atirador] || (ate[r.atirador]=[])).push(t.pratos ? r.total/t.pratos*100 : 0); } }
+    for(let i=0;i<k;i++){ const t=turnos[i]; for(const r of t.registros){
+      antes[r.atirador] = (antes[r.atirador]||0) + 1; } }
+    const indiceDe = a => { const u=(ate[a]||[]).slice(-7);
+      const b3=[...u].sort((x,y)=>y-x).slice(0,3);
+      return b3.length ? b3.reduce((s,v)=>s+v,0)/b3.length : 0; };
+    const alvo = Math.max(0, ...Object.keys(bestK).map(indiceDe));
+    calc = (atir,b)=>{
+      const indice = indiceDe(atir);
+      const fator = fatorRampa(antes[atir]||0);
+      const lacuna = Math.max(0, alvo - indice);
+      const bonus = fator * lacuna * (turno.pratos/100);
+      const nota = Math.min(RAMPA.teto, liderK ? (b.total + bonus)/liderK*100 : 0);
+      return { media_3t: round2(indice), handicap: Math.round(bonus),
+               pratos_hc: Math.round(b.total+bonus), pct_final: round2(nota), fator: round2(fator) };
+    };
+  } else {
+    const histPcts = []; for(let i=0;i<=k;i++) histPcts.push(pctBase(turnos[i]).pcts);
+    const hc = turno.hc;
+    calc = (atir,b)=>{
+      const historico=[]; for(const pc of histPcts) if(atir in pc) historico.push(pc[atir]);
+      const hist3 = historico.slice(-3);
+      const media = hist3.reduce((s,v)=>s+v,0)/hist3.length;
+      const handicap = media >= LIMITE_PCT ? 0 : Math.floor((100-media)/10*hc);
+      const pratosHc = b.total + handicap;
+      return { media_3t: round2(media), handicap, pratos_hc: Math.trunc(pratosHc),
+               pct_final: round2(liderK ? pratosHc/liderK*100 : 0), fator: null };
+    };
+  }
+
   const linhas = [];
   for(const atir in bestK){
     const b = bestK[atir];
-    const historico = [];
-    for(const pc of histPcts) if(atir in pc) historico.push(pc[atir]);
-    const hist3 = historico.slice(-3);
-    const media = hist3.reduce((s,v)=>s+v,0) / hist3.length;
-    const handicap = media >= LIMITE_PCT ? 0 : Math.floor((100 - media) / 10 * hc);
-    const pratosHc = b.total + handicap;
-    const pctFinal = liderK ? pratosHc / liderK * 100 : 0;
+    const c = calc(atir, b);
     linhas.push({
       atirador: atir,
       total: Math.trunc(b.total),
       pct_base: liderK ? round2(b.total / liderK * 100) : 0,
-      media_3t: round2(media),
-      handicap: handicap,
-      pratos_hc: Math.trunc(pratosHc),
-      pct_final: round2(pctFinal),
+      media_3t: c.media_3t, handicap: c.handicap, pratos_hc: c.pratos_hc,
+      pct_final: c.pct_final, fator: c.fator,
       postos_fechados: b.postos_fechados,
       ult_posto: b.stations.length ? b.stations[b.stations.length-1] : 0,
       passadas: turno.registros.filter(r => r.atirador === atir).length,
@@ -510,11 +541,26 @@ function renderTurno(){
     <td>${turno.pratos ? (r.total/turno.pratos*100).toFixed(1) : "0.0"}%</td>
     <td>${r.postos_fechados}</td></tr>`).join("");
 
+  const inclusao = modoHC === "inclusao";
+  const labMedia = inclusao ? "Índice" : "Média 3T";
+  const tipMedia = inclusao
+    ? "Índice = média das melhores 3 das últimas 7 passadas (% de acerto). Quanto maior, menor o handicap."
+    : "Média dos seus percentuais nos últimos 3 turnos — usada só para calcular o handicap (Art. 15 e 17). No 1º turno é igual ao % base, pois ainda não há histórico.";
+  const labHc = inclusao ? "Bônus" : "HC";
+  const bannerModo = inclusao
+    ? `<div class="note" style="background:rgba(224,184,60,.14);color:var(--accent2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 6px">🧪 Você está vendo o <b>Handicap de Inclusão (teste)</b> — ainda não é o oficial. Fator em rampa: 0,82 para novatos, afinando até 0,60 com a experiência.</div>`
+    : "";
   el.innerHTML = `
     <div class="controls">
       <div class="ctl"><label>Turno (mês)</label>
         <select id="turnoSel">${options}</select></div>
+      <div class="ctl"><label>Handicap</label>
+        <select id="modoHcSel">
+          <option value="atual" ${inclusao?"":"selected"}>Atual (Regulamento)</option>
+          <option value="inclusao" ${inclusao?"selected":""}>Inclusão (teste)</option>
+        </select></div>
     </div>
+    ${bannerModo}
     ${kpis}
     <h3 class="sec">Pódio</h3>
     <div class="podium">${pod}</div>
@@ -526,18 +572,20 @@ function renderTurno(){
       <tbody>${pratosRows}</tbody></table></div>
     <p class="note" style="margin-bottom:20px">Ranking pela <b>quantidade de pratos quebrados</b> (sem handicap).
       O campeão oficial do turno é pela <b>pontuação com handicap</b> — tabela abaixo.</p>
-    <h3 class="sec">Classificação completa (oficial · com handicap)</h3>
+    <h3 class="sec">Classificação completa (${inclusao ? "TESTE · Inclusão" : "oficial · com handicap"})</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Col.</th><th>Atirador</th><th>Pratos</th><th>% base</th>
-        <th>Média 3T ${help("Média dos seus percentuais nos últimos 3 turnos — usada só para calcular o handicap (Art. 15 e 17). No 1º turno é igual ao % base, pois ainda não há histórico.")}</th><th>HC</th><th>Pontuação ${help("Pontuação final do turno = % do líder + bônus de handicap. Pode passar de 100%: quem recebe handicap soma pratos de bônus e pode ultrapassar o líder de pratos. É ela que decide a colocação (Art. 11).")}</th><th>Postos fech.</th></tr></thead>
+        <th>${labMedia} ${help(tipMedia)}</th><th>${labHc}</th><th>Pontuação ${help("Pontuação final do turno = % do líder + bônus de handicap. Pode passar de 100%: quem recebe handicap soma pratos de bônus e pode ultrapassar o líder de pratos. É ela que decide a colocação (Art. 11).")}</th><th>Postos fech.</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
-    <p class="note">Pontuação = percentual com handicap (Art. 11). Handicap só para quem está
-      &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17).
-      Desempate por postos fechados (Art. 22).</p>`;
+    <p class="note">${inclusao
+      ? "Handicap de Inclusão (teste): Bônus = fator × (maior índice − seu índice) × (pratos ÷ 100). O fator é a rampa (0,82 → 0,60) conforme suas passadas. Nota = (pratos + bônus) ÷ líder × 100, teto 105%."
+      : "Pontuação = percentual com handicap (Art. 11). Handicap só para quem está &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17). Desempate por postos fechados (Art. 22)."}</p>`;
 
   document.getElementById("turnoSel").addEventListener("change", e=>{
     turnoIdx = +e.target.value; renderTurno();
   });
+  const mSel = document.getElementById("modoHcSel");
+  if(mSel) mSel.addEventListener("change", e=>{ modoHC = e.target.value; renderAll(); });
 }
 
 function renderTemp(){
