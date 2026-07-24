@@ -370,7 +370,7 @@ function rankingPerfectStride(turno){
     const total = perfect.reduce((s,v)=>s+v,0);
     const fechados = pm.length ? perfect.filter((v,i)=> pm[i] && v>=pm[i]).length : 0;
     const melhorReal = Math.max(...regs.map(r => r.total));
-    linhas.push({ atirador:atir, perfect:total, fechados, melhorReal,
+    linhas.push({ atirador:atir, perfect:total, fechados, melhorReal, passadas:regs.length,
       acerto: turno.pratos ? total/turno.pratos*100 : 0 });
   }
   linhas.sort((a,b)=> b.perfect - a.perfect || b.fechados - a.fechados);
@@ -547,6 +547,7 @@ function renderTurno(){
     <td><span class="rankbubble">${r.col}</span></td>
     <td>${atLink(r.atirador)}</td>
     <td>${r.total}</td>
+    <td>${r.passadas}</td>
     <td>${r.pct_base.toFixed(2)}%</td>
     <td>${r.media_3t.toFixed(2)}%</td>
     <td>${r.handicap ? `<span class="tag hc">+${r.handicap}</span>` : `<span class="tag zero">—</span>`}</td>
@@ -567,6 +568,7 @@ function renderTurno(){
   const perfectRows = psRk.map(r=>`<tr class="${r.col===1?"lead":""}">
     <td><span class="rankbubble">${r.col}</span></td>
     <td>${atLink(r.atirador)}</td>
+    <td>${r.passadas}</td>
     <td><b>${r.perfect}</b></td>
     <td>${r.acerto.toFixed(1)}%</td>
     <td>${r.melhorReal}</td>
@@ -606,7 +608,7 @@ function renderTurno(){
       O campeão oficial do turno é pela <b>pontuação com handicap</b> — tabela abaixo.</p>
     <h3 class="sec">Classificação completa (${inclusao ? "TESTE · Inclusão" : "oficial · com handicap"})</h3>
     <div class="tablewrap"><table>
-      <thead><tr><th>Col.</th><th>Atirador</th><th>Pratos</th><th>% base</th>
+      <thead><tr><th>Col.</th><th>Atirador</th><th>Pratos</th><th>Pass.</th><th>% base</th>
         <th>${labMedia} ${help(tipMedia)}</th><th>${labHc}</th><th>Pontuação ${help("Pontuação final do turno = % do líder + bônus de handicap. Pode passar de 100%: quem recebe handicap soma pratos de bônus e pode ultrapassar o líder de pratos. É ela que decide a colocação (Art. 11).")}</th><th>Postos fech.</th></tr></thead>
       <tbody>${rows}</tbody></table></div>
     <p class="note">${inclusao
@@ -614,7 +616,7 @@ function renderTurno(){
       : "Pontuação = percentual com handicap (Art. 11). Handicap só para quem está &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17). Desempate por postos fechados (Art. 22)."}</p>
     <h3 class="sec">🏹 Classificação por Perfect Stride (potencial — melhor de cada posto)</h3>
     <div class="tablewrap"><table>
-      <thead><tr><th>Col.</th><th>Atirador</th><th>Perfect</th><th>% acerto</th><th>Melhor real</th><th>+Pot.</th><th>Postos fech.</th></tr></thead>
+      <thead><tr><th>Col.</th><th>Atirador</th><th>Pass.</th><th>Perfect</th><th>% acerto</th><th>Melhor real</th><th>+Pot.</th><th>Postos fech.</th></tr></thead>
       <tbody>${perfectRows}</tbody></table></div>
     <p class="note">Junta o <b>melhor resultado de cada posto</b> entre todas as passadas de cada atirador no turno — o "melhor eu" combinado. É o <b>potencial</b> de cada um, não a nota oficial.</p>`;
 
