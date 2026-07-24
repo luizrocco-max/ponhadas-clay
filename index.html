@@ -356,6 +356,27 @@ function rankingDoTurno(dados, k){
   linhas.forEach((l,i) => l.col = i + 1);
   return linhas;
 }
+// ranking por "Perfect Stride": melhor de cada posto entre todas as passadas de cada atirador
+function rankingPerfectStride(turno){
+  const pm = turno.postos_max || [];
+  const porAtir = {};
+  for(const r of turno.registros){ (porAtir[r.atirador] || (porAtir[r.atirador]=[])).push(r); }
+  const linhas = [];
+  for(const atir in porAtir){
+    const regs = porAtir[atir];
+    const n = pm.length || (regs[0] ? regs[0].stations.length : 0);
+    const perfect = [];
+    for(let i=0;i<n;i++) perfect.push(Math.max(0, ...regs.map(r => r.stations[i]||0)));
+    const total = perfect.reduce((s,v)=>s+v,0);
+    const fechados = pm.length ? perfect.filter((v,i)=> pm[i] && v>=pm[i]).length : 0;
+    const melhorReal = Math.max(...regs.map(r => r.total));
+    linhas.push({ atirador:atir, perfect:total, fechados, melhorReal,
+      acerto: turno.pratos ? total/turno.pratos*100 : 0 });
+  }
+  linhas.sort((a,b)=> b.perfect - a.perfect || b.fechados - a.fechados);
+  linhas.forEach((l,i)=> l.col = i+1);
+  return linhas;
+}
 function tabelaTemporada(dados){
   const map = {};
   for(let k=0;k<dados.turnos.length;k++){
@@ -541,6 +562,17 @@ function renderTurno(){
     <td>${turno.pratos ? (r.total/turno.pratos*100).toFixed(1) : "0.0"}%</td>
     <td>${r.postos_fechados}</td></tr>`).join("");
 
+  // classificação por Perfect Stride (melhor de cada posto entre as passadas)
+  const psRk = rankingPerfectStride(turno);
+  const perfectRows = psRk.map(r=>`<tr class="${r.col===1?"lead":""}">
+    <td><span class="rankbubble">${r.col}</span></td>
+    <td>${atLink(r.atirador)}</td>
+    <td><b>${r.perfect}</b></td>
+    <td>${r.acerto.toFixed(1)}%</td>
+    <td>${r.melhorReal}</td>
+    <td>${r.perfect-r.melhorReal>0 ? `<span class="tag hc">+${r.perfect-r.melhorReal}</span>` : `<span class="tag zero">—</span>`}</td>
+    <td>${r.fechados}</td></tr>`).join("");
+
   const inclusao = modoHC === "inclusao";
   const labMedia = inclusao ? "Índice" : "Média 3T";
   const tipMedia = inclusao
@@ -579,7 +611,12 @@ function renderTurno(){
       <tbody>${rows}</tbody></table></div>
     <p class="note">${inclusao
       ? "Handicap de Inclusão (teste): Bônus = fator × (maior índice − seu índice) × (pratos ÷ 100). O fator é a rampa (0,82 → 0,60) conforme suas passadas. Nota = (pratos + bônus) ÷ líder × 100, teto 105%."
-      : "Pontuação = percentual com handicap (Art. 11). Handicap só para quem está &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17). Desempate por postos fechados (Art. 22)."}</p>`;
+      : "Pontuação = percentual com handicap (Art. 11). Handicap só para quem está &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17). Desempate por postos fechados (Art. 22)."}</p>
+    <h3 class="sec">🏹 Classificação por Perfect Stride (potencial — melhor de cada posto)</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Col.</th><th>Atirador</th><th>Perfect</th><th>% acerto</th><th>Melhor real</th><th>+Pot.</th><th>Postos fech.</th></tr></thead>
+      <tbody>${perfectRows}</tbody></table></div>
+    <p class="note">Junta o <b>melhor resultado de cada posto</b> entre todas as passadas de cada atirador no turno — o "melhor eu" combinado. É o <b>potencial</b> de cada um, não a nota oficial.</p>`;
 
   document.getElementById("turnoSel").addEventListener("change", e=>{
     turnoIdx = +e.target.value; renderTurno();
