@@ -1,5 +1,5 @@
 {
-  "gerado_em": "24/07/2026 13:54",
+  "gerado_em": "25/07/2026 16:22",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -589,6 +589,36 @@
             6
           ],
           "data": "2026-07-24"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 55,
+          "stations": [
+            9,
+            6,
+            11,
+            7,
+            6,
+            6,
+            5,
+            5
+          ],
+          "data": "2026-07-25"
+        },
+        {
+          "atirador": "GUILHERMO ORLANDO",
+          "total": 57,
+          "stations": [
+            8,
+            8,
+            8,
+            8,
+            9,
+            6,
+            5,
+            5
+          ],
+          "data": "2026-07-25"
         }
       ]
     }
