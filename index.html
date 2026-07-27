@@ -111,6 +111,10 @@
   .tag{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
   .tag.hc{background:rgba(224,184,60,.16);color:var(--accent2)}
   .tag.zero{color:var(--muted)}
+  .chip{background:var(--panel2);border:1px solid var(--line);color:var(--muted);border-radius:999px;
+    padding:6px 12px;font-size:12.5px;font-weight:600;cursor:pointer;margin:0 6px 6px 0;transition:.12s}
+  .chip:hover{border-color:var(--accent2);color:var(--txt)}
+  .chip.on{background:var(--accent);color:#fff;border-color:transparent}
   .atlink{cursor:pointer;border-bottom:1px dashed transparent;transition:.12s}
   .atlink:hover{color:var(--accent2);border-bottom-color:var(--accent2)}
   tbody td .atlink::after{content:" ›";color:var(--muted);font-weight:700}
@@ -185,12 +189,14 @@
     <button class="tab active" data-view="turno">🏆 Ranking do Turno</button>
     <button class="tab" data-view="temp">🏛️ Temporada · Hall of Fame</button>
     <button class="tab" data-view="atir">👤 Por Atirador</button>
+    <button class="tab" data-view="comparar">⚖️ Comparar</button>
   </nav>
   <div id="updated" class="note"></div>
 
   <section id="view-turno"></section>
   <section id="view-temp" hidden></section>
   <section id="view-atir" hidden></section>
+  <section id="view-comparar" hidden></section>
   <section id="view-regras" hidden></section>
   <section id="view-regulamento" hidden></section>
 
@@ -484,6 +490,33 @@ function svgStations(postosMax, series){
   lg += `<rect x="${padL+series.length*128}" y="4" width="11" height="11" fill="#232a22" rx="2"/><text x="${padL+series.length*128+16}" y="14" fill="#9aa596" font-size="11">máx. do posto</text>`;
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${lg}${g}</svg>`;
 }
+function svgMultiLine(labels, series, suffix){
+  const W=760, H=330, padL=46, padR=14, padT=40, padB=44;
+  const all = series.flatMap(s=>s.values).filter(v=>v!=null);
+  let maxV = Math.max(...all, suffix==="%" ? 100 : -Infinity);
+  let minV = Math.min(...all, suffix==="%" ? 0 : Infinity);
+  if(!isFinite(maxV)) maxV = 1; if(!isFinite(minV)) minV = 0;
+  if(suffix!=="%" && minV===maxV) minV = 0;
+  const n = labels.length;
+  const sx = i => padL + (n<=1 ? (W-padL-padR)/2 : i/(n-1)*(W-padL-padR));
+  const sy = v => padT + (1-(v-minV)/((maxV-minV)||1))*(H-padT-padB);
+  let grid="", axis="";
+  for(let t=0;t<=4;t++){ const val=minV+(maxV-minV)*t/4, y=sy(val);
+    grid+=`<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#2b332a" stroke-width="1"/>`;
+    axis+=`<text x="${padL-8}" y="${y+4}" text-anchor="end" fill="#9aa596" font-size="10">${val.toFixed(0)}${suffix||""}</text>`; }
+  let xlab=""; labels.forEach((l,i)=> xlab+=`<text x="${sx(i)}" y="${H-padB+18}" text-anchor="middle" fill="#9aa596" font-size="10">${esc(l)}</text>`);
+  let lines="";
+  series.forEach(s=>{
+    let seg=[]; const polys=[];
+    s.values.forEach((v,i)=>{ if(v!=null) seg.push(`${sx(i)},${sy(v)}`); else { if(seg.length){polys.push(seg);seg=[];} } });
+    if(seg.length) polys.push(seg);
+    polys.forEach(pp=>{ if(pp.length>1) lines+=`<polyline points="${pp.join(' ')}" fill="none" stroke="${s.color}" stroke-width="2.5"/>`; });
+    s.values.forEach((v,i)=>{ if(v!=null) lines+=`<circle cx="${sx(i)}" cy="${sy(v)}" r="4" fill="${s.color}" stroke="#12160f" stroke-width="1.5"/>`; });
+  });
+  let lg=""; series.forEach((s,i)=>{ const lx=padL+i*150;
+    lg+=`<rect x="${lx}" y="6" width="11" height="11" rx="2" fill="${s.color}"/><text x="${lx+16}" y="16" fill="#e9ece6" font-size="11">${esc(s.name)}</text>`; });
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${lg}${grid}${lines}${axis}${xlab}</svg>`;
+}
 function svgTotals(totals, labels, pratos){
   // uma barra por passada; rótulo = data (dd/mm); melhor em verde; linha da média
   const n = totals.length;
@@ -514,6 +547,8 @@ function svgTotals(totals, labels, pratos){
 let DADOS = null;
 let turnoIdx = 0;
 let atiradorSel = null;
+let comparBase = "pontuacao";
+let comparSel = null;
 
 function renderTurno(){
   const el = document.getElementById("view-turno");
@@ -812,6 +847,74 @@ function renderAtir(){
   });
 }
 
+function renderComparar(){
+  const el = document.getElementById("view-comparar");
+  const todos = [...new Set(DADOS.turnos.flatMap(t=>t.registros.map(r=>r.atirador)))].sort();
+  if(!todos.length){ el.innerHTML = `<p class="note">Sem atiradores.</p>`; return; }
+  if(!comparSel){ // padrão: top 3 do último turno
+    const last = DADOS.turnos.length-1;
+    comparSel = rankingDoTurno(DADOS, last).slice(0,3).map(r=>r.atirador);
+  }
+  comparSel = comparSel.filter(a=>todos.includes(a));
+  const base = comparBase;
+  const suffix = (base==="pontuacao"||base==="acerto") ? "%" : "";
+  const PALETA = ["#e4572e","#e0b83c","#2f9e5f","#5aa9e6","#c77dff"];
+
+  // pré-calcula por turno (uma vez)
+  const perTurno = DADOS.turnos.map((t,k)=>{
+    const rk = rankingDoTurno(DADOS,k), rkMap={}; rk.forEach(r=>rkMap[r.atirador]=r);
+    const ps = rankingPerfectStride(t), psMap={}; ps.forEach(r=>psMap[r.atirador]=r);
+    return { rkMap, psMap, best: melhorPorAtirador(t), pratos: t.pratos };
+  });
+  const metric = (k,a)=>{ const {rkMap,psMap,best,pratos}=perTurno[k];
+    if(base==="pontuacao") return rkMap[a] ? rkMap[a].pct_final : null;
+    if(base==="pratos")    return best[a] ? best[a].total : null;
+    if(base==="perfect")   return psMap[a] ? psMap[a].perfect : null;
+    if(base==="acerto")    return (best[a] && pratos) ? round2(best[a].total/pratos*100) : null;
+    return null; };
+
+  const chips = todos.map(a=>`<button class="chip ${comparSel.includes(a)?"on":""}" data-catir="${esc(a)}">${esc(titleCase(a))}</button>`).join("");
+  const labels = DADOS.turnos.map(t=>fmtTurno(t.aba));
+  const series = comparSel.map((a,i)=>({ name:titleCase(a), color:PALETA[i%PALETA.length],
+    values: DADOS.turnos.map((t,k)=>metric(k,a)) }));
+
+  const fmtV = v => v==null ? "—" : (suffix==="%" ? v.toFixed(2)+"%" : String(v));
+  const linhasTab = labels.map((lab,k)=>`<tr><td>${esc(lab)}</td>${series.map(s=>`<td>${fmtV(s.values[k])}</td>`).join("")}</tr>`).join("");
+  const mediaTab = `<tr class="lead"><td><b>Média</b></td>${series.map(s=>{ const vs=s.values.filter(v=>v!=null);
+    const m=vs.length? vs.reduce((a,b)=>a+b,0)/vs.length : null;
+    return `<td><b>${m==null?"—":(suffix==="%"?m.toFixed(2)+"%":m.toFixed(1))}</b></td>`; }).join("")}</tr>`;
+
+  const corpo = series.length ? `
+    <div class="card chartwrap">${svgMultiLine(labels, series, suffix)}</div>
+    <h3 class="sec">Tabela comparativa</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Turno</th>${series.map(s=>`<th>${esc(s.name)}</th>`).join("")}</tr></thead>
+      <tbody>${linhasTab}${mediaTab}</tbody></table></div>`
+    : `<p class="note">Escolha ao menos 1 atirador acima.</p>`;
+
+  el.innerHTML = `
+    <div class="controls">
+      <div class="ctl"><label>Base de comparação</label>
+        <select id="comparBaseSel">
+          <option value="pontuacao" ${base==="pontuacao"?"selected":""}>Pontuação (com handicap)</option>
+          <option value="pratos" ${base==="pratos"?"selected":""}>Pratos quebrados</option>
+          <option value="perfect" ${base==="perfect"?"selected":""}>Perfect Stride</option>
+          <option value="acerto" ${base==="acerto"?"selected":""}>% de acerto</option>
+        </select></div>
+    </div>
+    <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Atiradores (toque para incluir · até 5)</label>
+    <div style="margin:8px 0 14px">${chips}</div>
+    ${corpo}`;
+
+  document.getElementById("comparBaseSel").addEventListener("change", e=>{ comparBase=e.target.value; renderComparar(); });
+  el.querySelectorAll(".chip").forEach(c=> c.addEventListener("click", ()=>{
+    const a = c.getAttribute("data-catir");
+    if(comparSel.includes(a)) comparSel = comparSel.filter(x=>x!==a);
+    else if(comparSel.length < 5) comparSel = [...comparSel, a];
+    renderComparar();
+  }));
+}
+
 function renderRegras(){
   document.getElementById("view-regras").innerHTML = `
   <div class="regras">
@@ -902,13 +1005,13 @@ function renderAll(){
       `<p class="note">🎯 Aguardando o organizador publicar os resultados.</p>`;
     return;
   }
-  renderTurno(); renderTemp(); renderAtir(); renderRegras(); renderRegulamento();
+  renderTurno(); renderTemp(); renderAtir(); renderComparar(); renderRegras(); renderRegulamento();
 }
 
 /* ---------- tabs / navegação ---------- */
 function setView(view){
   document.querySelectorAll(".tab, .docbtn").forEach(t=>t.classList.toggle("active", t.dataset.view===view));
-  ["turno","temp","atir","regras","regulamento"].forEach(v=>{
+  ["turno","temp","atir","comparar","regras","regulamento"].forEach(v=>{
     document.getElementById("view-"+v).hidden = (v !== view);
   });
 }
