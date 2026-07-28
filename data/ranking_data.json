@@ -1,5 +1,5 @@
 {
-  "gerado_em": "25/07/2026 16:22",
+  "gerado_em": "28/07/2026 17:34",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -619,6 +619,81 @@
             5
           ],
           "data": "2026-07-25"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 54,
+          "stations": [
+            6,
+            8,
+            11,
+            7,
+            5,
+            9,
+            4,
+            4
+          ],
+          "data": "2026-07-28"
+        },
+        {
+          "atirador": "FELIPE POTTOFF",
+          "total": 56,
+          "stations": [
+            9,
+            6,
+            8,
+            6,
+            9,
+            7,
+            6,
+            5
+          ],
+          "data": "2026-07-28"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 60,
+          "stations": [
+            9,
+            6,
+            11,
+            8,
+            9,
+            7,
+            4,
+            6
+          ],
+          "data": "2026-07-28"
+        },
+        {
+          "atirador": "MARCELO VALENTE",
+          "total": 44,
+          "stations": [
+            6,
+            7,
+            8,
+            6,
+            4,
+            4,
+            6,
+            3
+          ],
+          "data": "2026-07-28"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 63,
+          "stations": [
+            8,
+            5,
+            11,
+            10,
+            8,
+            8,
+            6,
+            7
+          ],
+          "data": "2026-07-28"
         }
       ]
     }
