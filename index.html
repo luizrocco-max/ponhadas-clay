@@ -238,7 +238,7 @@ const GITHUB_REPO = "luizrocco-max/ponhadas-clay";   // dono/repo
 const DATA_PATH   = "data/ranking_data.json";
 // Cloudflare Worker que confere a senha e publica no GitHub (login do organizador)
 const PUBLISH_URL = "https://ponhadas-publish.luiz-rocco.workers.dev";
-const LIMITE_PCT  = 93.0;                              // >=93% do líder não recebe handicap (Art.14)
+const LIMITE_PCT  = 90.0;                              // >=90% do líder não recebe handicap (Art.14)
 const HC_POR_PRATOS = {50:3, 75:5, 100:7};
 // modo de handicap: "atual" (Regulamento) ou "inclusao" (teste) — padrão é o atual
 let modoHC = "atual";
@@ -337,9 +337,12 @@ function rankingDoTurno(dados, k){
       const handicap = media >= LIMITE_PCT ? 0 : Math.floor((100-media)/10*hc);
       const pratosHc = b.total + handicap;
       return { media_3t: round2(media), handicap, pratos_hc: Math.trunc(pratosHc),
-               pct_final: round2(liderK ? pratosHc/liderK*100 : 0), fator: null };
+               pct_final: round2(Math.min(105, liderK ? pratosHc/liderK*100 : 0)), fator: null }; // teto 105% (Art. novo)
     };
   }
+
+  // Perfect Stride por atirador (para o novo critério de desempate)
+  const psMap = {}; rankingPerfectStride(turno).forEach(r => psMap[r.atirador] = r.perfect);
 
   const linhas = [];
   for(const atir in bestK){
@@ -351,14 +354,17 @@ function rankingDoTurno(dados, k){
       pct_base: liderK ? round2(b.total / liderK * 100) : 0,
       media_3t: c.media_3t, handicap: c.handicap, pratos_hc: c.pratos_hc,
       pct_final: c.pct_final, fator: c.fator,
+      perfect: psMap[atir] || 0,
       postos_fechados: b.postos_fechados,
       ult_posto: b.stations.length ? b.stations[b.stations.length-1] : 0,
       passadas: turno.registros.filter(r => r.atirador === atir).length,
     });
   }
+  // desempate (Art. novo): 1º pratos quebrados (bruto), 2º Perfect Stride, 3º postos fechados
   linhas.sort((a,b) => b.pct_final - a.pct_final ||
-                        b.postos_fechados - a.postos_fechados ||
-                        b.ult_posto - a.ult_posto);
+                        b.total - a.total ||
+                        b.perfect - a.perfect ||
+                        b.postos_fechados - a.postos_fechados);
   linhas.forEach((l,i) => l.col = i + 1);
   return linhas;
 }
@@ -561,7 +567,7 @@ function renderTurno(){
 
   const kpis = `<div class="kpis">
     <div class="kpi"><div class="v">${turno.pratos}</div><div class="l">Pratos do turno</div></div>
-    <div class="kpi accent"><div class="v">${turno.hc}</div><div class="l">Handicap / 10 p.p. ${help("Pratos de bônus a cada 10 pontos percentuais de diferença para o líder (só para quem está abaixo de 93%). Depende da prova: 3 para 50 pratos, 5 para 75 e 7 para 100 (Art. 15 e 16).")}</div></div>
+    <div class="kpi accent"><div class="v">${turno.hc}</div><div class="l">Handicap / 10 p.p. ${help("Pratos de bônus a cada 10 pontos percentuais de diferença para o líder (só para quem está abaixo de 90%). Depende da prova: 3 para 50 pratos, 5 para 75 e 7 para 100 (Art. 15 e 16).")}</div></div>
     <div class="kpi field"><div class="v">${rk.length}</div><div class="l">Atiradores</div></div>
     <div class="kpi"><div class="v" style="font-size:18px">${esc(lider)}</div><div class="l">Líder do turno</div></div>
   </div>`;
@@ -648,7 +654,7 @@ function renderTurno(){
       <tbody>${rows}</tbody></table></div>
     <p class="note">${inclusao
       ? "Handicap de Inclusão (teste): Bônus = fator × (maior índice − seu índice) × (pratos ÷ 100). O fator é a rampa (0,82 → 0,60) conforme suas passadas. Nota = (pratos + bônus) ÷ líder × 100, teto 105%."
-      : "Pontuação = percentual com handicap (Art. 11). Handicap só para quem está &lt; 93% do líder, calculado pela média dos últimos 3 turnos (Art. 14–17). Desempate por postos fechados (Art. 22)."}</p>
+      : "Pontuação = percentual com handicap (Art. 11), com teto de 105%. Handicap só para quem está &lt; 90% do líder (média dos últimos 3 turnos, Art. 14–17). Desempate: 1º pratos quebrados, 2º Perfect Stride, 3º postos fechados."}</p>
     <h3 class="sec">🏹 Classificação por Perfect Stride (potencial — melhor de cada posto)</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Col.</th><th>Atirador</th><th>Pass.</th><th>Perfect</th><th>% acerto</th><th>Melhor real</th><th>+Pot.</th><th>Postos fech.</th></tr></thead>
@@ -922,14 +928,14 @@ function renderRegras(){
     <ul>
       <li><b>Turnos mensais.</b> Vale a <b>maior passada</b> de cada atirador no mês (sem limite de tentativas).</li>
       <li><b>Pontuação base</b> = percentual de acerto = <code>seus pratos ÷ pratos do líder × 100</code> (o líder faz 100%).</li>
-      <li><b>Handicap</b> (nivelamento): só para quem está <b>abaixo de 93%</b> do líder.
+      <li><b>Handicap</b> (nivelamento): só para quem está <b>abaixo de 90%</b> do líder (com <b>teto de 105%</b>).
         <ul>
           <li>Bônus em pratos = <code>(diferença em p.p. até 100%) ÷ 10 × HC</code>, com <b>HC = 3 / 5 / 7</b> para provas de <b>50 / 75 / 100</b> pratos.</li>
           <li>A diferença usa a <b>média dos últimos 3 turnos</b> do atirador (1º turno = só ele; 2º = média de 2; 3º+ = média de 3).</li>
           <li>Os pratos de handicap somam ao resultado e recalcula-se o percentual → essa é a <b>pontuação final</b>.</li>
         </ul>
       </li>
-      <li><b>Desempate no turno:</b> mais <b>postos fechados</b>; depois melhor no último posto.</li>
+      <li><b>Desempate no turno:</b> 1º mais <b>pratos quebrados</b>; 2º maior <b>Perfect Stride</b>; 3º mais <b>postos fechados</b>.</li>
       <li><b>Hall of Fame (Atirador do Ano):</b> quem vence <b>mais turnos</b>; empate → mais <b>pódios (top 3)</b>.</li>
     </ul>
     <p class="regintro">Quer o texto completo? Veja a aba <b>📜 Regulamento</b> (com download do PDF oficial).</p>
@@ -964,7 +970,7 @@ function renderRegulamento(){
     <h3 class="regsec">4. Sistema de Handicap</h3>
     <div class="art"><span class="artnum">Art. 12º —</span>O bônus de handicap tem por objetivo equilibrar as chances de competição entre atiradores de diferentes níveis, permitindo que todos participem de forma justa e motivadora.</div>
     <div class="art"><span class="artnum">Art. 13º —</span>O bônus de handicap é definido pela fórmula determinada e divulgada pela organização da "Ponhada" e somado ao percentual de acerto dos atiradores em cada turno.</div>
-    <div class="art"><span class="artnum">Art. 14º —</span>Atiradores que obtenham resultados entre 100% e 93% do melhor resultado do turno, não farão jus ao bônus de handicap. Atiradores cujos resultados sejam inferiores a 93% utilizarão o bônus de handicap seguindo a fórmula no artigo a seguir:</div>
+    <div class="art"><span class="artnum">Art. 14º —</span>Atiradores que obtenham resultados entre 100% e 90% do melhor resultado do turno não farão jus ao bônus de handicap. Atiradores cujos resultados sejam inferiores a 90% utilizarão o bônus de handicap seguindo a fórmula no artigo a seguir. A pontuação final com handicap fica limitada a um teto de 105%.</div>
     <div class="art"><span class="artnum">Art. 15º —</span>A fórmula para determinar o bônus de handicap se baseia na diferença em pontos percentuais que o atirador obtiver em relação ao melhor atirador do turno, na média dos percentuais dos últimos 3 turnos. Em uma prova de 75 pratos, a cada 10 pontos percentuais de diferença serão concedidos a título de bônus de handicap 5 pratos ao participante (para diferenças não múltiplos de 10 será utilizada proporção aritmética "regra de 3" para determinar o número de pratos de handicap). Para provas de 100 pratos, 7 pratos a cada 10 pontos percentuais e numa prova de 50 pratos, 3 pratos a cada 10 pontos percentuais. Esse número de pratos será então somado ao resultado que o atirador obteve e com este número se calculará o seu percentual de acerto.</div>
     <div class="art"><span class="artnum">Art. 16º —</span>O bônus é aplicado proporcionalmente a rodadas de 100 e de 50 pratos, da seguinte forma: Para provas de 100 pratos, 7 pratos a cada 10 pontos percentuais e para provas de 50 pratos, 3 pratos a cada 10 pontos percentuais.</div>
     <div class="art"><span class="artnum">Art. 17º —</span>O handicap é dinâmico entre Turnos e por ser calculado com base na média dos últimos 3 turnos evitará distorções ao longo do tempo. Com o passar dos turnos o atirador passa a receber o bônus correspondente ao seu novo nível de acertos, refletindo sua evolução real. No primeiro turno de cada participante o handicap será calculado com base nos dados daquele turno somente, no segundo turno o cálculo utilizará a média dos dois turnos nos quais participou e a partir do terceiro turno sempre a média dos últimos três turnos.</div>
@@ -976,7 +982,7 @@ function renderRegulamento(){
 
     <h3 class="regsec">7. Premiação por Turno</h3>
     <div class="art"><span class="artnum">Art. 21º —</span>Ao final de cada Turno, o atirador com a maior pontuação será declarado Campeão do Turno.</div>
-    <div class="art"><span class="artnum">Art. 22º —</span>Em caso de empate no primeiro lugar, será declarado vencedor o atirador que obteve o maior número de postos com pontuação máxima ("postos fechados"). Caso o empate persista, o vencedor será o que tiver o melhor resultado no último posto, e assim subsequentemente até que haja um desempate, desde que observado o disposto no artigo 38º deste Regulamento.</div>
+    <div class="art"><span class="artnum">Art. 22º —</span>Em caso de empate, o desempate seguirá a seguinte ordem: 1º) maior número de <b>pratos quebrados efetivamente</b> (sem handicap); 2º) maior pontuação no <b>"Perfect Stride"</b> (melhor resultado de cada posto entre as passadas); 3º) maior número de <b>postos fechados</b>.</div>
     <div class="art"><span class="artnum">Art. 23º —</span>O primeiro colocado de cada Turno receberá um prêmio simbólico oferecido pelo clube, a critério da diretoria — como uma garrafa de bebida, um charuto ou uma caixa de cartuchos.</div>
     <div class="art"><span class="artnum">Art. 24º —</span>A fotografia do Campeão do Turno será exibida com destaque no mural do clube pelo período do Turno seguinte, até que um novo campeão seja coroado.</div>
 
