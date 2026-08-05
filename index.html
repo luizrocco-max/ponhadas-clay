@@ -346,7 +346,9 @@ function rankingDoTurno(dados, k){
       const historico=[]; for(const pc of histPcts) if(atir in pc) historico.push(pc[atir]);
       const hist3 = historico.slice(-3);
       const media = hist3.reduce((s,v)=>s+v,0)/hist3.length;
-      const handicap = media >= limite ? 0 : Math.floor((100-media)/10*hc);
+      const pctRodada = liderK ? b.total/liderK*100 : 0;   // resultado da PRÓPRIA rodada
+      // gatilho (tem handicap?) pela RODADA; quantidade de pratos pela MÉDIA das últimas 3 etapas
+      const handicap = pctRodada >= limite ? 0 : Math.floor((100-media)/10*hc);
       const pratosHc = b.total + handicap;
       return { media_3t: round2(media), handicap, pratos_hc: Math.trunc(pratosHc),
                pct_final: round2(Math.min(teto, liderK ? pratosHc/liderK*100 : 0)), fator: null };
@@ -633,7 +635,7 @@ function renderTurno(){
   const labMedia = inclusao ? "Índice" : "Média 3T";
   const tipMedia = inclusao
     ? "Índice = média das melhores 3 das últimas 7 passadas (% de acerto). Quanto maior, menor o handicap."
-    : "Média dos seus percentuais nos últimos 3 turnos — usada só para calcular o handicap (Art. 15 e 17). No 1º turno é igual ao % base, pois ainda não há histórico.";
+    : "Média dos seus percentuais nas últimas 3 etapas — define a QUANTIDADE de pratos do handicap (quem TEM handicap é decidido pelo resultado da rodada). Art. 15 e 17. No 1º turno é igual ao % base, pois ainda não há histórico.";
   const labHc = inclusao ? "Bônus" : "HC";
   const bannerModo = inclusao
     ? `<div class="note" style="background:rgba(224,184,60,.14);color:var(--accent2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 6px">🧪 Você está vendo o <b>Handicap de Inclusão (teste)</b> — ainda não é o oficial. Fator em rampa: 0,82 para novatos, afinando até 0,60 com a experiência.</div>`
@@ -662,8 +664,8 @@ function renderTurno(){
     <p class="note">${inclusao
       ? "Handicap de Inclusão (teste): Bônus = fator × (maior índice − seu índice) × (pratos ÷ 100). O fator é a rampa (0,82 → 0,60) conforme suas passadas. Nota = (pratos + bônus) ÷ líder × 100, teto 105%."
       : (novaT
-          ? "Pontuação = percentual com handicap (Art. 11), com teto de 105%. Handicap só para quem está &lt; 90% do líder (média dos últimos 3 turnos, Art. 14–17). Desempate: 1º pratos quebrados, 2º Perfect Stride, 3º postos fechados."
-          : "Pontuação = percentual com handicap (Art. 11). Handicap só para quem está &lt; 93% do líder (média dos últimos 3 turnos, Art. 14–17). Desempate por postos fechados (Art. 22). — regra vigente até Julho/2026.")}</p>
+          ? "Pontuação = percentual com handicap (Art. 11), com teto de 105%. Tem handicap quem fica &lt; 90% do líder <b>na rodada</b>; a <b>quantidade de pratos</b> usa a média das últimas 3 etapas (Art. 14–17). Desempate: 1º pratos quebrados, 2º Perfect Stride, 3º postos fechados."
+          : "Pontuação = percentual com handicap (Art. 11). Tem handicap quem fica &lt; 93% do líder <b>na rodada</b>; a quantidade de pratos usa a média das últimas 3 etapas (Art. 14–17). Desempate por postos fechados (Art. 22). — regra vigente até Julho/2026.")}</p>
     <h3 class="sec">🏹 Classificação por Perfect Stride (potencial — melhor de cada posto)</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Col.</th><th>Atirador</th><th>Pass.</th><th>Perfect</th><th>% acerto</th><th>Melhor real</th><th>+Pot.</th><th>Postos fech.</th></tr></thead>
