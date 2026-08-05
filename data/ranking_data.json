@@ -1,5 +1,5 @@
 {
-  "gerado_em": "04/08/2026 22:42",
+  "gerado_em": "05/08/2026 16:02",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -943,6 +943,102 @@
             2
           ],
           "data": "2026-08-01"
+        },
+        {
+          "atirador": "FELIPE POTTOFF",
+          "total": 31,
+          "stations": [
+            8,
+            7,
+            6,
+            6,
+            4
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 37,
+          "stations": [
+            9,
+            9,
+            8,
+            4,
+            7
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "FELIPE POTTOFF",
+          "total": 34,
+          "stations": [
+            7,
+            8,
+            7,
+            5,
+            7
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 37,
+          "stations": [
+            8,
+            8,
+            8,
+            6,
+            7
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "FELIPE POTTOFF",
+          "total": 36,
+          "stations": [
+            9,
+            9,
+            6,
+            7,
+            5
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 30,
+          "stations": [
+            9,
+            6,
+            2,
+            5,
+            8
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 35,
+          "stations": [
+            10,
+            6,
+            5,
+            7,
+            7
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 19,
+          "stations": [
+            6,
+            3,
+            2,
+            3,
+            5
+          ],
+          "data": "2026-08-05"
         }
       ]
     }
