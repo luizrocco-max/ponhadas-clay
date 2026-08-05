@@ -925,10 +925,12 @@ function renderHandicap(){
       <div style="font-size:14px;margin-bottom:8px">🎁 <b>Como funciona o handicap</b> — o handicap dá pratos de bônus a quem está atrás, para todos brigarem parelho. Passo a passo:</div>
       <ol style="margin:0;padding-left:20px;display:grid;gap:6px">
         <li><b>% na rodada</b> = seus pratos ÷ pratos do líder × 100 <span class="muted">(o líder faz 100%)</span>.</li>
-        <li><b>Gatilho</b> — quem ganha handicap? Só quem ficou <b>abaixo de ${limite}%</b> do líder <b>na rodada daquele dia</b> <span class="muted">(vale o resultado do dia, não a média).</span></li>
-        <li><b>Quantidade de pratos</b> — quantos pratos de bônus? Aí sim entra a sua <b>média dos meses anteriores</b>: o seu aproveitamento (%) médio das <b>últimas 3 etapas (meses)</b> do campeonato.
-          <br><span style="font-family:ui-monospace,monospace;font-size:12px;background:rgba(0,0,0,.18);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px">bônus = ⌊ (100 − média dos meses) ÷ 10 × HC ⌋</span>
-          <br><span class="muted" style="font-size:12px">Ex.: média 78,6% e HC ${hc} → ⌊(100−78,6)÷10×${hc}⌋ = <b>${Math.floor((100-78.6)/10*hc)}</b> pratos. Enquanto não houver 3 meses, usa os que já existem.</span></li>
+        <li><b>Você tem direito a handicap?</b> <span class="muted">(olha o SEU dia)</span><br>
+          Só tem quem, <b>naquele dia</b>, fez <b>menos de ${limite}%</b> dos pratos do líder. Fez ${limite}% ou mais → <b>sem</b> handicap.</li>
+        <li><b>Quantos pratos de bônus você ganha?</b> <span class="muted">(agora sim olha a MÉDIA dos meses)</span><br>
+          Pega o seu aproveitamento (%) de <b>cada um dos últimos 3 meses</b> e tira a média. Quanto mais longe de 100% ela estiver, mais pratos:
+          <br><span style="font-family:ui-monospace,monospace;font-size:12px;background:rgba(0,0,0,.18);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px">bônus = (100 − sua média dos meses) ÷ 10 × HC &nbsp;<span class="muted">(arredonda p/ baixo)</span></span>
+          <br><span class="muted" style="font-size:12px">Ex.: média 78,6% · HC ${hc} → (100−78,6) ÷ 10 × ${hc} = <b>${Math.floor((100-78.6)/10*hc)}</b> pratos. Ainda não tem 3 meses? Usa os que já existem.</span></li>
         <li><b>HC da prova</b> = <b>${hc}</b> pratos neste turno <span class="muted">(3/5/7 para provas de 50/75/100 · ${esc(provaTxt)}).</span></li>
         ${nova ? `<li><b>Teto</b> — a pontuação final não passa de <b>${teto}%</b>.</li>` : ""}
         <li>Só a <b>melhor passada</b> de cada um no mês recebe handicap.</li>
