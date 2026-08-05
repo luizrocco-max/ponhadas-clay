@@ -567,6 +567,7 @@ function svgTotals(totals, labels, pratos){
 let DADOS = null;
 let turnoIdx = 0;
 let atiradorSel = null;
+let atirTurnoIdx = null;   // mês selecionado na aba Por Atirador
 let comparBase = "pontuacao";
 let comparSel = null;
 
@@ -710,6 +711,14 @@ function renderAtir(){
   if(!atiradorSel || !todos.includes(atiradorSel)) atiradorSel = todos[0];
   const opts = todos.map(a=>`<option value="${esc(a)}" ${a===atiradorSel?"selected":""}>${esc(titleCase(a))}</option>`).join("");
 
+  // mês selecionado: se inválido ou sem passadas deste atirador, cai para o último mês dele
+  const participou = k => DADOS.turnos[k] && DADOS.turnos[k].registros.some(r=>r.atirador===atiradorSel);
+  if(atirTurnoIdx==null || atirTurnoIdx<0 || atirTurnoIdx>=DADOS.turnos.length || !participou(atirTurnoIdx)){
+    atirTurnoIdx = -1;
+    for(let k=DADOS.turnos.length-1;k>=0;k--) if(participou(k)){ atirTurnoIdx=k; break; }
+  }
+  const optTurnos = DADOS.turnos.map((t,i)=>`<option value="${i}" ${i===atirTurnoIdx?"selected":""} ${participou(i)?"":"disabled"}>${esc(fmtTurno(t.aba))}</option>`).join("");
+
   const hist = [];
   for(let k=0;k<DADOS.turnos.length;k++){
     const r = rankingDoTurno(DADOS,k).find(x=>x.atirador===atiradorSel);
@@ -727,14 +736,12 @@ function renderAtir(){
       <td>${h.handicap?`<span class="tag hc">+${h.handicap}</span>`:`<span class="tag zero">—</span>`}</td>
       <td><b>${h.pct_final.toFixed(2)}%</b></td></tr>`).join("");
 
-    // todas as passadas (tentativas) do atirador, marcando a oficial (a que vale)
+    // passadas (tentativas) SÓ do mês selecionado, marcando a oficial (a que vale)
     const passadas = [];
-    for(let k=0;k<DADOS.turnos.length;k++){
-      const turno = DADOS.turnos[k], pm = turno.postos_max;
+    {
+      const turno = DADOS.turnos[atirTurnoIdx], pm = turno.postos_max;
       const regs = turno.registros.filter(r=>r.atirador===atiradorSel);
-      if(!regs.length) continue;
       const best = melhorPorAtirador(turno)[atiradorSel];
-      // ordena as passadas do turno da melhor para a pior (aguenta 20+ tentativas)
       const comPf = regs.map(r=>{
         let pf = 0;
         if(pm){ for(let i=0;i<r.stations.length;i++){ if(pm[i] && r.stations[i] >= pm[i]) pf++; } }
@@ -747,8 +754,8 @@ function renderAtir(){
         passadas.push({turno:turno.aba, data:r.data||"", stations:r.stations, total:r.total, pf, oficial});
       });
     }
+    const totalPassadasCarreira = DADOS.turnos.reduce((s,t)=> s + t.registros.filter(r=>r.atirador===atiradorSel).length, 0);
     const passRows = passadas.map(pa=>`<tr class="${pa.oficial?"lead":""}">
-      <td>${esc(fmtTurno(pa.turno))}</td>
       <td>${esc(fmtData(pa.data))||"—"}</td>
       <td style="color:var(--muted)">${pa.stations.join(" · ")}</td>
       <td><b>${pa.total}</b></td>
@@ -761,7 +768,7 @@ function renderAtir(){
         <div class="kpi"><div class="v">${hist.length}</div><div class="l">Turnos disputados</div></div>
         <div class="kpi accent"><div class="v">${melhorCol}º</div><div class="l">Melhor colocação</div></div>
         <div class="kpi field"><div class="v">${vit}</div><div class="l">Vitórias</div></div>
-        <div class="kpi"><div class="v">${passadas.length}</div><div class="l">Passadas (tentativas)</div></div>
+        <div class="kpi"><div class="v">${totalPassadasCarreira}</div><div class="l">Passadas (total)</div></div>
       </div>
       <h3 class="sec">Evolução na temporada</h3>
       <div class="card chartwrap">${svgLine(hist.map(h=>fmtTurno(h.turno)), hist.map(h=>h.pct_final))}</div>
@@ -769,24 +776,22 @@ function renderAtir(){
       <div class="tablewrap"><table>
         <thead><tr><th>Turno</th><th>Col.</th><th>Pratos</th><th>% base</th><th>HC</th><th>Pontuação ${help("Pontuação final do turno = % do líder + bônus de handicap. Pode passar de 100%: quem recebe handicap soma pratos de bônus e pode ultrapassar o líder de pratos. É ela que decide a colocação (Art. 11).")}</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
-      <h3 class="sec">Todas as passadas</h3>
+      <h3 class="sec">Todas as passadas — ${esc(fmtTurno(DADOS.turnos[atirTurnoIdx].aba))}</h3>
       <p class="note" style="margin-top:0">Cada atirador pode atirar quantas vezes quiser no turno (Art. 7º).
-        Vale a de <b>maior pontuação</b> — marcada como <span class="tag hc">✓ OFICIAL</span>.</p>
+        Vale a de <b>maior pontuação</b> — marcada como <span class="tag hc">✓ OFICIAL</span>. Só as passadas <b>deste mês</b>.</p>
       <div class="tablewrap"><table>
-        <thead><tr><th>Turno</th><th>Data</th><th>Postos (por estação)</th><th>Pratos</th><th>Postos fech.</th><th>Vale?</th></tr></thead>
+        <thead><tr><th>Data</th><th>Postos (por estação)</th><th>Pratos</th><th>Postos fech.</th><th>Vale?</th></tr></thead>
         <tbody>${passRows}</tbody></table></div>
       ${comparativos()}`;
   }
 
   // ── comparativos do último turno do atirador ──────────────────────────────
   function comparativos(){
-    let kLast = -1;
-    for(let k=DADOS.turnos.length-1;k>=0;k--)
-      if(DADOS.turnos[k].registros.some(r=>r.atirador===atiradorSel)){ kLast=k; break; }
-    if(kLast < 0) return "";
-    const turno = DADOS.turnos[kLast];
+    const kSel = atirTurnoIdx;
+    if(kSel < 0 || !DADOS.turnos[kSel].registros.some(r=>r.atirador===atiradorSel)) return "";
+    const turno = DADOS.turnos[kSel];
     const pm = turno.postos_max || [];
-    const rk = rankingDoTurno(DADOS, kLast);
+    const rk = rankingDoTurno(DADOS, kSel);
     const me = rk.find(x=>x.atirador===atiradorSel);
     const best = melhorPorAtirador(turno);
     const campo = Object.values(best);
@@ -824,7 +829,7 @@ function renderAtir(){
        {name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>` : "";
 
     return `
-      <h3 class="sec">📊 Comparação com os demais — último turno (${esc(fmtTurno(turno.aba))})</h3>
+      <h3 class="sec">📊 Comparação com os demais — ${esc(fmtTurno(turno.aba))}</h3>
       <div class="kpis">
         <div class="kpi accent"><div class="v">${me?me.col:"—"}º</div><div class="l">Posição no turno</div></div>
         <div class="kpi"><div class="v">${me?me.pct_base.toFixed(1):"—"}%</div><div class="l">% do líder</div></div>
@@ -856,9 +861,13 @@ function renderAtir(){
   el.innerHTML = `
     <div class="controls">
       <div class="ctl"><label>Atirador</label><select id="atirSel">${opts}</select></div>
+      <div class="ctl"><label>Mês (etapa)</label><select id="atirTurnoSel">${optTurnos}</select></div>
     </div>${body}`;
   document.getElementById("atirSel").addEventListener("change", e=>{
-    atiradorSel = e.target.value; renderAtir();
+    atiradorSel = e.target.value; atirTurnoIdx = null; renderAtir();
+  });
+  document.getElementById("atirTurnoSel").addEventListener("change", e=>{
+    atirTurnoIdx = +e.target.value; renderAtir();
   });
 }
 
@@ -979,7 +988,7 @@ function renderRegulamento(){
     <h3 class="regsec">4. Sistema de Handicap</h3>
     <div class="art"><span class="artnum">Art. 12º —</span>O bônus de handicap tem por objetivo equilibrar as chances de competição entre atiradores de diferentes níveis, permitindo que todos participem de forma justa e motivadora.</div>
     <div class="art"><span class="artnum">Art. 13º —</span>O bônus de handicap é definido pela fórmula determinada e divulgada pela organização da "Ponhada" e somado ao percentual de acerto dos atiradores em cada turno.</div>
-    <div class="art"><span class="artnum">Art. 14º —</span>Atiradores que obtenham resultados entre 100% e 90% do melhor resultado do turno não farão jus ao bônus de handicap. Atiradores cujos resultados sejam inferiores a 90% utilizarão o bônus de handicap seguindo a fórmula no artigo a seguir. A pontuação final com handicap fica limitada a um teto de 105%.</div>
+    <div class="art"><span class="artnum">Art. 14º —</span>O critério para ter ou não direito ao handicap é o resultado do atirador <b>na própria rodada</b>: quem fica entre 100% e 90% do melhor resultado do turno não recebe handicap; abaixo de 90%, recebe (fórmula no artigo seguinte). A pontuação final com handicap fica limitada a um <b>teto de 105%</b>, também apurado pelo resultado da rodada. A <b>média das últimas 3 etapas</b> é usada apenas para calcular a <b>quantidade de pratos</b> do handicap (Art. 15).</div>
     <div class="art"><span class="artnum">Art. 15º —</span>A fórmula para determinar o bônus de handicap se baseia na diferença em pontos percentuais que o atirador obtiver em relação ao melhor atirador do turno, na média dos percentuais dos últimos 3 turnos. Em uma prova de 75 pratos, a cada 10 pontos percentuais de diferença serão concedidos a título de bônus de handicap 5 pratos ao participante (para diferenças não múltiplos de 10 será utilizada proporção aritmética "regra de 3" para determinar o número de pratos de handicap). Para provas de 100 pratos, 7 pratos a cada 10 pontos percentuais e numa prova de 50 pratos, 3 pratos a cada 10 pontos percentuais. Esse número de pratos será então somado ao resultado que o atirador obteve e com este número se calculará o seu percentual de acerto.</div>
     <div class="art"><span class="artnum">Art. 16º —</span>O bônus é aplicado proporcionalmente a rodadas de 100 e de 50 pratos, da seguinte forma: Para provas de 100 pratos, 7 pratos a cada 10 pontos percentuais e para provas de 50 pratos, 3 pratos a cada 10 pontos percentuais.</div>
     <div class="art"><span class="artnum">Art. 17º —</span>O handicap é dinâmico entre Turnos e por ser calculado com base na média dos últimos 3 turnos evitará distorções ao longo do tempo. Com o passar dos turnos o atirador passa a receber o bônus correspondente ao seu novo nível de acertos, refletindo sua evolução real. No primeiro turno de cada participante o handicap será calculado com base nos dados daquele turno somente, no segundo turno o cálculo utilizará a média dos dois turnos nos quais participou e a partir do terceiro turno sempre a média dos últimos três turnos.</div>
