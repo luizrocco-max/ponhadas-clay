@@ -642,13 +642,7 @@ function renderTurno(){
     <div class="controls">
       <div class="ctl"><label>Turno (mês)</label>
         <select id="turnoSel">${options}</select></div>
-      <div class="ctl"><label>Handicap</label>
-        <select id="modoHcSel">
-          <option value="atual" ${inclusao?"":"selected"}>Atual (Regulamento)</option>
-          <option value="inclusao" ${inclusao?"selected":""}>Inclusão (teste)</option>
-        </select></div>
     </div>
-    ${bannerModo}
     ${kpis}
     <h3 class="sec">Pódio</h3>
     <div class="podium">${pod}</div>
@@ -679,8 +673,6 @@ function renderTurno(){
   document.getElementById("turnoSel").addEventListener("change", e=>{
     turnoIdx = +e.target.value; renderTurno();
   });
-  const mSel = document.getElementById("modoHcSel");
-  if(mSel) mSel.addEventListener("change", e=>{ modoHC = e.target.value; renderAll(); });
 }
 
 function renderTemp(){
