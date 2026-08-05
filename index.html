@@ -348,9 +348,8 @@ function rankingDoTurno(dados, k){
       const historico=[]; for(const pc of histPcts) if(atir in pc) historico.push(pc[atir]);
       const hist3 = historico.slice(-3);
       const media = hist3.reduce((s,v)=>s+v,0)/hist3.length;
-      const pctRodada = liderK ? b.total/liderK*100 : 0;   // resultado da PRÓPRIA rodada
-      // gatilho (tem handicap?) pela RODADA; quantidade de pratos pela MÉDIA das últimas 3 etapas
-      const handicap = pctRodada >= limite ? 0 : Math.floor((100-media)/10*hc);
+      // gatilho (tem direito?) E quantidade de pratos: ambos pela MÉDIA das últimas 3 etapas (meses)
+      const handicap = media >= limite ? 0 : Math.floor((100-media)/10*hc);
       const pratosHc = b.total + handicap;
       return { media_3t: round2(media), handicap, pratos_hc: Math.trunc(pratosHc),
                pct_final: round2(Math.min(teto, liderK ? pratosHc/liderK*100 : 0)), fator: null };
@@ -922,18 +921,20 @@ function renderHandicap(){
       <div class="ctl"><label>Turno (mês)</label><select id="hcTurnoSel">${options}</select></div>
     </div>
     <div class="note" style="background:rgba(224,184,60,.10);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:2px 0 12px;font-size:13px;line-height:1.65">
-      <div style="font-size:14px;margin-bottom:8px">🎁 <b>Como funciona o handicap</b> — o handicap dá pratos de bônus a quem está atrás, para todos brigarem parelho. Passo a passo:</div>
+      <div style="font-size:14px;margin-bottom:6px">🎁 <b>Como funciona o handicap</b> — dá pratos de bônus a quem está atrás, para todos brigarem parelho.</div>
+      <div class="muted" style="font-size:12px;margin-bottom:8px">📖 <b>Etapa</b> = cada mês/turno do campeonato. &nbsp;·&nbsp; <b>Passada</b> = cada vez que você fez a prova (vale a sua melhor passada da etapa).</div>
       <ol style="margin:0;padding-left:20px;display:grid;gap:6px">
-        <li><b>% na rodada</b> = seus pratos ÷ pratos do líder × 100 <span class="muted">(o líder faz 100%)</span>.</li>
-        <li><b>Você tem direito a handicap?</b> <span class="muted">(olha o SEU dia)</span><br>
-          Só tem quem, <b>naquele dia</b>, fez <b>menos de ${limite}%</b> dos pratos do líder. Fez ${limite}% ou mais → <b>sem</b> handicap.</li>
-        <li><b>Quantos pratos de bônus você ganha?</b> <span class="muted">(agora sim olha a MÉDIA dos meses)</span><br>
-          Pega o seu <b>% só por pratos</b> <span class="muted">(sem handicap)</span> de <b>cada um dos últimos 3 meses</b> e tira a média. Quanto mais longe de 100% ela estiver, mais pratos:
-          <br><span style="font-family:ui-monospace,monospace;font-size:12px;background:rgba(0,0,0,.18);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px">bônus = (100 − sua média dos meses) ÷ 10 × HC &nbsp;<span class="muted">(arredonda p/ baixo)</span></span>
-          <br><span class="muted" style="font-size:12px">Ex.: média 78,6% · HC ${hc} → (100−78,6) ÷ 10 × ${hc} = <b>${Math.floor((100-78.6)/10*hc)}</b> pratos. Ainda não tem 3 meses? Usa os que já existem.</span></li>
-        <li><b>HC da prova</b> = <b>${hc}</b> pratos neste turno <span class="muted">(3/5/7 para provas de 50/75/100 · ${esc(provaTxt)}).</span></li>
+        <li><b>% numa etapa</b> = seus pratos ÷ pratos do líder da etapa × 100 <span class="muted">(o líder faz 100%)</span>.</li>
+        <li><b>Você tem direito a handicap?</b> <span class="muted">(olha a MÉDIA das etapas)</span><br>
+          Tem direito quem está com a <b>média das últimas 3 etapas (meses) abaixo de ${limite}%</b>. Média de ${limite}% ou mais → <b>sem</b> handicap.
+          <br><span class="muted" style="font-size:12px">É sempre a média das 3 etapas anteriores. Como o campeonato ainda só tem 2 etapas, é a média das 2. Quem nunca atirou antes: conta só a etapa atual.</span></li>
+        <li><b>Quantos pratos de bônus?</b> <span class="muted">(a mesma média define)</span><br>
+          Quanto mais longe de 100% a sua média estiver, mais pratos:
+          <br><span style="font-family:ui-monospace,monospace;font-size:12px;background:rgba(0,0,0,.18);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px">bônus = (100 − sua média das etapas) ÷ 10 × HC &nbsp;<span class="muted">(arredonda p/ baixo)</span></span>
+          <br><span class="muted" style="font-size:12px">Ex.: média 78,6% · HC ${hc} → (100−78,6) ÷ 10 × ${hc} = <b>${Math.floor((100-78.6)/10*hc)}</b> pratos.</span></li>
+        <li><b>HC da prova</b> = <b>${hc}</b> pratos nesta etapa <span class="muted">(3/5/7 para provas de 50/75/100 · ${esc(provaTxt)}).</span></li>
         ${nova ? `<li><b>Teto</b> — a pontuação final não passa de <b>${teto}%</b>.</li>` : ""}
-        <li>Só a <b>melhor passada</b> de cada um no mês recebe handicap.</li>
+        <li>Só a sua <b>melhor passada</b> da etapa recebe handicap.</li>
       </ol>
     </div>
     <div class="note" style="border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:0 0 12px;font-size:12.5px;line-height:1.6">
@@ -950,11 +951,11 @@ function renderHandicap(){
     <div class="tablewrap"><table>
       <thead><tr>
         <th>Col. (oficial)</th><th>Atirador</th><th>Pratos</th>
-        <th>% na rodada</th><th>Média (meses)</th><th>Handicap</th><th>Pontuação</th>
+        <th>% na etapa</th><th>Média 3 etapas</th><th>Handicap</th><th>Pontuação</th>
         <th>Só por pratos</th><th>Efeito</th>
       </tr></thead>
       <tbody>${rows}</tbody></table></div>
-    <p class="note"><b>% na rodada</b> (resultado do dia) aciona o gatilho: abaixo de ${limite}% ganha handicap. <b>Média (meses)</b> = aproveitamento médio das últimas 3 etapas anteriores — é ela que define a quantidade de pratos de bônus. Ordenado pela colocação oficial. O handicap só é aplicado à melhor passada de cada um.</p>`;
+    <p class="note"><b>Média 3 etapas</b> (média dos últimos meses) é o que manda: abaixo de ${limite}% dá direito ao handicap <b>e</b> define quantos pratos de bônus. <b>% na etapa</b> é só o seu resultado deste mês (informativo — não é o gatilho). Ordenado pela colocação oficial; o handicap só entra na sua melhor passada.</p>`;
 
   document.getElementById("hcTurnoSel").addEventListener("change", e=>{ hcTurnoIdx = +e.target.value; renderHandicap(); });
 }
