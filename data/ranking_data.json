@@ -4,8 +4,8 @@
     {
       "aba": "Julho de 2026",
       "ordem": [
-        0,
-        0
+        2026,
+        7
       ],
       "pratos": 75,
       "hc": 5,
@@ -715,8 +715,8 @@
     {
       "aba": "Agosto de 2026",
       "ordem": [
-        0,
-        0
+        2026,
+        8
       ],
       "pratos": 50,
       "hc": 3,
@@ -729,7 +729,7 @@
       ],
       "registros": [
         {
-          "atirador": "LUIZ H COKE",
+          "atirador": "LUIZ H. COKE",
           "total": 36,
           "stations": [
             9,
@@ -753,7 +753,7 @@
           "data": "2026-08-03"
         },
         {
-          "atirador": "LUIZ H COKE",
+          "atirador": "LUIZ H. COKE",
           "total": 32,
           "stations": [
             6,
@@ -789,7 +789,7 @@
           "data": "2026-08-03"
         },
         {
-          "atirador": "RENATO POLLIZI",
+          "atirador": "RENATO POLIZZI",
           "total": 30,
           "stations": [
             4,
@@ -813,7 +813,7 @@
           "data": "2026-08-03"
         },
         {
-          "atirador": "LUIZ H COKE",
+          "atirador": "LUIZ H. COKE",
           "total": 29,
           "stations": [
             9,
@@ -825,7 +825,7 @@
           "data": "2026-08-03"
         },
         {
-          "atirador": "RENATO POLLIZI",
+          "atirador": "RENATO POLIZZI",
           "total": 27,
           "stations": [
             4,
@@ -837,7 +837,7 @@
           "data": "2026-08-01"
         },
         {
-          "atirador": "LUIS H NEVES",
+          "atirador": "LUIS H. NEVES",
           "total": 27,
           "stations": [
             5,
@@ -849,7 +849,7 @@
           "data": "2026-08-02"
         },
         {
-          "atirador": "FELIPE POTHOFF",
+          "atirador": "FELIPE POTTOFF",
           "total": 26,
           "stations": [
             5,
@@ -861,7 +861,7 @@
           "data": "2026-08-03"
         },
         {
-          "atirador": "LUIS H NEVES",
+          "atirador": "LUIS H. NEVES",
           "total": 26,
           "stations": [
             8,
@@ -885,7 +885,7 @@
           "data": "2026-08-03"
         },
         {
-          "atirador": "JOAO PEDRO ANDRADE",
+          "atirador": "JOÃO PEDRO ANDRADE",
           "total": 24,
           "stations": [
             5,
@@ -909,7 +909,7 @@
           "data": "2026-08-03"
         },
         {
-          "atirador": "FERNAO LARA MESQUITA",
+          "atirador": "FERNÃO LARA MESQUITA",
           "total": 20,
           "stations": [
             4,
@@ -921,7 +921,7 @@
           "data": "2026-08-01"
         },
         {
-          "atirador": "LUIS H NEVES",
+          "atirador": "LUIS H. NEVES",
           "total": 14,
           "stations": [
             4,

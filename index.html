@@ -243,6 +243,12 @@ const LIMITE_PCT  = 93.0;                              // corte do handicap (reg
 const REGRA_NOVA_DESDE = [2026, 8];
 function regraNova(turno){ const o = ordemMes(turno.aba);
   return o[0] > REGRA_NOVA_DESDE[0] || (o[0] === REGRA_NOVA_DESDE[0] && o[1] >= REGRA_NOVA_DESDE[1]); }
+// une grafias diferentes do mesmo atirador entre os meses (para a média e o histórico ligarem)
+const ALIAS_ATIRADOR = {
+  "LUIZ H COKE":"LUIZ H. COKE", "RENATO POLLIZI":"RENATO POLIZZI", "FELIPE POTHOFF":"FELIPE POTTOFF",
+  "LUIS H NEVES":"LUIS H. NEVES", "FERNAO LARA MESQUITA":"FERNÃO LARA MESQUITA", "JOAO PEDRO ANDRADE":"JOÃO PEDRO ANDRADE",
+};
+const canonNome = n => { const u = String(n).trim().toUpperCase(); return ALIAS_ATIRADOR[u] || u; };
 const HC_POR_PRATOS = {50:3, 75:5, 100:7};
 // modo de handicap: "atual" (Regulamento) ou "inclusao" (teste) — padrão é o atual
 let modoHC = "atual";
@@ -1069,7 +1075,7 @@ document.addEventListener("click", e=>{
    PARSER DE PLANILHA (porte do parse_planilha do ponhadas_clay.py)
 ══════════════════════════════════════════════════════════════════════════ */
 function ordemMes(nome){
-  let txt = String(nome).trim().toLowerCase().replace(/[-_/]/g,".");
+  let txt = String(nome).trim().toLowerCase().replace(/[-_/\s]+/g,".");
   const partes = txt.split(".").filter(Boolean);
   let mes=null, ano=null;
   for(const p of partes){
@@ -1140,7 +1146,7 @@ function parsePlanilha(arraybuf){
       const stations = postos_idx.map(j=>{ const c=cell(i,j); return (c!=null && isNum(c)) ? Math.trunc(c) : 0; });
       let dv = c_data>=0 ? cell(i,c_data) : null, dataStr="";
       if(dv!=null) dataStr = (dv instanceof Date) ? dv.toISOString().slice(0,10) : String(dv).slice(0,10);
-      registros.push({atirador:nome.trim().toUpperCase(), total:totf, stations, data:dataStr});
+      registros.push({atirador:canonNome(nome), total:totf, stations, data:dataStr});
     }
     if(registros.length)
       turnos.push({aba:String(aba), ordem:ordemMes(aba), pratos, hc, postos_max, registros});
