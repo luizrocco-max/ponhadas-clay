@@ -238,7 +238,11 @@ const GITHUB_REPO = "luizrocco-max/ponhadas-clay";   // dono/repo
 const DATA_PATH   = "data/ranking_data.json";
 // Cloudflare Worker que confere a senha e publica no GitHub (login do organizador)
 const PUBLISH_URL = "https://ponhadas-publish.luiz-rocco.workers.dev";
-const LIMITE_PCT  = 90.0;                              // >=90% do líder não recebe handicap (Art.14)
+const LIMITE_PCT  = 93.0;                              // corte do handicap (regra ANTIGA, até Julho/2026)
+// Regra nova (90% + teto 105% + novo desempate) vale a partir de Agosto/2026; turnos anteriores ficam como estavam
+const REGRA_NOVA_DESDE = [2026, 8];
+function regraNova(turno){ const o = ordemMes(turno.aba);
+  return o[0] > REGRA_NOVA_DESDE[0] || (o[0] === REGRA_NOVA_DESDE[0] && o[1] >= REGRA_NOVA_DESDE[1]); }
 const HC_POR_PRATOS = {50:3, 75:5, 100:7};
 // modo de handicap: "atual" (Regulamento) ou "inclusao" (teste) — padrão é o atual
 let modoHC = "atual";
@@ -304,6 +308,8 @@ function pctBase(turno){
 function rankingDoTurno(dados, k){
   const turnos = dados.turnos;
   const turno = turnos[k];
+  const nova = regraNova(turno);               // Agosto/2026 em diante usa a regra nova
+  const limite = nova ? 90 : 93, teto = nova ? 105 : Infinity;
   const pb = pctBase(turno), bestK = pb.best, liderK = pb.lider;
 
   let calc;
@@ -334,10 +340,10 @@ function rankingDoTurno(dados, k){
       const historico=[]; for(const pc of histPcts) if(atir in pc) historico.push(pc[atir]);
       const hist3 = historico.slice(-3);
       const media = hist3.reduce((s,v)=>s+v,0)/hist3.length;
-      const handicap = media >= LIMITE_PCT ? 0 : Math.floor((100-media)/10*hc);
+      const handicap = media >= limite ? 0 : Math.floor((100-media)/10*hc);
       const pratosHc = b.total + handicap;
       return { media_3t: round2(media), handicap, pratos_hc: Math.trunc(pratosHc),
-               pct_final: round2(Math.min(105, liderK ? pratosHc/liderK*100 : 0)), fator: null }; // teto 105% (Art. novo)
+               pct_final: round2(Math.min(teto, liderK ? pratosHc/liderK*100 : 0)), fator: null };
     };
   }
 
@@ -360,11 +366,11 @@ function rankingDoTurno(dados, k){
       passadas: turno.registros.filter(r => r.atirador === atir).length,
     });
   }
-  // desempate (Art. novo): 1º pratos quebrados (bruto), 2º Perfect Stride, 3º postos fechados
-  linhas.sort((a,b) => b.pct_final - a.pct_final ||
-                        b.total - a.total ||
-                        b.perfect - a.perfect ||
-                        b.postos_fechados - a.postos_fechados);
+  // desempate: Agosto/2026+ = pratos → Perfect Stride → postos fechados; antes = postos fechados → último posto
+  if(nova) linhas.sort((a,b) => b.pct_final - a.pct_final || b.total - a.total ||
+                                 b.perfect - a.perfect || b.postos_fechados - a.postos_fechados);
+  else     linhas.sort((a,b) => b.pct_final - a.pct_final || b.postos_fechados - a.postos_fechados ||
+                                 b.ult_posto - a.ult_posto);
   linhas.forEach((l,i) => l.col = i + 1);
   return linhas;
 }
@@ -562,12 +568,13 @@ function renderTurno(){
   if(turnoIdx >= turnos.length) turnoIdx = turnos.length - 1;
   const options = turnos.map((t,i)=>`<option value="${i}" ${i===turnoIdx?"selected":""}>${esc(fmtTurno(t.aba))}</option>`).join("");
   const turno = turnos[turnoIdx];
+  const novaT = regraNova(turno);   // regra do turno exibido (Agosto/2026+ = nova)
   const rk = rankingDoTurno(DADOS, turnoIdx);
   const lider = rk.length ? titleCase(rk[0].atirador) : "—";
 
   const kpis = `<div class="kpis">
     <div class="kpi"><div class="v">${turno.pratos}</div><div class="l">Pratos do turno</div></div>
-    <div class="kpi accent"><div class="v">${turno.hc}</div><div class="l">Handicap / 10 p.p. ${help("Pratos de bônus a cada 10 pontos percentuais de diferença para o líder (só para quem está abaixo de 90%). Depende da prova: 3 para 50 pratos, 5 para 75 e 7 para 100 (Art. 15 e 16).")}</div></div>
+    <div class="kpi accent"><div class="v">${turno.hc}</div><div class="l">Handicap / 10 p.p. ${help("Pratos de bônus a cada 10 pontos percentuais de diferença para o líder (só para quem está abaixo de "+(novaT?"90%":"93%")+"). Depende da prova: 3 para 50 pratos, 5 para 75 e 7 para 100 (Art. 15 e 16).")}</div></div>
     <div class="kpi field"><div class="v">${rk.length}</div><div class="l">Atiradores</div></div>
     <div class="kpi"><div class="v" style="font-size:18px">${esc(lider)}</div><div class="l">Líder do turno</div></div>
   </div>`;
@@ -654,7 +661,9 @@ function renderTurno(){
       <tbody>${rows}</tbody></table></div>
     <p class="note">${inclusao
       ? "Handicap de Inclusão (teste): Bônus = fator × (maior índice − seu índice) × (pratos ÷ 100). O fator é a rampa (0,82 → 0,60) conforme suas passadas. Nota = (pratos + bônus) ÷ líder × 100, teto 105%."
-      : "Pontuação = percentual com handicap (Art. 11), com teto de 105%. Handicap só para quem está &lt; 90% do líder (média dos últimos 3 turnos, Art. 14–17). Desempate: 1º pratos quebrados, 2º Perfect Stride, 3º postos fechados."}</p>
+      : (novaT
+          ? "Pontuação = percentual com handicap (Art. 11), com teto de 105%. Handicap só para quem está &lt; 90% do líder (média dos últimos 3 turnos, Art. 14–17). Desempate: 1º pratos quebrados, 2º Perfect Stride, 3º postos fechados."
+          : "Pontuação = percentual com handicap (Art. 11). Handicap só para quem está &lt; 93% do líder (média dos últimos 3 turnos, Art. 14–17). Desempate por postos fechados (Art. 22). — regra vigente até Julho/2026.")}</p>
     <h3 class="sec">🏹 Classificação por Perfect Stride (potencial — melhor de cada posto)</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Col.</th><th>Atirador</th><th>Pass.</th><th>Perfect</th><th>% acerto</th><th>Melhor real</th><th>+Pot.</th><th>Postos fech.</th></tr></thead>
