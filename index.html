@@ -816,9 +816,22 @@ function renderAtir(){
     const aproveit = turno.pratos ? melhor/turno.pratos*100 : 0;
     const dLiga = meBest.total - mediaLiga;
 
+    // melhor de cada posto (Perfect Stride): do atirador, e a média da liga por posto (melhor de cada um)
+    const nPostos = pm.length || (regs[0] ? regs[0].stations.length : 0);
+    const perfect = [];
+    for(let i=0;i<nPostos;i++) perfect.push(Math.max(0, ...regs.map(r => r.stations[i]||0)));
+    const psPorAtir = {};
+    for(const r of turno.registros){ const p = psPorAtir[r.atirador] || (psPorAtir[r.atirador]=[]);
+      (r.stations||[]).forEach((v,i)=> p[i] = Math.max(p[i]||0, v||0)); }
+    const fieldPSAvg = pm.map((_,i)=>{ const vs = Object.values(psPorAtir).map(p=>p[i]||0);
+      return vs.length ? vs.reduce((s,v)=>s+v,0)/vs.length : 0; });
+    const perfectTotal = perfect.reduce((s,v)=>s+v,0);
+    const perfectFechados = pm.length ? perfect.filter((v,i)=> pm[i] && v>=pm[i]).length : 0;
+
     const chartCmp = pm.length ? `<div class="card chartwrap">${svgStations(pm,
-      [{name:"Você", values:meBest.stations, color:"#e4572e"},
-       {name:"Média da liga", values:fieldAvg, color:"#e0b83c"}])}</div>` : "";
+      [{name:"Você", values:perfect, color:"#e4572e"},
+       {name:"Média da liga", values:fieldPSAvg, color:"#e0b83c"}])}</div>
+      <p class="note" style="margin-top:0">Cada barra é o <b>melhor de cada um em cada posto</b> no mês. Um posto que você <b>fechou</b> em qualquer passada aparece aqui — não só o da sua melhor passada.</p>` : "";
     const chartOwn = pm.length ? `<div class="card chartwrap">${svgStations(pm,
       [{name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>
       <p class="note">Barras = seus acertos por posto; cinza = o máximo do posto. Quanto mais cheia, mais perto de <b>fechar</b> o posto.</p>` : "";
@@ -827,12 +840,6 @@ function renderAtir(){
       <div class="card chartwrap">${svgTotals(passOrd.map(r=>r.total), passOrd.map(r=>fmtDataCurta(r.data)), turno.pratos)}</div>
       <p class="note" style="margin-top:0">Cada barra é uma passada, na data em que ocorreu — dá pra comparar quantas vezes atirou no mês e a evolução. Verde = a que valeu.</p>`;
 
-    // The Perfect Stride: melhor resultado de cada posto entre TODAS as passadas do turno
-    const nPostos = pm.length || (regs[0] ? regs[0].stations.length : 0);
-    const perfect = [];
-    for(let i=0;i<nPostos;i++) perfect.push(Math.max(0, ...regs.map(r => r.stations[i]||0)));
-    const perfectTotal = perfect.reduce((s,v)=>s+v,0);
-    const perfectFechados = pm.length ? perfect.filter((v,i)=> pm[i] && v>=pm[i]).length : 0;
     const chartPerfect = pm.length ? `<div class="card chartwrap">${svgStations(pm,
       [{name:"Perfect Stride", values:perfect, color:"#e0b83c"},
        {name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>` : "";
