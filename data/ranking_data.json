@@ -1,5 +1,5 @@
 {
-  "gerado_em": "2026-08-05T12:00:00",
+  "gerado_em": "06/08/2026 17:42",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1037,6 +1037,30 @@
             2,
             3,
             5
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 34,
+          "stations": [
+            10,
+            7,
+            6,
+            5,
+            6
+          ],
+          "data": "2026-08-05"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 32,
+          "stations": [
+            8,
+            9,
+            6,
+            5,
+            4
           ],
           "data": "2026-08-05"
         }
