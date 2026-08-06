@@ -826,13 +826,17 @@ function renderAtir(){
     const perfectTotal = perfect.reduce((s,v)=>s+v,0);
     const perfectFechados = pm.length ? perfect.filter((v,i)=> pm[i] && v>=pm[i]).length : 0;
     const fechadosMark = pm.map((_,i)=> !!(pm[i] && perfect[i] >= pm[i]));   // postos que fechou em qualquer passada
-    // Você = passada que valeu, mas um posto FECHADO (em qualquer passada) mostra o resultado fechado (o máximo do posto)
-    const youBars = meBest.stations.map((v,i)=> fechadosMark[i] ? pm[i] : v);
+    // média da liga por posto = melhor de cada atirador em cada posto (Perfect Stride), p/ comparar igual com igual
+    const psPorAtir = {};
+    for(const r of turno.registros){ const p = psPorAtir[r.atirador] || (psPorAtir[r.atirador]=[]);
+      (r.stations||[]).forEach((v,i)=> p[i] = Math.max(p[i]||0, v||0)); }
+    const fieldPSAvg = pm.map((_,i)=>{ const vs = Object.values(psPorAtir).map(p=>p[i]||0);
+      return vs.length ? vs.reduce((s,v)=>s+v,0)/vs.length : 0; });
 
     const chartCmp = pm.length ? `<div class="card chartwrap">${svgStations(pm,
-      [{name:"Você", values:youBars, color:"#e4572e"},
-       {name:"Média da liga", values:fieldAvg, color:"#e0b83c"}], fechadosMark)}</div>
-      <p class="note" style="margin-top:0">Barras = a sua <b>passada que valeu</b>, vs a média da liga por posto. Um posto que você <b>fechou</b> em qualquer passada aparece com o <b>resultado fechado</b> e um <b>★</b> (ex.: um posto fechado mostra ${pm.length?pm[0]:10}, mesmo que na passada que valeu você tenha feito menos).</p>` : "";
+      [{name:"Você", values:perfect, color:"#e4572e"},
+       {name:"Média da liga", values:fieldPSAvg, color:"#e0b83c"}], fechadosMark)}</div>
+      <p class="note" style="margin-top:0">Barras = o seu <b>melhor resultado em cada posto</b> no mês (juntando todas as suas passadas), vs a média da liga por posto. O <b>★</b> marca um posto que você <b>fechou</b>.</p>` : "";
     const chartOwn = pm.length ? `<div class="card chartwrap">${svgStations(pm,
       [{name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>
       <p class="note">Barras = seus acertos por posto; cinza = o máximo do posto. Quanto mais cheia, mais perto de <b>fechar</b> o posto.</p>` : "";
