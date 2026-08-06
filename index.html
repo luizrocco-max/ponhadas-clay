@@ -485,8 +485,9 @@ function svgLine(labels, values){
   const poly = n>1 ? `<polyline points="${pts}" fill="none" stroke="#2f9e5f" stroke-width="3"/>` : "";
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet">${grid}${poly}${dots}${axis}${xlab}</svg>`;
 }
-function svgStations(postosMax, series){
+function svgStations(postosMax, series, marks){
   // barras verticais por posto: fundo cinza = máximo do posto; barras coloridas = séries
+  // marks (opcional): array booleano por posto — desenha ★ (posto fechado) sobre a 1ª série
   const n = postosMax.length;
   if(!n) return "";
   const W = Math.max(360, n*72), H = 210, padL = 14, padR = 10, padT = 26, padB = 34;
@@ -504,6 +505,8 @@ function svgStations(postosMax, series){
       g += `<rect x="${bx+bwi*0.08}" y="${sy(v)}" width="${bwi*0.84}" height="${base-sy(v)}" fill="${s.color}" rx="2"/>`;
       g += `<text x="${bx+bwi/2}" y="${sy(v)-3}" text-anchor="middle" fill="#9aa596" font-size="9">${(+v).toFixed(v%1?1:0)}</text>`;
     });
+    if(marks && marks[i]){ const vy = series[0].values[i]||0;
+      g += `<text x="${gx+bwi/2}" y="${sy(vy)-12}" text-anchor="middle" fill="#e0b83c" font-size="13">★</text>`; }
     g += `<text x="${x0+slot/2}" y="${base+15}" text-anchor="middle" fill="#9aa596" font-size="10">P${i+1}</text>`;
     g += `<text x="${x0+slot/2}" y="${base+26}" text-anchor="middle" fill="#5f6a5a" font-size="9">/${postosMax[i]}</text>`;
   }
@@ -816,22 +819,18 @@ function renderAtir(){
     const aproveit = turno.pratos ? melhor/turno.pratos*100 : 0;
     const dLiga = meBest.total - mediaLiga;
 
-    // melhor de cada posto (Perfect Stride): do atirador, e a média da liga por posto (melhor de cada um)
+    // Perfect Stride (melhor de cada posto entre TODAS as passadas do turno) — usado abaixo e p/ marcar postos fechados
     const nPostos = pm.length || (regs[0] ? regs[0].stations.length : 0);
     const perfect = [];
     for(let i=0;i<nPostos;i++) perfect.push(Math.max(0, ...regs.map(r => r.stations[i]||0)));
-    const psPorAtir = {};
-    for(const r of turno.registros){ const p = psPorAtir[r.atirador] || (psPorAtir[r.atirador]=[]);
-      (r.stations||[]).forEach((v,i)=> p[i] = Math.max(p[i]||0, v||0)); }
-    const fieldPSAvg = pm.map((_,i)=>{ const vs = Object.values(psPorAtir).map(p=>p[i]||0);
-      return vs.length ? vs.reduce((s,v)=>s+v,0)/vs.length : 0; });
     const perfectTotal = perfect.reduce((s,v)=>s+v,0);
     const perfectFechados = pm.length ? perfect.filter((v,i)=> pm[i] && v>=pm[i]).length : 0;
+    const fechadosMark = pm.map((_,i)=> !!(pm[i] && perfect[i] >= pm[i]));   // postos que fechou em qualquer passada
 
     const chartCmp = pm.length ? `<div class="card chartwrap">${svgStations(pm,
-      [{name:"Você", values:perfect, color:"#e4572e"},
-       {name:"Média da liga", values:fieldPSAvg, color:"#e0b83c"}])}</div>
-      <p class="note" style="margin-top:0">Cada barra é o <b>melhor de cada um em cada posto</b> no mês. Um posto que você <b>fechou</b> em qualquer passada aparece aqui — não só o da sua melhor passada.</p>` : "";
+      [{name:"Você", values:meBest.stations, color:"#e4572e"},
+       {name:"Média da liga", values:fieldAvg, color:"#e0b83c"}], fechadosMark)}</div>
+      <p class="note" style="margin-top:0">Barras = a sua <b>passada que valeu</b> (igual à planilha) vs a média da liga por posto. O <b>★</b> marca um posto que você <b>fechou</b> em alguma passada do mês (mesmo que não tenha sido na passada que valeu).</p>` : "";
     const chartOwn = pm.length ? `<div class="card chartwrap">${svgStations(pm,
       [{name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>
       <p class="note">Barras = seus acertos por posto; cinza = o máximo do posto. Quanto mais cheia, mais perto de <b>fechar</b> o posto.</p>` : "";
