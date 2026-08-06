@@ -1241,9 +1241,10 @@ function parsePlanilha(arraybuf){
       const nome = cell(i,c_at);
       if(typeof nome!=="string" || !nome.trim()) continue;
       const stations = postos_idx.map(j=>{ const c=cell(i,j); return (c!=null && isNum(c)) ? Math.trunc(c) : 0; });
-      let totf = c_tot!=null ? Number(cell(i,c_tot)) : NaN;
-      // se a coluna TOTAL não tiver valor calculado (planilha sem cache de fórmula), soma os postos
-      if(!isFinite(totf)) totf = stations.reduce((s,v)=>s+v,0);
+      const somaSt = stations.reduce((s,v)=>s+v,0);
+      // total = soma dos postos (dado cru, sempre confiável); a coluna TOTAL é fórmula e pode vir sem cache (0/vazio)
+      let totf = stations.length ? somaSt : Number(c_tot!=null ? cell(i,c_tot) : NaN);
+      if(!isFinite(totf)) continue;
       if(!(totf>0) && stations.every(v=>!v)) continue;   // linha realmente vazia
       let dv = c_data>=0 ? cell(i,c_data) : null, dataStr="";
       if(dv!=null) dataStr = (dv instanceof Date) ? dv.toISOString().slice(0,10) : String(dv).slice(0,10);
