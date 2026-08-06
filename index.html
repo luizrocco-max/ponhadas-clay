@@ -1240,11 +1240,11 @@ function parsePlanilha(arraybuf){
     for(let i=headerRow+1;i<df.length;i++){
       const nome = cell(i,c_at);
       if(typeof nome!=="string" || !nome.trim()) continue;
-      const tot = c_tot!=null ? cell(i,c_tot) : null;
-      if(tot==null) continue;
-      const totf = Number(tot);
-      if(!isFinite(totf)) continue;
       const stations = postos_idx.map(j=>{ const c=cell(i,j); return (c!=null && isNum(c)) ? Math.trunc(c) : 0; });
+      let totf = c_tot!=null ? Number(cell(i,c_tot)) : NaN;
+      // se a coluna TOTAL não tiver valor calculado (planilha sem cache de fórmula), soma os postos
+      if(!isFinite(totf)) totf = stations.reduce((s,v)=>s+v,0);
+      if(!(totf>0) && stations.every(v=>!v)) continue;   // linha realmente vazia
       let dv = c_data>=0 ? cell(i,c_data) : null, dataStr="";
       if(dv!=null) dataStr = (dv instanceof Date) ? dv.toISOString().slice(0,10) : String(dv).slice(0,10);
       registros.push({atirador:canonNome(nome), total:totf, stations, data:dataStr});
