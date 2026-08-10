@@ -167,6 +167,21 @@
   .regclose{margin-top:20px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
   .foot{color:var(--muted);font-size:11.5px;text-align:center;margin:26px 0 8px}
   @media(max-width:560px){.podium{grid-template-columns:1fr}.badge{margin:8px 0 0}}
+  /* Ponhadores do mês (Hall of Fame) */
+  .ponhadores{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin:6px 0 2px}
+  .ponhador{margin:0}
+  .ph-foto{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;border:2px solid var(--accent2);background:linear-gradient(160deg,#20261e,#0e120e);box-shadow:0 4px 14px rgba(0,0,0,.35)}
+  .ph-foto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;cursor:zoom-in;display:block}
+  .ph-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--accent2);opacity:.55}
+  .ph-tag{position:absolute;top:7px;left:7px;background:rgba(0,0,0,.6);color:var(--accent2);font-size:10px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:20px}
+  .ph-cap{text-align:center;margin-top:6px}
+  .ph-mes{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .ph-nome{font-weight:800;font-size:13px;color:var(--txt);line-height:1.15}
+  .lb{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.86);display:none;align-items:center;justify-content:center;padding:18px;cursor:zoom-out}
+  .lb.open{display:flex}
+  .lb figure{margin:0;text-align:center}
+  .lb img{max-width:94vw;max-height:88vh;border-radius:12px;border:2px solid var(--accent2);box-shadow:0 10px 40px rgba(0,0,0,.6)}
+  .lb figcaption{color:var(--accent2);font-weight:700;margin-top:10px;font-size:14px}
 </style>
 
 <div id="splash"><img src="logo.png" alt="Ponhada's Clay League CCTSP"></div>
@@ -713,6 +728,56 @@ function renderTurno(){
   });
 }
 
+function ponhadoresDoMes(dados){
+  const out=[];
+  for(let k=0;k<dados.turnos.length;k++){
+    const rk=rankingDoTurno(dados,k);
+    if(!rk.length) continue;
+    const w=rk.find(r=>r.col===1);
+    if(!w) continue;
+    const t=dados.turnos[k];
+    const ord=(t.ordem&&t.ordem.length===2)?t.ordem:ordemMes(t.aba);
+    const key=`${ord[0]}-${String(ord[1]).padStart(2,"0")}`;
+    out.push({key, aba:t.aba, atirador:w.atirador});
+  }
+  return out;
+}
+function ponhadoresHTML(dados){
+  const lst=ponhadoresDoMes(dados);
+  if(!lst.length) return "";
+  const cards=lst.slice().reverse().map(p=>{
+    const src=`ponhadores/${p.key}.jpg`;
+    const nome=esc(titleCase(p.atirador));
+    const mes=esc(fmtTurno(p.aba));
+    const capJs=`${mes} · ${nome}`.replace(/'/g,"\\'");
+    return `<figure class="ponhador">
+      <div class="ph-foto">
+        <div class="ph-fallback">🏆</div>
+        <img loading="lazy" src="${src}" alt="Ponhador de ${mes} — ${nome}"
+             onclick="abrirPonhador(this.src,'${capJs}')" onerror="this.remove();">
+        <span class="ph-tag">👑 PONHADOR</span>
+      </div>
+      <figcaption class="ph-cap"><div class="ph-mes">${mes}</div><div class="ph-nome">${nome}</div></figcaption>
+    </figure>`;
+  }).join("");
+  return `<h3 class="sec">👑 Ponhadores do mês</h3>
+    <div class="ponhadores">${cards}</div>
+    <p class="note">O vencedor de cada turno. Clique para ampliar. Meses sem foto mostram o troféu 🏆.</p>`;
+}
+function abrirPonhador(src, cap){
+  let lb=document.getElementById("lbPonhador");
+  if(!lb){
+    lb=document.createElement("div");
+    lb.id="lbPonhador"; lb.className="lb";
+    lb.innerHTML=`<figure><img alt=""><figcaption></figcaption></figure>`;
+    lb.addEventListener("click",()=>lb.classList.remove("open"));
+    document.body.appendChild(lb);
+  }
+  lb.querySelector("img").src=src;
+  lb.querySelector("figcaption").textContent=cap||"";
+  lb.classList.add("open");
+}
+
 function renderTemp(){
   const el = document.getElementById("view-temp");
   const temp = tabelaTemporada(DADOS);
@@ -729,6 +794,7 @@ function renderTemp(){
       <div style="font-size:22px;font-weight:800;margin-top:4px">${esc(titleCase(c.atirador))}
         <span style="color:var(--accent2)"> · ${c.vitorias} vitória(s), ${c.podios} pódio(s)</span></div>
     </div>
+    ${ponhadoresHTML(DADOS)}
     <h3 class="sec">Vitórias de turno no ano</h3>
     <div class="card chartwrap">${svgWinsBars(temp)}</div>
     <h3 class="sec">Classificação da temporada</h3>
