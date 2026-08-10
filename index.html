@@ -342,17 +342,25 @@ function rankingDoTurno(dados, k){
                pratos_hc: Math.round(b.total+bonus), pct_final: round2(nota), fator: round2(fator) };
     };
   } else {
-    const histPcts = []; for(let i=0;i<=k;i++) histPcts.push(pctBase(turnos[i]).pcts);
+    // Por turno: o DÉFICIT (100 − aproveitamento) de cada mês, ZERADO se o atirador NÃO acionou o gatilho
+    // daquele mês (mês bom, aproveitamento >= gatilho). Assim um mês bom puxa a média para baixo (menos handicap).
+    const histDef = [];
+    for(let i=0;i<=k;i++){
+      const gat = regraNova(turnos[i]) ? 90 : 93;
+      const pc = pctBase(turnos[i]).pcts, def = {};
+      for(const a in pc){ const ap = pc[a]; def[a] = ap < gat ? (100 - ap) : 0; }
+      histDef.push(def);
+    }
     const hc = turno.hc;
     calc = (atir,b)=>{
-      const historico=[]; for(const pc of histPcts) if(atir in pc) historico.push(pc[atir]);
+      const historico=[]; for(const d of histDef) if(atir in d) historico.push(d[atir]);
       const hist3 = historico.slice(-3);
-      const media = hist3.reduce((s,v)=>s+v,0)/hist3.length;      // média sobre PRATOS QUEBRADOS (sem handicap)
+      const mediaDef = hist3.length ? hist3.reduce((s,v)=>s+v,0)/hist3.length : 0;   // média do DÉFICIT (mês bom = 0)
       const pctTurno = liderK ? b.total/liderK*100 : 0;           // resultado DESTA etapa (melhor passada)
-      // ÚNICO gatilho: resultado DESTA etapa < limite. A média das 3 etapas só define a QUANTIDADE (não é gatilho).
-      const handicap = pctTurno < limite ? Math.floor((100-media)/10*hc) : 0;
+      // ÚNICO gatilho: resultado DESTA etapa < limite. A quantidade usa a média do déficit (mês bom conta 0).
+      const handicap = pctTurno < limite ? Math.floor(mediaDef/10*hc) : 0;
       const pratosHc = b.total + handicap;
-      return { media_3t: round2(media), handicap, pratos_hc: Math.trunc(pratosHc),
+      return { media_3t: round2(100 - mediaDef), handicap, pratos_hc: Math.trunc(pratosHc),
                pct_final: round2(Math.min(teto, liderK ? pratosHc/liderK*100 : 0)), fator: null };
     };
   }
@@ -957,9 +965,10 @@ function renderHandicap(){
           Tem direito quem, <b>nesta etapa</b>, fez <b>abaixo de ${limite}%</b> do líder. Fez ${limite}% ou mais → <b>sem</b> handicap.
           <br><span class="muted" style="font-size:12px">Vale só o resultado do mês. A média das etapas <b>não</b> é gatilho — ela entra depois, só na quantidade.</span></li>
         <li><b>Quantos pratos de bônus?</b> <span class="muted">(a média das etapas define)</span><br>
-          Passou no gatilho? Recebe handicap <b>independente da sua média</b> — e a média define <b>quantos</b> pratos. Ela é sempre sobre os <b>pratos quebrados, sem o acréscimo do handicap</b>. Quanto mais longe de 100%, mais pratos:
-          <br><span style="font-family:ui-monospace,monospace;font-size:12px;background:rgba(0,0,0,.18);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px">bônus = (100 − sua média das etapas) ÷ 10 × HC &nbsp;<span class="muted">(arredonda p/ baixo)</span></span>
-          <br><span class="muted" style="font-size:12px">Ex.: média 78,6% · HC ${hc} → (100−78,6) ÷ 10 × ${hc} = <b>${Math.floor((100-78.6)/10*hc)}</b> pratos. A média é sempre a das últimas 3 etapas (com menos, usa o que tem; nunca atirou antes, conta só a etapa atual).</span></li>
+          Passou no gatilho? A quantidade sai da sua <b>média das últimas 3 etapas</b> (sobre pratos quebrados). Quanto mais longe de 100%, mais pratos:
+          <br><span style="font-family:ui-monospace,monospace;font-size:12px;background:rgba(0,0,0,.18);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px">bônus = ⌊ [ (100 − sua média das etapas) × HC ] ÷ 10 ⌋ &nbsp;<span class="muted">(arredonda p/ baixo)</span></span>
+          <br><span class="muted" style="font-size:12px"><b>Detalhe importante:</b> um mês em que você <b>foi bem</b> (ficou ≥ ${limite}%, não pegou handicap) conta como <b>100%</b> na média — ou seja, <b>não aumenta</b> o seu handicap. Só os meses em que você ficou atrás puxam a média para baixo. Isso é <b>mais justo</b>: quem teve mês bom recebe menos muleta.</span>
+          <br><span class="muted" style="font-size:12px">Ex.: média 78,6% · HC ${hc} → ⌊(100−78,6) × ${hc} ÷ 10⌋ = <b>${Math.floor((100-78.6)/10*hc)}</b> pratos. É sempre a média das últimas 3 etapas (com menos, usa o que tem).</span></li>
         <li><b>HC da prova</b> = <b>${hc}</b> pratos nesta etapa <span class="muted">(3/5/7 para provas de 50/75/100 · ${esc(provaTxt)}).</span></li>
         ${nova ? `<li><b>Teto</b> — a pontuação final não passa de <b>${teto}%</b>.</li>` : ""}
         <li>Só a sua <b>melhor passada</b> da etapa recebe handicap.</li>
@@ -983,7 +992,7 @@ function renderHandicap(){
         <th>Só por pratos</th><th>Efeito</th>
       </tr></thead>
       <tbody>${rows}</tbody></table></div>
-    <p class="note"><b>% na etapa</b> (resultado do mês) é o único gatilho: abaixo de ${limite}% dá direito ao handicap. A <b>Média 3 etapas</b> (sempre sobre pratos quebrados, sem handicap) não é gatilho — ela só define <b>quantos</b> pratos de bônus. Ordenado pela colocação oficial; o handicap só entra na sua melhor passada.</p>`;
+    <p class="note"><b>% na etapa</b> (resultado do mês) é o único gatilho: abaixo de ${limite}% dá direito ao handicap. A <b>Média 3 etapas</b> (sobre pratos quebrados) só define <b>quantos</b> pratos — e um mês em que você foi bem (≥ ${limite}%) conta como <b>100%</b> nela (não aumenta o handicap). Ordenado pela colocação oficial; o handicap só entra na sua melhor passada.</p>`;
 
   document.getElementById("hcTurnoSel").addEventListener("change", e=>{ hcTurnoIdx = +e.target.value; renderHandicap(); });
 }
