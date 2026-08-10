@@ -597,8 +597,22 @@ function renderTurno(){
     <div class="kpi"><div class="v">${turno.pratos}</div><div class="l">Pratos do turno</div></div>
     <div class="kpi accent"><div class="v">${turno.hc}</div><div class="l">Handicap / 10 p.p. ${help("Pratos de bônus a cada 10 pontos percentuais de diferença para o líder (só para quem está abaixo de "+(novaT?"90%":"93%")+"). Depende da prova: 3 para 50 pratos, 5 para 75 e 7 para 100 (Art. 15 e 16).")}</div></div>
     <div class="kpi field"><div class="v">${rk.length}</div><div class="l">Atiradores</div></div>
+    <div class="kpi"><div class="v">${turno.registros.length}</div><div class="l">Passadas no turno</div></div>
     <div class="kpi"><div class="v" style="font-size:18px">${esc(lider)}</div><div class="l">Líder do turno</div></div>
   </div>`;
+
+  // passadas por atirador (na etapa) + total
+  const passOrd = [...rk].map(r=>({nome:r.atirador, n:r.passadas})).sort((a,b)=> b.n - a.n || a.nome.localeCompare(b.nome));
+  const passBlock = `
+    <h3 class="sec">📋 Passadas por atirador</h3>
+    <div class="card" style="padding:12px 16px;margin-bottom:6px">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 20px">
+        ${passOrd.map(p=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)"><span>${atLink(p.nome)}</span><b>${p.n}</b></div>`).join("")}
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:2px solid var(--accent);font-weight:800;font-size:15px">
+        <span>TOTAL</span><span style="color:var(--accent)">${turno.registros.length} passadas</span>
+      </div>
+    </div>`;
 
   const medals=["🥇","🥈","🥉"], gcls=["g1","g2","g3"];
   let pod="";
@@ -661,6 +675,7 @@ function renderTurno(){
     ${kpis}
     <h3 class="sec">Pódio</h3>
     <div class="podium">${pod}</div>
+    ${passBlock}
     <h3 class="sec">Pontuação final (percentual com handicap)</h3>
     <div class="card chartwrap">${svgStackedBars(rk)}</div>
     <h3 class="sec">🎯 Classificação por pratos (bruto — quem quebrou mais)</h3>
