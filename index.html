@@ -177,6 +177,8 @@
   .ph-cap{text-align:center;margin-top:6px}
   .ph-mes{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
   .ph-nome{font-weight:800;font-size:13px;color:var(--txt);line-height:1.15}
+  .ph-and{font-size:12px;vertical-align:middle;white-space:nowrap;cursor:help}
+  .ph-foto.andamento{border-style:dashed}
   .lb{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.86);display:none;align-items:center;justify-content:center;padding:18px;cursor:zoom-out}
   .lb.open{display:flex}
   .lb figure{margin:0;text-align:center}
@@ -738,7 +740,7 @@ function ponhadoresDoMes(dados){
     const t=dados.turnos[k];
     const ord=(t.ordem&&t.ordem.length===2)?t.ordem:ordemMes(t.aba);
     const key=`${ord[0]}-${String(ord[1]).padStart(2,"0")}`;
-    out.push({key, aba:t.aba, atirador:w.atirador});
+    out.push({key, aba:t.aba, atirador:w.atirador, emAndamento:(k===dados.turnos.length-1)});
   }
   return out;
 }
@@ -749,20 +751,24 @@ function ponhadoresHTML(dados){
     const src=`ponhadores/${p.key}.jpg`;
     const nome=esc(titleCase(p.atirador));
     const mes=esc(fmtTurno(p.aba));
-    const capJs=`${mes} · ${nome}`.replace(/'/g,"\\'");
+    const capBase=p.emAndamento?`${mes} · ${nome} · ⏳ parcial (mês em andamento)`:`${mes} · ${nome}`;
+    const cap=capBase.replace(/'/g,"\\'");
+    const icone=p.emAndamento?"⏳❓":"🏆";
+    const tag=p.emAndamento?"⏳ PARCIAL":"👑 PONHADOR";
+    const marca=p.emAndamento?` <span class="ph-and" title="Mês em andamento — líder por enquanto, ainda não terminou">⏳❓</span>`:"";
     return `<figure class="ponhador">
-      <div class="ph-foto">
-        <div class="ph-fallback">🏆</div>
+      <div class="ph-foto${p.emAndamento?" andamento":""}">
+        <div class="ph-fallback">${icone}</div>
         <img loading="lazy" src="${src}" alt="Ponhador de ${mes} — ${nome}"
-             onclick="abrirPonhador(this.src,'${capJs}')" onerror="this.remove();">
-        <span class="ph-tag">👑 PONHADOR</span>
+             onclick="abrirPonhador(this.src,'${cap}')" onerror="this.remove();">
+        <span class="ph-tag">${tag}</span>
       </div>
-      <figcaption class="ph-cap"><div class="ph-mes">${mes}</div><div class="ph-nome">${nome}</div></figcaption>
+      <figcaption class="ph-cap"><div class="ph-mes">${mes}</div><div class="ph-nome">${nome}${marca}</div></figcaption>
     </figure>`;
   }).join("");
   return `<h3 class="sec">👑 Ponhadores do mês</h3>
     <div class="ponhadores">${cards}</div>
-    <p class="note">O vencedor de cada turno. Clique para ampliar. Meses sem foto mostram o troféu 🏆.</p>`;
+    <p class="note">O vencedor de cada turno. Clique para ampliar. Meses sem foto mostram 🏆. <b>⏳❓</b> = mês <b>em andamento</b> (líder provisório — ainda não terminou).</p>`;
 }
 function abrirPonhador(src, cap){
   let lb=document.getElementById("lbPonhador");
