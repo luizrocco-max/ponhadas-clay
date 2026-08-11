@@ -315,10 +315,16 @@ function melhorPorAtirador(turno){
     if(pm){ for(let i=0;i<r.stations.length;i++){ const m=pm[i]; if(m && r.stations[i] >= m) pf++; } }
     const cand = Object.assign({}, r, {postos_fechados: pf});
     const cur = best[r.atirador];
-    if(cur == null || cand.total > cur.total ||
-       (cand.total === cur.total && pf > cur.postos_fechados)){
-      best[r.atirador] = cand;
+    // passada oficial: maior pontuação → mais postos fechados → mais antiga (data)
+    const dt = r.data || "9999-99-99";
+    let melhor = false;
+    if(cur == null) melhor = true;
+    else if(cand.total > cur.total) melhor = true;
+    else if(cand.total === cur.total){
+      if(pf > cur.postos_fechados) melhor = true;
+      else if(pf === cur.postos_fechados && dt < (cur.data || "9999-99-99")) melhor = true;
     }
+    if(melhor) best[r.atirador] = cand;
   }
   return best;
 }
@@ -717,7 +723,7 @@ function renderTurno(){
     <p class="note">${inclusao
       ? "Handicap de Inclusão (teste): Bônus = fator × (maior índice − seu índice) × (pratos ÷ 100). O fator é a rampa (0,82 → 0,60) conforme suas passadas. Nota = (pratos + bônus) ÷ líder × 100, teto 105%."
       : (novaT
-          ? "Pontuação = percentual com handicap (Art. 11), com teto de 105%. Tem handicap quem fica &lt; 90% do líder <b>na rodada</b>; a <b>quantidade de pratos</b> usa a média das últimas 3 etapas (Art. 14–17). Desempate: 1º pratos quebrados, 2º Perfect Stride, 3º postos fechados."
+          ? "Pontuação = percentual com handicap (Art. 11), com teto de 105%. Tem handicap quem fica &lt; 90% do líder <b>na rodada</b>; a <b>quantidade de pratos</b> usa a média das últimas 3 etapas (Art. 14–17). Desempate: 1º pratos quebrados, 2º Perfect Stride, 3º postos fechados (da passada que vale)."
           : "Pontuação = percentual com handicap (Art. 11). Tem handicap quem fica &lt; 93% do líder <b>na rodada</b>; a quantidade de pratos usa a média das últimas 3 etapas (Art. 14–17). Desempate por postos fechados (Art. 22). — regra vigente até Julho/2026.")}</p>
     <h3 class="sec">🏹 Classificação por Perfect Stride (potencial — melhor de cada posto)</h3>
     <div class="tablewrap"><table>
@@ -853,7 +859,9 @@ function renderAtir(){
         let pf = 0;
         if(pm){ for(let i=0;i<r.stations.length;i++){ if(pm[i] && r.stations[i] >= pm[i]) pf++; } }
         return {r, pf};
-      }).sort((a,b)=> b.r.total - a.r.total || b.pf - a.pf);
+      }).sort((a,b)=> b.r.total - a.r.total || b.pf - a.pf
+                      || ((a.r.data||"9999-99-99") < (b.r.data||"9999-99-99") ? -1
+                          : (a.r.data||"9999-99-99") > (b.r.data||"9999-99-99") ? 1 : 0));
       let marcada = false;
       comPf.forEach(({r,pf})=>{
         const oficial = !marcada && best && r.total === best.total && pf === best.postos_fechados;
@@ -1151,7 +1159,7 @@ function renderRegras(){
           <li>Os pratos de handicap somam ao resultado e recalcula-se o percentual → essa é a <b>pontuação final</b>.</li>
         </ul>
       </li>
-      <li><b>Desempate no turno:</b> 1º mais <b>pratos quebrados</b>; 2º maior <b>Perfect Stride</b>; 3º mais <b>postos fechados</b>.</li>
+      <li><b>Desempate no turno:</b> 1º mais <b>pratos quebrados</b>; 2º maior <b>Perfect Stride</b>; 3º mais <b>postos fechados</b> (na passada que vale).</li>
       <li><b>Hall of Fame (Atirador do Ano):</b> quem vence <b>mais turnos</b>; empate → mais <b>pódios (top 3)</b>.</li>
     </ul>
     <p class="regintro">Quer o texto completo? Veja a aba <b>📜 Regulamento</b> (com download do PDF oficial).</p>
@@ -1198,7 +1206,7 @@ function renderRegulamento(){
 
     <h3 class="regsec">7. Premiação por Turno</h3>
     <div class="art"><span class="artnum">Art. 21º —</span>Ao final de cada Turno, o atirador com a maior pontuação será declarado Campeão do Turno.</div>
-    <div class="art"><span class="artnum">Art. 22º —</span>Em caso de empate, o desempate seguirá a seguinte ordem: 1º) maior número de <b>pratos quebrados efetivamente</b> (sem handicap); 2º) maior pontuação no <b>"Perfect Stride"</b> (melhor resultado de cada posto entre as passadas); 3º) maior número de <b>postos fechados</b>.</div>
+    <div class="art"><span class="artnum">Art. 22º —</span>Em caso de empate, o desempate seguirá a seguinte ordem: 1º) maior número de <b>pratos quebrados efetivamente</b> (sem handicap); 2º) maior pontuação no <b>"Perfect Stride"</b> (melhor resultado de cada posto entre as passadas); 3º) maior número de <b>postos fechados na passada que vale</b>. A <b>passada que vale</b> (oficial) de cada atirador é a de <b>maior pontuação</b>; havendo empate de pontuação, a de <b>mais postos fechados</b>; persistindo o empate, a <b>mais antiga</b>.</div>
     <div class="art"><span class="artnum">Art. 23º —</span>O primeiro colocado de cada Turno receberá um prêmio simbólico oferecido pelo clube, a critério da diretoria — como uma garrafa de bebida, um charuto ou uma caixa de cartuchos.</div>
     <div class="art"><span class="artnum">Art. 24º —</span>A fotografia do Campeão do Turno será exibida com destaque no mural do clube pelo período do Turno seguinte, até que um novo campeão seja coroado.</div>
 
