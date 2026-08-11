@@ -869,6 +869,10 @@ function renderAtir(){
         passadas.push({turno:turno.aba, data:r.data||"", stations:r.stations, total:r.total, pf, oficial});
       });
     }
+    // exibição por DATA (mais antiga → mais recente); mesma data → maior pontuação primeiro. A oficial já foi marcada acima.
+    passadas.sort((a,b)=> ((a.data||"9999-99-99") < (b.data||"9999-99-99") ? -1
+                          : (a.data||"9999-99-99") > (b.data||"9999-99-99") ? 1
+                          : b.total - a.total));
     const totalPassadasCarreira = DADOS.turnos.reduce((s,t)=> s + t.registros.filter(r=>r.atirador===atiradorSel).length, 0);
     const passRows = passadas.map(pa=>`<tr class="${pa.oficial?"lead":""}">
       <td>${esc(fmtData(pa.data))||"—"}</td>
