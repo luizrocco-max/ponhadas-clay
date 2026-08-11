@@ -947,7 +947,7 @@ function renderAtir(){
     const chartOwn = pm.length ? `<div class="card chartwrap">${svgStations(pm,
       [{name:"Sua melhor passada", values:meBest.stations, color:"#2f9e5f"}])}</div>
       <p class="note">Barras = seus acertos por posto; cinza = o máximo do posto. Quanto mais cheia, mais perto de <b>fechar</b> o posto.</p>` : "";
-    const passOrd = [...regs].sort((a,b)=> String(a.data||"").localeCompare(String(b.data||"")));
+    const passOrd = [...regs].sort((a,b)=> String(a.data||"").localeCompare(String(b.data||"")) || (a.total - b.total));
     const chartTotals = `<h3 class="sec" style="font-size:13.5px;color:var(--muted)">Pontuação de cada passada (por data)</h3>
       <div class="card chartwrap">${svgTotals(passOrd.map(r=>r.total), passOrd.map(r=>fmtDataCurta(r.data)), turno.pratos)}</div>
       <p class="note" style="margin-top:0">Cada barra é uma passada, na data em que ocorreu — dá pra comparar quantas vezes atirou no mês e a evolução. Verde = a que valeu.</p>`;
