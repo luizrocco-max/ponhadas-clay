@@ -1,5 +1,5 @@
 {
-  "gerado_em": "11/08/2026 11:14",
+  "gerado_em": "11/08/2026 16:21",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1147,6 +1147,66 @@
             5
           ],
           "data": "2026-08-08"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 34,
+          "stations": [
+            8,
+            10,
+            8,
+            3,
+            5
+          ],
+          "data": "2026-08-11"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 38,
+          "stations": [
+            10,
+            9,
+            8,
+            5,
+            6
+          ],
+          "data": "2026-08-11"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 37,
+          "stations": [
+            10,
+            9,
+            5,
+            6,
+            7
+          ],
+          "data": "2026-08-11"
+        },
+        {
+          "atirador": "FELIPE POTTOFF",
+          "total": 40,
+          "stations": [
+            9,
+            9,
+            7,
+            6,
+            9
+          ],
+          "data": "2026-08-11"
+        },
+        {
+          "atirador": "FELIPE POTTOFF",
+          "total": 34,
+          "stations": [
+            9,
+            8,
+            7,
+            6,
+            4
+          ],
+          "data": "2026-08-11"
         }
       ]
     }
