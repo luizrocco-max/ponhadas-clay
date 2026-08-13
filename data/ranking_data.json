@@ -1,5 +1,5 @@
 {
-  "gerado_em": "11/08/2026 16:21",
+  "gerado_em": "13/08/2026 16:40",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1207,6 +1207,30 @@
             4
           ],
           "data": "2026-08-11"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 36,
+          "stations": [
+            10,
+            9,
+            3,
+            5,
+            9
+          ],
+          "data": "2026-08-13"
+        },
+        {
+          "atirador": "FAROUK MUHIEDDINE",
+          "total": 25,
+          "stations": [
+            6,
+            7,
+            5,
+            3,
+            4
+          ],
+          "data": "2026-08-13"
         }
       ]
     }
