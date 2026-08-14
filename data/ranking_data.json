@@ -1,5 +1,5 @@
 {
-  "gerado_em": "13/08/2026 16:40",
+  "gerado_em": "14/08/2026 13:36",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1231,6 +1231,42 @@
             4
           ],
           "data": "2026-08-13"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 27,
+          "stations": [
+            6,
+            7,
+            4,
+            5,
+            5
+          ],
+          "data": "2026-08-14"
+        },
+        {
+          "atirador": "VLADIMIR K. RANEVSKY",
+          "total": 18,
+          "stations": [
+            6,
+            4,
+            3,
+            2,
+            3
+          ],
+          "data": "2026-08-14"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 39,
+          "stations": [
+            7,
+            8,
+            7,
+            7,
+            10
+          ],
+          "data": "2026-08-14"
         }
       ]
     }
