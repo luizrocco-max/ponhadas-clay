@@ -1,5 +1,5 @@
 {
-  "gerado_em": "14/08/2026 13:36",
+  "gerado_em": "16/08/2026 15:13",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1267,6 +1267,78 @@
             10
           ],
           "data": "2026-08-14"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 33,
+          "stations": [
+            9,
+            8,
+            7,
+            4,
+            5
+          ],
+          "data": "2026-08-15"
+        },
+        {
+          "atirador": "DANTE CARRARO",
+          "total": 32,
+          "stations": [
+            8,
+            7,
+            5,
+            5,
+            7
+          ],
+          "data": "2026-08-15"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 32,
+          "stations": [
+            6,
+            5,
+            6,
+            8,
+            7
+          ],
+          "data": "2026-08-15"
+        },
+        {
+          "atirador": "FERNÃO BORBA",
+          "total": 19,
+          "stations": [
+            3,
+            3,
+            5,
+            3,
+            5
+          ],
+          "data": "2026-08-15"
+        },
+        {
+          "atirador": "FELIPE POTTOFF",
+          "total": 36,
+          "stations": [
+            9,
+            10,
+            6,
+            4,
+            7
+          ],
+          "data": "2026-08-16"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 29,
+          "stations": [
+            7,
+            7,
+            6,
+            3,
+            6
+          ],
+          "data": "2026-08-16"
         }
       ]
     }
