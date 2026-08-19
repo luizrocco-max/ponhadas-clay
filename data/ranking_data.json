@@ -1,5 +1,5 @@
 {
-  "gerado_em": "18/08/2026 14:34",
+  "gerado_em": "19/08/2026 17:55",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1329,28 +1329,88 @@
           "data": "2026-08-16"
         },
         {
-          "atirador": "LUIS H. NEVES",
-          "total": 29,
+          "atirador": "RICARDO MEIRELLES",
+          "total": 11,
           "stations": [
-            7,
-            7,
-            6,
+            0,
             3,
-            6
+            2,
+            3,
+            3
           ],
           "data": "2026-08-16"
         },
         {
-          "atirador": "LUIS H. NEVES",
-          "total": 40,
+          "atirador": "FELIPE POTTOFF",
+          "total": 37,
+          "stations": [
+            10,
+            9,
+            7,
+            6,
+            5
+          ],
+          "data": "2026-08-19"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 33,
+          "stations": [
+            10,
+            10,
+            5,
+            6,
+            2
+          ],
+          "data": "2026-08-19"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 37,
           "stations": [
             9,
             9,
-            6,
             7,
-            9
+            4,
+            8
           ],
-          "data": "2026-08-16"
+          "data": "2026-08-19"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 37,
+          "stations": [
+            10,
+            8,
+            7,
+            6,
+            6
+          ],
+          "data": "2026-08-19"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 38,
+          "stations": [
+            10,
+            7,
+            7,
+            6,
+            8
+          ],
+          "data": "2026-08-19"
+        },
+        {
+          "atirador": "ALEXANDRE SCHUNN",
+          "total": 29,
+          "stations": [
+            9,
+            7,
+            6,
+            2,
+            5
+          ],
+          "data": "2026-08-19"
         }
       ]
     }
