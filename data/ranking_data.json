@@ -1,5 +1,5 @@
 {
-  "gerado_em": "19/08/2026 17:55",
+  "gerado_em": "20/08/2026 10:13",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1354,13 +1354,13 @@
         },
         {
           "atirador": "GUILHERME VALLERINI",
-          "total": 33,
+          "total": 39,
           "stations": [
             10,
             10,
             5,
             6,
-            2
+            8
           ],
           "data": "2026-08-19"
         },
