@@ -208,6 +208,7 @@
     <button class="tab" data-view="atir">👤 Por Atirador</button>
     <button class="tab" data-view="comparar">⚖️ Comparar</button>
     <button class="tab" data-view="handicap">🎁 Handicap</button>
+    <button class="tab" data-view="dia">📅 Por dia</button>
   </nav>
   <div id="updated" class="note"></div>
 
@@ -216,6 +217,7 @@
   <section id="view-atir" hidden></section>
   <section id="view-comparar" hidden></section>
   <section id="view-handicap" hidden></section>
+  <section id="view-dia" hidden></section>
   <section id="view-regras" hidden></section>
   <section id="view-regulamento" hidden></section>
 
@@ -613,6 +615,53 @@ let atirTurnoIdx = null;   // mês selecionado na aba Por Atirador
 let hcTurnoIdx = null;     // mês selecionado na aba Handicap
 let comparBase = "pontuacao";
 let comparSel = null;
+let diaSel = null;               // data selecionada na aba Por dia
+
+function renderDia(){
+  const el = document.getElementById("view-dia");
+  const itens = [];
+  for(const t of DADOS.turnos){
+    const pm = t.postos_max;
+    for(const r of t.registros){
+      if(!r.data) continue;
+      let pf = 0;
+      if(pm){ for(let i=0;i<r.stations.length;i++){ if(pm[i] && r.stations[i] >= pm[i]) pf++; } }
+      itens.push({data:r.data, atirador:r.atirador, stations:r.stations, total:r.total, pf, aba:t.aba});
+    }
+  }
+  if(!itens.length){ el.innerHTML = `<p class="note">Ainda não há passadas com data registrada.</p>`; return; }
+  const datas = [...new Set(itens.map(i=>i.data))].sort((a,b)=> String(b).localeCompare(String(a)));
+  if(diaSel == null || !datas.includes(diaSel)) diaSel = datas[0];
+  const opts = datas.map(d=>{
+    const aba = itens.find(i=>i.data===d).aba;
+    return `<option value="${esc(d)}" ${d===diaSel?"selected":""}>${esc(fmtData(d))} · ${esc(fmtTurno(aba))}</option>`;
+  }).join("");
+  const doDia = itens.filter(i=>i.data===diaSel)
+                     .sort((a,b)=> b.total - a.total || a.atirador.localeCompare(b.atirador));
+  const nAtir = new Set(doDia.map(i=>i.atirador)).size;
+  const rows = doDia.map((i,idx)=>`<tr>
+    <td><span class="rankbubble">${idx+1}</span></td>
+    <td>${atLink(i.atirador)}</td>
+    <td style="color:var(--muted)">${i.stations.join(" · ")}</td>
+    <td><b>${i.total}</b></td>
+    <td>${i.pf?`<span class="tag hc">${i.pf}★</span>`:`<span class="tag zero">—</span>`}</td>
+  </tr>`).join("");
+  el.innerHTML = `
+    <div class="card" style="margin:14px 0">
+      <label for="diaSel" style="font-size:13px;color:var(--muted)">📅 Escolha o dia:</label>
+      <select id="diaSel" style="margin-left:8px">${opts}</select>
+    </div>
+    <div class="kpis">
+      <div class="kpi accent"><div class="v">${doDia.length}</div><div class="l">Passadas no dia</div></div>
+      <div class="kpi"><div class="v">${nAtir}</div><div class="l">Atiradores</div></div>
+    </div>
+    <h3 class="sec">Quem atirou em ${esc(fmtData(diaSel))}</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th>Atirador</th><th>Postos (por estação)</th><th>Pratos</th><th>Postos fech.</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+    <p class="note">Todas as passadas registradas nesse dia, da <b>maior</b> para a <b>menor</b> pontuação. Clique no nome para abrir o perfil do atirador.</p>`;
+  document.getElementById("diaSel").addEventListener("change", e=>{ diaSel = e.target.value; renderDia(); });
+}
 
 function renderTurno(){
   const el = document.getElementById("view-turno");
@@ -1239,13 +1288,13 @@ function renderAll(){
       `<p class="note">🎯 Aguardando o organizador publicar os resultados.</p>`;
     return;
   }
-  renderTurno(); renderTemp(); renderAtir(); renderComparar(); renderHandicap(); renderRegras(); renderRegulamento();
+  renderTurno(); renderTemp(); renderAtir(); renderComparar(); renderHandicap(); renderDia(); renderRegras(); renderRegulamento();
 }
 
 /* ---------- tabs / navegação ---------- */
 function setView(view){
   document.querySelectorAll(".tab, .docbtn").forEach(t=>t.classList.toggle("active", t.dataset.view===view));
-  ["turno","temp","atir","comparar","handicap","regras","regulamento"].forEach(v=>{
+  ["turno","temp","atir","comparar","handicap","dia","regras","regulamento"].forEach(v=>{
     document.getElementById("view-"+v).hidden = (v !== view);
   });
 }
