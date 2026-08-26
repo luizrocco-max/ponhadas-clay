@@ -1,5 +1,5 @@
 {
-  "gerado_em": "26/08/2026 12:45",
+  "gerado_em": "26/08/2026 14:28",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1495,6 +1495,18 @@
             5
           ],
           "data": "2026-08-21"
+        },
+        {
+          "atirador": "FELIPE  POTTHOFF",
+          "total": 40,
+          "stations": [
+            10,
+            10,
+            7,
+            5,
+            8
+          ],
+          "data": "2026-08-26"
         }
       ]
     }
