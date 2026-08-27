@@ -3,6 +3,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Ponhada's Clay League CCTSP — Ranking Oficial</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>">
+<!-- PWA (app instalável) -->
+<meta name="theme-color" content="#12160f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ponhadas">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <style>
   :root{
     --bg:#0f1210; --panel:#161b16; --panel2:#1e241d; --line:#2b332a;
@@ -197,6 +205,7 @@
       <p>Ranking oficial da temporada · percentual + sistema de handicap</p>
     </div>
     <div class="hdocs" id="hdocs">
+      <button class="docbtn" id="installBtn" hidden>📲 Instalar app</button>
       <button class="docbtn" data-view="regras">📋 Regras</button>
       <button class="docbtn" data-view="regulamento">📜 Regulamento</button>
     </div>
@@ -1302,7 +1311,7 @@ document.getElementById("tabs").addEventListener("click", e=>{
   const b = e.target.closest(".tab"); if(b) setView(b.dataset.view);
 });
 document.getElementById("hdocs").addEventListener("click", e=>{
-  const b = e.target.closest(".docbtn"); if(b) setView(b.dataset.view);
+  const b = e.target.closest(".docbtn"); if(b && b.dataset.view) setView(b.dataset.view);
 });
 
 // clique no nome de um atirador → abre a página dele
@@ -1507,4 +1516,23 @@ fetch(DATA_PATH, {cache:"no-store"})
   .then(r=> r.ok ? r.json() : null)
   .then(d=>{ DADOS=d; if(DADOS && DADOS.turnos) turnoIdx=DADOS.turnos.length-1; renderAll(); })
   .catch(()=>{ DADOS=null; renderAll(); });
+
+/* ---------- PWA: service worker + botão "Instalar app" ---------- */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", ()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); });
+}
+(function(){
+  const btn = document.getElementById("installBtn");
+  if(!btn) return;
+  const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const iOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  let deferred = null;
+  window.addEventListener("beforeinstallprompt", e=>{ e.preventDefault(); deferred = e; if(!standalone) btn.hidden = false; });
+  window.addEventListener("appinstalled", ()=>{ btn.hidden = true; });
+  if(iOS && !standalone) btn.hidden = false;   // iOS não dispara beforeinstallprompt
+  btn.addEventListener("click", async ()=>{
+    if(deferred){ deferred.prompt(); try{ await deferred.userChoice; }catch(_){} deferred = null; btn.hidden = true; return; }
+    alert("📲 Como instalar o app do Ponhadas\n\niPhone (Safari): toque em Compartilhar (o quadrado com a seta ↑) e depois em \"Adicionar à Tela de Início\".\n\nAndroid (Chrome): toque no menu ⋮ e depois em \"Instalar app\" / \"Adicionar à tela inicial\".");
+  });
+})();
 </script>
