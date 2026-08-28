@@ -1,5 +1,5 @@
 {
-  "gerado_em": "26/08/2026 14:28",
+  "gerado_em": "28/08/2026 11:11",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1507,6 +1507,30 @@
             8
           ],
           "data": "2026-08-26"
+        },
+        {
+          "atirador": "RICARDO MEIRELLES",
+          "total": 21,
+          "stations": [
+            5,
+            4,
+            4,
+            3,
+            5
+          ],
+          "data": "2026-08-27"
+        },
+        {
+          "atirador": "JOSE OTAVIO JUNQUEIRA",
+          "total": 12,
+          "stations": [
+            1,
+            2,
+            3,
+            1,
+            5
+          ],
+          "data": "2026-08-27"
         }
       ]
     }
