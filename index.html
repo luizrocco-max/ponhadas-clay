@@ -812,6 +812,7 @@ function renderTurno(){
 
 function ponhadoresDoMes(dados){
   const out=[];
+  const hoje=new Date(), anoAtual=hoje.getFullYear(), mesAtual=hoje.getMonth()+1;
   for(let k=0;k<dados.turnos.length;k++){
     const rk=rankingDoTurno(dados,k);
     if(!rk.length) continue;
@@ -820,7 +821,8 @@ function ponhadoresDoMes(dados){
     const t=dados.turnos[k];
     const ord=(t.ordem&&t.ordem.length===2)?t.ordem:ordemMes(t.aba);
     const key=`${ord[0]}-${String(ord[1]).padStart(2,"0")}`;
-    out.push({key, aba:t.aba, atirador:w.atirador, emAndamento:(k===dados.turnos.length-1)});
+    const emAndamento = (ord[0]===anoAtual && ord[1]===mesAtual);   // só o mês corrente é "parcial"
+    out.push({key, aba:t.aba, atirador:w.atirador, emAndamento});
   }
   return out;
 }
