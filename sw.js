@@ -1,8 +1,9 @@
 /* Ponhada's Clay League — Service Worker (PWA)
    - App shell em cache (abre offline)
    - Dados do ranking sempre da rede quando online (cai pro cache offline)
-   - Bump CACHE ao mudar o shell */
-const CACHE = "ponhadas-v1";
+   - NUNCA guarda respostas de erro (404 etc.) — evita "prender" foto que ainda não existia
+   - Bump CACHE ao mudar o shell (o activate limpa os caches antigos) */
+const CACHE = "ponhadas-v2";
 const SHELL = [
   "/", "/index.html", "/manifest.webmanifest", "/logo.png",
   "/apple-touch-icon.png",
@@ -23,6 +24,15 @@ self.addEventListener("activate", e => {
   );
 });
 
+// só guarda no cache respostas boas (200, same-origin) — nunca 404/erro
+function putIfOk(req, res) {
+  if (res && res.ok && res.type !== "opaque") {
+    const cp = res.clone();
+    caches.open(CACHE).then(c => c.put(req, cp));
+  }
+  return res;
+}
+
 self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
@@ -32,9 +42,7 @@ self.addEventListener("fetch", e => {
   // Dados do ranking: rede primeiro (sempre atualizado), cache como reserva offline
   if (url.pathname.startsWith("/data/")) {
     e.respondWith(
-      fetch(req).then(r => {
-        const cp = r.clone(); caches.open(CACHE).then(c => c.put(req, cp)); return r;
-      }).catch(() => caches.match(req))
+      fetch(req).then(r => putIfOk(req, r)).catch(() => caches.match(req))
     );
     return;
   }
@@ -45,10 +53,8 @@ self.addEventListener("fetch", e => {
     return;
   }
 
-  // Demais arquivos (fotos, ícones, etc.): cache primeiro, senão rede (e guarda)
+  // Demais arquivos (fotos, ícones, etc.): cache primeiro, senão rede (e guarda só se OK)
   e.respondWith(
-    caches.match(req).then(c => c || fetch(req).then(r => {
-      const cp = r.clone(); caches.open(CACHE).then(cc => cc.put(req, cp)); return r;
-    }))
+    caches.match(req).then(c => c || fetch(req).then(r => putIfOk(req, r)))
   );
 });
