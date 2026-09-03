@@ -1408,6 +1408,12 @@ function parsePlanilha(arraybuf){
         postos_max = vals.map(v=>Math.trunc(v)); break;
       }
     }
+    // provas com menos postos que as 5 colunas: corta os postos inativos (máx 0) do fim,
+    // pra a prova aparecer com o nº certo de postos (ex.: 50 pratos em 2 postos de 25)
+    if(postos_max){
+      while(postos_max.length > 1 && !(postos_max[postos_max.length-1] > 0)) postos_max.pop();
+      postos_idx.length = postos_max.length;
+    }
 
     let pratos=null, hc=null;
     for(let i=0;i<Math.min(df.length,12);i++){
