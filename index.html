@@ -220,6 +220,13 @@
   .dq .s{font-size:12px;color:var(--muted);margin-top:2px}
   .salto{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13.5px}
   .salto .d{font-weight:800} .salto .d.pos{color:var(--good)} .salto .d.neg{color:var(--accent)} .salto .d.zero{color:var(--muted)}
+  .tend{font-weight:800;font-size:12.5px;padding:1px 7px;border-radius:12px;background:rgba(255,255,255,.06);white-space:nowrap}
+  .tend.up{color:var(--good)} .tend.down{color:var(--accent)} .tend.flat{color:var(--muted)}
+  /* flyer do mês */
+  .flyerbtn{display:inline-flex;align-items:center;gap:8px;background:var(--accent2);color:#12160f;font-weight:800;border:0;border-radius:20px;padding:8px 16px;cursor:pointer;font-size:13.5px}
+  .flyerbtn:hover{filter:brightness(1.08)}
+  .lb .flyerhint{color:#e9ece6;font-size:13px;margin-top:10px;text-align:center}
+  .lb .flyerdl{display:inline-block;margin-top:10px;background:var(--accent2);color:#12160f;font-weight:800;padding:8px 16px;border-radius:20px;text-decoration:none}
 </style>
 
 <div id="splash"><img src="logo.png" alt="Ponhada's Clay League CCTSP"></div>
@@ -700,6 +707,78 @@ function renderDia(){
   document.getElementById("diaSel").addEventListener("change", e=>{ diaSel = e.target.value; renderDia(); });
 }
 
+/* ---------- 📸 Flyer do mês (imagem pronta pro WhatsApp, gerada dos dados do turno) ---------- */
+function carregarImagem(src){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
+function abrirFlyer(dataUrl, nome){
+  let lb=document.getElementById("lbFlyer");
+  if(!lb){
+    lb=document.createElement("div"); lb.id="lbFlyer"; lb.className="lb";
+    lb.innerHTML=`<figure onclick="event.stopPropagation()"><img alt="Flyer do mês"><figcaption></figcaption>
+      <div class="flyerhint">📱 No celular: <b>toque e segure</b> na imagem → <b>Salvar</b> / <b>Compartilhar</b> no WhatsApp</div>
+      <div style="text-align:center"><a class="flyerdl" download>⬇️ Baixar PNG</a> &nbsp; <a class="flyerdl" href="#" onclick="document.getElementById('lbFlyer').classList.remove('open');return false" style="background:#2b332a;color:#e9ece6">Fechar</a></div></figure>`;
+    lb.addEventListener("click", ()=>lb.classList.remove("open"));
+    document.body.appendChild(lb);
+  }
+  lb.querySelector("img").src=dataUrl;
+  lb.querySelector("figcaption").textContent=nome;
+  const a=lb.querySelector("a.flyerdl"); a.href=dataUrl; a.download=nome.replace(/[^\w.-]+/g,"_")+".png";
+  lb.classList.add("open");
+}
+async function gerarFlyer(k){
+  const t=DADOS.turnos[k], rk=rankingDoTurno(DADOS,k);
+  if(!rk.length) return;
+  const W=1080, H=1350, c=document.createElement("canvas"); c.width=W; c.height=H;
+  const x=c.getContext("2d");
+  const g=x.createRadialGradient(W/2,H*0.18,80,W/2,H*0.5,H); g.addColorStop(0,"#20261d"); g.addColorStop(.55,"#12160f"); g.addColorStop(1,"#0b0e08");
+  x.fillStyle=g; x.fillRect(0,0,W,H);
+  const F=(w,s)=>`${w} ${s}px "Segoe UI", system-ui, -apple-system, Arial, sans-serif`;
+  const fit=(txt,max,font)=>{ x.font=font; if(x.measureText(txt).width<=max) return txt; let s=txt; while(s.length>2 && x.measureText(s+"…").width>max) s=s.slice(0,-1); return s+"…"; };
+  const rr=(px,py,w,h,r,fill)=>{ x.beginPath(); x.moveTo(px+r,py); x.arcTo(px+w,py,px+w,py+h,r); x.arcTo(px+w,py+h,px,py+h,r); x.arcTo(px,py+h,px,py,r); x.arcTo(px,py,px+w,py,r); x.closePath(); x.fillStyle=fill; x.fill(); };
+  try{ const img=await carregarImagem("logo.png"); const h=170, w=img.width*h/img.height;
+    x.shadowColor="rgba(0,0,0,.55)"; x.shadowBlur=30; x.shadowOffsetY=10; x.drawImage(img,(W-w)/2,40,w,h);
+    x.shadowColor="transparent"; x.shadowBlur=0; x.shadowOffsetY=0; }catch(_){}
+  const ord=(t.ordem&&t.ordem.length===2)?t.ordem:ordemMes(t.aba); const hoje=new Date();
+  const parcial = ord[0]===hoje.getFullYear() && ord[1]===(hoje.getMonth()+1);
+  x.textAlign="center"; x.fillStyle="#e0b83c"; x.font=F("800",22); x.fillText("PONHADA'S CLAY LEAGUE  ·  CCTSP", W/2, 250);
+  x.fillStyle="#e9ece6"; x.font=F("900",52); x.fillText(`Resultado de ${fmtTurno(t.aba)}${parcial?"  ⏳":""}`, W/2, 312);
+  if(parcial){ x.fillStyle="#b9c0b2"; x.font=F("600",20); x.fillText("PARCIAL — mês ainda em andamento", W/2, 344); }
+  rr(W/2-60, parcial?360:336, 120, 5, 3, "#e0b83c");
+  let y = parcial?410:386;
+  const sec=(txt)=>{ x.textAlign="left"; x.fillStyle="#e0b83c"; x.font=F("800",26); x.fillText(txt, 70, y); y+=18; };
+  const linha=(esq, dir, sub)=>{ const hh=sub?86:66; rr(60,y,W-120,hh,16,"rgba(255,255,255,.045)");
+    x.textAlign="left"; x.fillStyle="#f2efe6"; x.font=F("800",30); x.fillText(fit(esq,600,F("800",30)), 84, y+42);
+    if(sub){ x.fillStyle="#b9c0b2"; x.font=F("500",20); x.fillText(fit(sub,700,F("500",20)), 84, y+72); }
+    x.textAlign="right"; x.fillStyle="#e0b83c"; x.font=F("900",32); x.fillText(dir, W-84, y+44); y+=hh+12; };
+  // pódio
+  sec("🏆 PÓDIO"); y+=14;
+  const med=["🥇","🥈","🥉"];
+  rk.slice(0,3).forEach((r,i)=> linha(`${med[i]} ${titleCase(r.atirador)}`, `${r.pct_final.toFixed(1)}%`, `${r.total} pratos${r.handicap?`  ·  handicap +${r.handicap}`:""}`));
+  // zebra do mês (maior salto com handicap)
+  y+=24; sec("⚖️ ZEBRA DO MÊS  ·  maior salto com handicap"); y+=14;
+  const porPratos=[...rk].sort((a,b)=> b.total-a.total || b.postos_fechados-a.postos_fechados);
+  const bp={}; porPratos.forEach((r,i)=>bp[r.atirador]=i+1);
+  const saltos=rk.map(r=>({a:r.atirador, d:bp[r.atirador]-r.col, de:bp[r.atirador], para:r.col, hc:r.handicap})).filter(s=>s.d>0).sort((a,b)=>b.d-a.d||b.hc-a.hc);
+  if(saltos.length) linha(`🦓 ${titleCase(saltos[0].a)}`, `+${saltos[0].d} posiç${saltos[0].d>1?"ões":"ão"}`, `${saltos[0].de}º por pratos → ${saltos[0].para}º oficial  ·  handicap +${saltos[0].hc}`);
+  else linha("Ninguém mudou de posição", "—", "a ordem oficial foi igual à ordem por pratos");
+  // destaques do mês
+  y+=24; sec("🔥 DESTAQUES DO MÊS"); y+=14;
+  const pm=t.postos_max||[]; let mp=null, pf=null; const cnt={};
+  for(const r of t.registros){ cnt[r.atirador]=(cnt[r.atirador]||0)+1;
+    if(!mp||r.total>mp.total) mp={atirador:r.atirador,total:r.total};
+    let f=0; for(let i=0;i<r.stations.length;i++){ if(pm[i]&&r.stations[i]>=pm[i]) f++; }
+    if(f>0&&(!pf||f>pf.f)) pf={atirador:r.atirador,f}; }
+  let mais=null; for(const a in cnt){ if(!mais||cnt[a]>mais.n) mais={a,n:cnt[a]}; }
+  if(mp) linha(`🎯 ${titleCase(mp.atirador)}`, `${mp.total}/${t.pratos}`, `melhor passada do mês  ·  ${(mp.total/t.pratos*100).toFixed(1)}% da prova`);
+  if(pf) linha(`⭐ ${titleCase(pf.atirador)}`, `${pf.f} posto${pf.f>1?"s":""}`, `mais postos fechados numa única passada`);
+  if(mais) linha(`🏃 ${titleCase(mais.a)}`, `${mais.n}`, `mais passadas no mês`);
+  // rodapé
+  const media = rk.reduce((s,r)=>s+r.pct_base,0)/rk.length;
+  x.textAlign="center"; x.fillStyle="#b9c0b2"; x.font=F("600",21);
+  x.fillText(`${rk.length} atiradores  ·  ${t.registros.length} passadas  ·  média da liga ${media.toFixed(1)}% do líder  ·  prova de ${t.pratos} pratos`, W/2, H-96);
+  rr(W/2-190, H-76, 380, 50, 25, "#e0b83c"); x.fillStyle="#12160f"; x.font=F("900",26); x.fillText("ponhadasclay.com.br", W/2, H-42);
+  abrirFlyer(c.toDataURL("image/png"), `Ponhadas — ${fmtTurno(t.aba)}`);
+}
+
 function renderTurno(){
   const el = document.getElementById("view-turno");
   const turnos = DADOS.turnos;
@@ -813,6 +892,8 @@ function renderTurno(){
     <div class="controls">
       <div class="ctl"><label>Turno (mês)</label>
         <select id="turnoSel">${options}</select></div>
+      <div class="ctl"><label>&nbsp;</label>
+        <button class="flyerbtn" id="flyerBtn" type="button">📸 Flyer do mês</button></div>
     </div>
     ${kpis}
     <h3 class="sec">Pódio</h3>
@@ -845,6 +926,12 @@ function renderTurno(){
 
   document.getElementById("turnoSel").addEventListener("change", e=>{
     turnoIdx = +e.target.value; renderTurno();
+  });
+  const fb = document.getElementById("flyerBtn");
+  if(fb) fb.addEventListener("click", async ()=>{
+    fb.disabled = true; const t0 = fb.textContent; fb.textContent = "⏳ Gerando…";
+    try{ await gerarFlyer(turnoIdx); } catch(err){ alert("Não consegui gerar o flyer: " + err); }
+    finally{ fb.disabled = false; fb.textContent = t0; }
   });
 }
 
@@ -1011,11 +1098,21 @@ function renderAtir(){
   else{
     const vit = hist.filter(h=>h.col===1).length;
     const melhorCol = Math.min(...hist.map(h=>h.col));
+    // tendência vs. o turno anterior em que o atirador participou (posição e % base)
+    const tend = h=>{ const i=hist.indexOf(h); if(i<=0) return null; const p=hist[i-1];
+      return {dCol: p.col - h.col, dPct: h.pct_base - p.pct_base}; };
+    const tendBadge = t=>{ if(!t) return `<span class="tag zero">1º turno</span>`;
+      const pos = t.dCol>0?`▲ ${t.dCol}`:(t.dCol<0?`▼ ${Math.abs(t.dCol)}`:"= pos.");
+      const cls = t.dCol>0?"up":(t.dCol<0?"down":"flat");
+      const pct = (t.dPct>=0?"+":"")+t.dPct.toFixed(1)+" p.p.";
+      return `<span class="tend ${cls}">${pos}</span> <span style="color:var(--muted);font-size:11.5px">${pct}</span>`; };
+    const ultTend = hist.length>=2 ? tend(hist[hist.length-1]) : null;
     const rows = hist.map(h=>`<tr>
       <td>${esc(fmtTurno(h.turno))}</td><td><span class="rankbubble">${h.col}</span></td>
       <td>${h.total}</td><td>${h.pct_base.toFixed(2)}%</td>
       <td>${h.handicap?`<span class="tag hc">+${h.handicap}</span>`:`<span class="tag zero">—</span>`}</td>
-      <td><b>${h.pct_final.toFixed(2)}%</b></td></tr>`).join("");
+      <td><b>${h.pct_final.toFixed(2)}%</b></td>
+      <td>${tendBadge(tend(h))}</td></tr>`).join("");
 
     // passadas (tentativas) SÓ do mês selecionado, marcando a oficial (a que vale)
     const passadas = [];
@@ -1056,12 +1153,13 @@ function renderAtir(){
         <div class="kpi accent"><div class="v">${melhorCol}º</div><div class="l">Melhor colocação</div></div>
         <div class="kpi field"><div class="v">${vit}</div><div class="l">Vitórias</div></div>
         <div class="kpi"><div class="v">${totalPassadasCarreira}</div><div class="l">Passadas (total)</div></div>
+        <div class="kpi ${ultTend ? (ultTend.dCol>0?"field":(ultTend.dCol<0?"accent":"")) : ""}"><div class="v">${ultTend ? (ultTend.dCol>0?`▲ ${ultTend.dCol}`:(ultTend.dCol<0?`▼ ${Math.abs(ultTend.dCol)}`:"=")) : "—"}</div><div class="l">Tendência vs. mês anterior${ultTend ? ` · ${(ultTend.dPct>=0?"+":"")+ultTend.dPct.toFixed(1)} p.p. no % base` : ""} ${help("Comparação com o último turno em que você participou: posições ganhas (▲) ou perdidas (▼) e a variação do seu % base (sem handicap).")}</div></div>
       </div>
       <h3 class="sec">Evolução na temporada</h3>
       <div class="card chartwrap">${svgLine(hist.map(h=>fmtTurno(h.turno)), hist.map(h=>h.pct_final))}</div>
       <h3 class="sec">Histórico (resultado oficial por turno)</h3>
       <div class="tablewrap"><table>
-        <thead><tr><th>Turno</th><th>Col.</th><th>Pratos</th><th>% base</th><th>HC</th><th>Pontuação ${help("Pontuação final do turno = % do líder + bônus de handicap. Pode passar de 100%: quem recebe handicap soma pratos de bônus e pode ultrapassar o líder de pratos. É ela que decide a colocação (Art. 11).")}</th></tr></thead>
+        <thead><tr><th>Turno</th><th>Col.</th><th>Pratos</th><th>% base</th><th>HC</th><th>Pontuação ${help("Pontuação final do turno = % do líder + bônus de handicap. Pode passar de 100%: quem recebe handicap soma pratos de bônus e pode ultrapassar o líder de pratos. É ela que decide a colocação (Art. 11).")}</th><th>Tend. ${help("Comparação com o turno anterior em que você participou: ▲ posições ganhas, ▼ perdidas, e a variação do % base (sem handicap) em pontos percentuais.")}</th></tr></thead>
         <tbody>${rows}</tbody></table></div>
       <h3 class="sec">Todas as passadas — ${esc(fmtTurno(DADOS.turnos[atirTurnoIdx].aba))}</h3>
       <p class="note" style="margin-top:0">Cada atirador pode atirar quantas vezes quiser no turno (Art. 7º).
