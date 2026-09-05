@@ -1,5 +1,5 @@
 {
-  "gerado_em": "03/09/2026 18:23",
+  "gerado_em": "05/09/2026 14:31",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1660,6 +1660,114 @@
             21
           ],
           "data": "2026-09-03"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 30,
+          "stations": [
+            12,
+            18
+          ],
+          "data": "2026-09-04"
+        },
+        {
+          "atirador": "RICARDO MEIRELLES",
+          "total": 26,
+          "stations": [
+            13,
+            13
+          ],
+          "data": "2026-09-04"
+        },
+        {
+          "atirador": "JOSE OTAVIO JUNQUEIRA",
+          "total": 23,
+          "stations": [
+            13,
+            10
+          ],
+          "data": "2026-09-04"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 38,
+          "stations": [
+            20,
+            18
+          ],
+          "data": "2026-09-04"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 32,
+          "stations": [
+            17,
+            15
+          ],
+          "data": "2026-09-04"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 32,
+          "stations": [
+            15,
+            17
+          ],
+          "data": "2026-09-04"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 43,
+          "stations": [
+            24,
+            19
+          ],
+          "data": "2026-09-05"
+        },
+        {
+          "atirador": "FERNÃO LARA MESQUITA",
+          "total": 25,
+          "stations": [
+            11,
+            14
+          ],
+          "data": "2026-09-05"
+        },
+        {
+          "atirador": "MAX POLIZZI",
+          "total": 25,
+          "stations": [
+            12,
+            13
+          ],
+          "data": "2026-09-05"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 29,
+          "stations": [
+            17,
+            12
+          ],
+          "data": "2026-09-05"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 27,
+          "stations": [
+            15,
+            12
+          ],
+          "data": "2026-09-05"
+        },
+        {
+          "atirador": "BRUNO VERCIANI",
+          "total": 28,
+          "stations": [
+            14,
+            14
+          ],
+          "data": "2026-09-05"
         }
       ]
     }
