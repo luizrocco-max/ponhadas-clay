@@ -208,6 +208,18 @@
   .lb figure{margin:0;text-align:center}
   .lb img{max-width:94vw;max-height:88vh;border-radius:12px;border:2px solid var(--accent2);box-shadow:0 10px 40px rgba(0,0,0,.6)}
   .lb figcaption{color:var(--accent2);font-weight:700;margin-top:10px;font-size:14px}
+  /* Destaques & recordes / efeito do handicap */
+  .destaques{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:6px 0}
+  .dq{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;border-left:4px solid var(--accent2)}
+  .dq.up{border-left-color:var(--good)} .dq.clay{border-left-color:var(--accent)}
+  .dq .ic{font-size:22px;line-height:1}
+  .dq .t{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:4px}
+  .dq .v{font-size:22px;font-weight:800;color:var(--accent2);margin-top:2px;line-height:1.1}
+  .dq.up .v{color:var(--good)}
+  .dq .n{font-weight:700;margin-top:3px}
+  .dq .s{font-size:12px;color:var(--muted);margin-top:2px}
+  .salto{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+  .salto .d{font-weight:800} .salto .d.pos{color:var(--good)} .salto .d.neg{color:var(--accent)} .salto .d.zero{color:var(--muted)}
 </style>
 
 <div id="splash"><img src="logo.png" alt="Ponhada's Clay League CCTSP"></div>
@@ -751,6 +763,31 @@ function renderTurno(){
     <td>${turno.pratos ? (r.total/turno.pratos*100).toFixed(1) : "0.0"}%</td>
     <td>${r.postos_fechados}</td></tr>`).join("");
 
+  // ⚖️ efeito do handicap: posição só por pratos (bruto) vs posição oficial (com handicap)
+  const brutoPos = {}; porPratos.forEach((r,i)=> brutoPos[r.atirador] = i+1);
+  const saltos = rk.map(r=>({atirador:r.atirador, oficial:r.col, bruto:brutoPos[r.atirador], delta:brutoPos[r.atirador]-r.col, hc:r.handicap}));
+  const subiu = saltos.filter(s=>s.delta>0).sort((a,b)=> b.delta-a.delta || b.hc-a.hc);
+  const maiorSalto = subiu[0] || null;
+  const comHC = rk.filter(r=>r.handicap>0).length;
+  const mediaBase = rk.length ? rk.reduce((s,r)=>s+r.pct_base,0)/rk.length : 0;
+  const acima90 = rk.filter(r=>r.pct_base>=90).length;
+  const saltoRows = saltos.filter(s=>s.delta!==0).sort((a,b)=> b.delta-a.delta).map(s=>{
+    const cls = s.delta>0?"pos":"neg"; const sig = s.delta>0?"▲ +":"▼ ";
+    return `<div class="salto"><span>${atLink(s.atirador)} <span style="color:var(--muted);font-size:12px">${s.bruto}º por pratos → ${s.oficial}º oficial${s.hc?` · HC +${s.hc}`:""}</span></span><span class="d ${cls}">${sig}${Math.abs(s.delta)}</span></div>`;
+  }).join("");
+  const hcEfeito = rk.length ? `
+    <h3 class="sec">⚖️ Efeito do handicap no turno</h3>
+    <div class="kpis">
+      <div class="kpi accent"><div class="v" style="font-size:18px">${maiorSalto ? esc(titleCase(maiorSalto.atirador)) : "—"}</div><div class="l">Maior salto com handicap ${maiorSalto ? `(+${maiorSalto.delta} posiç${maiorSalto.delta>1?"ões":"ão"})` : ""} ${help("Quem mais subiu na classificação oficial em relação à posição só por pratos quebrados. É a 'zebra' do mês — o handicap fazendo o que promete.")}</div></div>
+      <div class="kpi"><div class="v">${comHC}<span style="font-size:14px;color:var(--muted)"> / ${rk.length}</span></div><div class="l">Atiradores com handicap</div></div>
+      <div class="kpi field"><div class="v">${mediaBase.toFixed(1)}%</div><div class="l">Média da liga (% do líder) ${help("Média do % base (sem handicap) de todos os atiradores do turno em relação ao líder. Quanto mais alta, mais parelho o mês.")}</div></div>
+      <div class="kpi"><div class="v">${acima90}</div><div class="l">Acima de 90% (sem handicap)</div></div>
+    </div>
+    ${saltoRows ? `<div class="card" style="padding:10px 16px;margin-bottom:6px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">Quem mudou de posição por causa do handicap (por pratos → oficial)</div>
+      ${saltoRows}
+    </div>` : `<p class="note">Neste turno o handicap não alterou nenhuma posição — a ordem oficial é igual à ordem por pratos.</p>`}` : "";
+
   // classificação por Perfect Stride (melhor de cada posto entre as passadas)
   const psRk = rankingPerfectStride(turno);
   const perfectRows = psRk.map(r=>`<tr class="${r.col===1?"lead":""}">
@@ -780,6 +817,7 @@ function renderTurno(){
     ${kpis}
     <h3 class="sec">Pódio</h3>
     <div class="podium">${pod}</div>
+    ${hcEfeito}
     ${passBlock}
     <h3 class="sec">Pontuação final (percentual com handicap)</h3>
     <div class="card chartwrap">${svgStackedBars(rk)}</div>
@@ -866,6 +904,59 @@ function abrirPonhador(src, cap){
   lb.classList.add("open");
 }
 
+// ── Números da temporada + recordes (todas as passadas de todos os turnos) ──
+function numerosTemporada(dados){
+  const at=new Set(); let passadas=0, pratos=0, somaPct=0, nPct=0;
+  const porAtir={};
+  let recPct=null, recPratos=null, recFech=null, recMes=null;
+  for(const t of dados.turnos){
+    const pm=t.postos_max||[]; const porMes={};
+    for(const r of t.registros){
+      at.add(r.atirador); passadas++; pratos+=r.total;
+      porAtir[r.atirador]=(porAtir[r.atirador]||0)+1;
+      porMes[r.atirador]=(porMes[r.atirador]||0)+1;
+      if(t.pratos){ const pc=r.total/t.pratos*100; somaPct+=pc; nPct++;
+        if(!recPct||pc>recPct.pc) recPct={pc, atirador:r.atirador, total:r.total, pratos:t.pratos, aba:t.aba, data:r.data}; }
+      if(!recPratos||r.total>recPratos.total) recPratos={total:r.total, atirador:r.atirador, aba:t.aba, pratos:t.pratos};
+      let pf=0; for(let i=0;i<r.stations.length;i++){ if(pm[i]&&r.stations[i]>=pm[i]) pf++; }
+      if(pf>0 && (!recFech||pf>recFech.pf)) recFech={pf, atirador:r.atirador, aba:t.aba, total:r.total};
+    }
+    for(const a in porMes){ if(!recMes||porMes[a]>recMes.n) recMes={n:porMes[a], atirador:a, aba:t.aba}; }
+  }
+  let assiduo=null; for(const a in porAtir){ if(!assiduo||porAtir[a]>assiduo.n) assiduo={atirador:a, n:porAtir[a]}; }
+  // maior evolução: salto de % base entre dois turnos consecutivos em que o atirador participou
+  let evol=null; const hist={};
+  for(let k=0;k<dados.turnos.length;k++){ for(const r of rankingDoTurno(dados,k)){ (hist[r.atirador]||(hist[r.atirador]=[])).push({k, pct:r.pct_base}); } }
+  for(const a in hist){ const h=hist[a];
+    for(let i=1;i<h.length;i++){ if(h[i].k===h[i-1].k+1){ const d=h[i].pct-h[i-1].pct;
+      if(!evol||d>evol.d) evol={d, atirador:a, de:dados.turnos[h[i-1].k].aba, para:dados.turnos[h[i].k].aba, antes:h[i-1].pct, depois:h[i].pct}; } } }
+  return {atiradores:at.size, passadas, pratos, mediaPct: nPct?somaPct/nPct:0, turnos:dados.turnos.length,
+          recPct, recPratos, recFech, recMes, assiduo, evol};
+}
+function destaquesHTML(dados){
+  const n=numerosTemporada(dados);
+  const nome=a=>atLink(a);
+  const dq=(cls,ic,t,v,nm,s)=>`<div class="dq ${cls}"><div class="ic">${ic}</div><div class="t">${t}</div><div class="v">${v}</div><div class="n">${nm}</div><div class="s">${s}</div></div>`;
+  const cards=[];
+  if(n.recPct) cards.push(dq("","🔥","Melhor passada da temporada",`${n.recPct.pc.toFixed(1)}%`,nome(n.recPct.atirador),`${n.recPct.total} de ${n.recPct.pratos} pratos · ${esc(fmtTurno(n.recPct.aba))}`));
+  if(n.recPratos) cards.push(dq("clay","🎯","Mais pratos numa passada",`${n.recPratos.total}`,nome(n.recPratos.atirador),`prova de ${n.recPratos.pratos} · ${esc(fmtTurno(n.recPratos.aba))}`));
+  if(n.recFech) cards.push(dq("","⭐","Mais postos fechados numa passada",`${n.recFech.pf}`,nome(n.recFech.atirador),`${n.recFech.total} pratos · ${esc(fmtTurno(n.recFech.aba))}`));
+  if(n.evol && n.evol.d>0) cards.push(dq("up","📈","Maior evolução mês a mês",`+${n.evol.d.toFixed(1)} p.p.`,nome(n.evol.atirador),`${n.evol.antes.toFixed(1)}% → ${n.evol.depois.toFixed(1)}% (${esc(fmtTurno(n.evol.de))} → ${esc(fmtTurno(n.evol.para))})`));
+  if(n.recMes) cards.push(dq("","🏃","Mais passadas num só mês",`${n.recMes.n}`,nome(n.recMes.atirador),esc(fmtTurno(n.recMes.aba))));
+  if(n.assiduo) cards.push(dq("","🔁","Mais assíduo da temporada",`${n.assiduo.n} passadas`,nome(n.assiduo.atirador),`em ${n.turnos} turno(s)`));
+  const kpis=`<div class="kpis">
+    <div class="kpi"><div class="v">${n.turnos}</div><div class="l">Turnos realizados</div></div>
+    <div class="kpi field"><div class="v">${n.atiradores}</div><div class="l">Atiradores na temporada</div></div>
+    <div class="kpi"><div class="v">${n.passadas}</div><div class="l">Passadas no ano</div></div>
+    <div class="kpi accent"><div class="v">${n.pratos.toLocaleString("pt-BR")}</div><div class="l">Pratos quebrados</div></div>
+    <div class="kpi"><div class="v">${n.mediaPct.toFixed(1)}%</div><div class="l">Aproveitamento médio ${help("Média do % de acerto de TODAS as passadas do ano (pratos quebrados ÷ pratos da prova). Mede o nível geral da liga.")}</div></div>
+  </div>`;
+  return `<h3 class="sec">📊 Números da temporada</h3>${kpis}
+    <h3 class="sec">🏅 Destaques &amp; recordes do ano</h3>
+    <div class="destaques">${cards.join("")}</div>
+    <p class="note">Recordes considerando <b>todas as passadas</b> de todos os turnos. "Melhor passada" é o maior % da prova (justo entre provas de 50, 75 ou 100). Evolução = salto do % base (sem handicap) entre dois meses seguidos.</p>`;
+}
+
 function renderTemp(){
   const el = document.getElementById("view-temp");
   const temp = tabelaTemporada(DADOS);
@@ -883,6 +974,7 @@ function renderTemp(){
         <span style="color:var(--accent2)"> · ${c.vitorias} vitória(s), ${c.podios} pódio(s)</span></div>
     </div>
     ${ponhadoresHTML(DADOS)}
+    ${destaquesHTML(DADOS)}
     <h3 class="sec">Vitórias de turno no ano</h3>
     <div class="card chartwrap">${svgWinsBars(temp)}</div>
     <h3 class="sec">Classificação da temporada</h3>
