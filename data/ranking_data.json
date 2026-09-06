@@ -1,5 +1,5 @@
 {
-  "gerado_em": "05/09/2026 14:31",
+  "gerado_em": "06/09/2026 14:35",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1768,6 +1768,33 @@
             14
           ],
           "data": "2026-09-05"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 40,
+          "stations": [
+            22,
+            18
+          ],
+          "data": "2026-09-06"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 43,
+          "stations": [
+            24,
+            19
+          ],
+          "data": "2026-09-06"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 40,
+          "stations": [
+            19,
+            21
+          ],
+          "data": "2026-09-06"
         }
       ]
     }
