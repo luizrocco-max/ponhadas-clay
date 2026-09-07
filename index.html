@@ -227,6 +227,19 @@
   .flyerbtn:hover{filter:brightness(1.08)}
   .lb .flyerhint{color:#e9ece6;font-size:13px;margin-top:10px;text-align:center}
   .lb .flyerdl{display:inline-block;margin-top:10px;background:var(--accent2);color:#12160f;font-weight:800;padding:8px 16px;border-radius:20px;text-decoration:none}
+  /* explicação de empates */
+  .emp-g{margin:0 0 14px} .emp-g:last-child{margin-bottom:0}
+  .emp-t{font-size:14px;font-weight:800;color:var(--accent2);margin-bottom:6px}
+  .emp{border-left:3px solid var(--line);padding:2px 0 2px 12px;margin:0 0 10px}
+  .emp:last-child{margin-bottom:0}
+  .emp-h{font-size:13.5px;margin-bottom:3px}
+  .emp-c{font-size:13px;color:var(--txt);padding:2px 0;opacity:.85}
+  .emp-c.ok{opacity:1;color:var(--good)}
+  .emp-c.ok b{color:var(--good)}
+  .emp-l{font-size:13.5px;line-height:1.5;padding:4px 0 4px 12px;border-left:3px solid var(--line);margin:0 0 6px}
+  .emp-l:last-child{margin-bottom:0}
+  .okc{color:var(--good)}
+  .tieflag{color:var(--accent2);cursor:help;font-size:12px}
 </style>
 
 <div id="splash"><img src="logo.png" alt="Ponhada's Clay League CCTSP"></div>
@@ -707,6 +720,61 @@ function renderDia(){
   document.getElementById("diaSel").addEventListener("change", e=>{ diaSel = e.target.value; renderDia(); });
 }
 
+/* ---------- ⚖️ Empates: explica qual critério decidiu cada um ---------- */
+function analisaEmpates(rk, nova){
+  const grupos = {};
+  rk.forEach(r=>{ const k = r.pct_final.toFixed(2); (grupos[k] || (grupos[k]=[])).push(r); });
+  const out = [];
+  Object.keys(grupos).forEach(k=>{
+    const g = grupos[k];            // já vem na ordem oficial
+    if(g.length < 2) return;
+    const pares = [];
+    for(let i=1;i<g.length;i++){
+      const a=g[i-1], b=g[i];       // "a" ficou à frente de "b"
+      if(a.pct_final !== b.pct_final){
+        pares.push({a, b, decimais:true, linhas:[]});
+        continue;
+      }
+      const crits = nova
+        ? [ {nome:"Pratos quebrados", extra:"sem handicap",           va:a.total,            vb:b.total},
+            {nome:"Perfect Stride",   extra:"melhor de cada posto",   va:a.perfect,          vb:b.perfect},
+            {nome:"Postos fechados",  extra:"na passada que vale",    va:a.postos_fechados,  vb:b.postos_fechados} ]
+        : [ {nome:"Postos fechados",  extra:"",                       va:a.postos_fechados,  vb:b.postos_fechados},
+            {nome:"Último posto",     extra:"",                       va:a.ult_posto,        vb:b.ult_posto} ];
+      const linhas=[]; let decidiu=null;
+      for(let c=0;c<crits.length;c++){
+        const cr = crits[c];
+        if(cr.va === cr.vb){ linhas.push({...cr, ord:c+1, res:"empate"}); }
+        else { linhas.push({...cr, ord:c+1, res:"decidiu"}); decidiu=cr; break; }
+      }
+      pares.push({a, b, linhas, decidiu});
+    }
+    out.push({pct:k, nomes:g.map(r=>r.atirador), pares});
+  });
+  return out;
+}
+function empatesHTML(rk, nova){
+  const emp = analisaEmpates(rk, nova);
+  if(!emp.length) return "";
+  const blocos = emp.map(e=>{
+    const pares = e.pares.map(p=>{
+      const A = `<b>${esc(titleCase(p.a.atirador))}</b>`, B = `<b>${esc(titleCase(p.b.atirador))}</b>`;
+      if(p.decimais) return `<div class="emp-l">${A} passou ${B} — decidiu na <b class="okc">própria pontuação</b> <span class="muted">(diferença nas casas decimais: ${p.a.pct_final.toFixed(4)}% × ${p.b.pct_final.toFixed(4)}%)</span></div>`;
+      const dec = p.linhas.find(l=>l.res==="decidiu");
+      if(!dec) return `<div class="emp-l">${A} e ${B} empataram em <b>todos</b> os critérios — a ordem entre eles é indiferente.</div>`;
+      const iguais = p.linhas.filter(l=>l.res==="empate").map(l=>`${l.nome.toLowerCase()} (${l.va})`).join(" e ");
+      return `<div class="emp-l">${A} passou ${B} — decidiu no <b class="okc">${dec.ord}º critério: ${dec.nome}</b> <b>${dec.va} × ${dec.vb}</b>${iguais?` <span class="muted">· já tinham empatado em ${iguais}</span>`:""}</div>`;
+    }).join("");
+    return `<div class="emp-g"><div class="emp-t">⚖️ Empate em <b>${e.pct}%</b> — ${e.nomes.map(n=>esc(titleCase(n))).join(" × ")}</div>${pares}</div>`;
+  }).join("");
+  const ordem = nova
+    ? "1º <b>pratos quebrados</b> (sem handicap) · 2º <b>Perfect Stride</b> · 3º <b>postos fechados</b> na passada que vale"
+    : "1º <b>postos fechados</b> · 2º <b>último posto</b> (regra vigente até Julho/2026)";
+  return `<h3 class="sec">⚖️ Como foi resolvido o empate</h3>
+    <div class="card" style="padding:14px 16px">${blocos}</div>
+    <p class="note">Quando dois atiradores terminam com a <b>mesma pontuação</b>, o desempate segue esta ordem (Art. 22): ${ordem}. Os critérios são testados um a um até que algum separe os dois.</p>`;
+}
+
 /* ---------- 📸 Flyer do mês (imagem pronta pro WhatsApp, gerada dos dados do turno) ---------- */
 function carregarImagem(src){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; }); }
 function abrirFlyer(dataUrl, nome){
@@ -822,9 +890,12 @@ function renderTurno(){
       <div class="sb">${sb}</div></div>`;
   }
 
+  // marca quem terminou empatado na pontuação (para a observação do desempate)
+  const cntPct = {}; rk.forEach(r=>{ const k=r.pct_final.toFixed(2); cntPct[k]=(cntPct[k]||0)+1; });
+  const empatado = r => cntPct[r.pct_final.toFixed(2)] > 1;
   const rows = rk.map(r=>`<tr class="${r.col===1?"lead":""}">
     <td><span class="rankbubble">${r.col}</span></td>
-    <td>${atLink(r.atirador)}</td>
+    <td>${atLink(r.atirador)}${empatado(r)?` <span class="tieflag" title="Terminou empatado na pontuação — veja abaixo qual critério decidiu">⚖️</span>`:""}</td>
     <td>${r.total}</td>
     <td>${r.passadas}</td>
     <td>${r.pct_base.toFixed(2)}%</td>
@@ -918,6 +989,7 @@ function renderTurno(){
       : (novaT
           ? "Pontuação = percentual com handicap (Art. 11), com teto de 105%. Tem handicap quem fica &lt; 90% do líder <b>na rodada</b>; a <b>quantidade de pratos</b> usa a média das últimas 3 etapas (Art. 14–17). Desempate: 1º pratos quebrados, 2º Perfect Stride, 3º postos fechados (da passada que vale)."
           : "Pontuação = percentual com handicap (Art. 11). Tem handicap quem fica &lt; 93% do líder <b>na rodada</b>; a quantidade de pratos usa a média das últimas 3 etapas (Art. 14–17). Desempate por postos fechados (Art. 22). — regra vigente até Julho/2026.")}</p>
+    ${empatesHTML(rk, novaT)}
     <h3 class="sec">🏹 Classificação por Perfect Stride (potencial — melhor de cada posto)</h3>
     <div class="tablewrap"><table>
       <thead><tr><th>Col.</th><th>Atirador</th><th>Pass.</th><th>Perfect</th><th>% acerto</th><th>Melhor real</th><th>+Pot.</th><th>Postos fech.</th></tr></thead>
