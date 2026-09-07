@@ -1,5 +1,5 @@
 {
-  "gerado_em": "06/09/2026 16:42",
+  "gerado_em": "07/09/2026 17:00",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1804,6 +1804,33 @@
             20
           ],
           "data": "2026-09-06"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 44,
+          "stations": [
+            23,
+            21
+          ],
+          "data": "2026-09-07"
+        },
+        {
+          "atirador": "FELIPE POTTHOFF",
+          "total": 42,
+          "stations": [
+            23,
+            19
+          ],
+          "data": "2026-09-07"
+        },
+        {
+          "atirador": "FELIPE POTTHOFF",
+          "total": 45,
+          "stations": [
+            25,
+            20
+          ],
+          "data": "2026-09-07"
         }
       ]
     }
