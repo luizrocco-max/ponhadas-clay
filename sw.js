@@ -3,7 +3,7 @@
    - Dados do ranking sempre da rede quando online (cai pro cache offline)
    - NUNCA guarda respostas de erro (404 etc.) — evita "prender" foto que ainda não existia
    - Bump CACHE ao mudar o shell (o activate limpa os caches antigos) */
-const CACHE = "ponhadas-v2";
+const CACHE = "ponhadas-v3";
 const SHELL = [
   "/", "/index.html", "/manifest.webmanifest", "/logo.png",
   "/apple-touch-icon.png",
