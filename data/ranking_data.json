@@ -1,5 +1,5 @@
 {
-  "gerado_em": "01/10/2026 16:11",
+  "gerado_em": "01/10/2026 16:55",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1879,13 +1879,35 @@
           "data": "2026-10-01"
         },
         {
-          "atirador": "MARIA PUCINELLI",
+          "atirador": "MARIO PUCINELLI",
           "total": 30,
           "stations": [
             18,
             2,
             6,
             4
+          ],
+          "data": "2026-10-01"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 32,
+          "stations": [
+            17,
+            4,
+            6,
+            5
+          ],
+          "data": "2026-10-01"
+        },
+        {
+          "atirador": "LUIS NEVES",
+          "total": 27,
+          "stations": [
+            15,
+            2,
+            3,
+            7
           ],
           "data": "2026-10-01"
         }
