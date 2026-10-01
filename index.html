@@ -227,6 +227,44 @@
   .flyerbtn:hover{filter:brightness(1.08)}
   .lb .flyerhint{color:#e9ece6;font-size:13px;margin-top:10px;text-align:center}
   .lb .flyerdl{display:inline-block;margin-top:10px;background:var(--accent2);color:#12160f;font-weight:800;padding:8px 16px;border-radius:20px;text-decoration:none}
+  /* tabelas vivas: ordenar pelo cabeçalho, busca e card rápido do atirador */
+  thead th{cursor:pointer;user-select:none}
+  thead th:hover{color:var(--txt)}
+  thead th.asc::after{content:" ▲";color:var(--accent2)} thead th.desc::after{content:" ▼";color:var(--accent2)}
+  tbody tr.hasat{cursor:pointer} tbody tr.hasat:hover{background:rgba(224,184,60,.08)}
+  tr.oculto{display:none!important} .oculto{display:none!important}
+  .busca{min-width:200px}
+  .cardat h2{margin:0;font-size:19px} .cardat .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .cardat .kpis{grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:12px 0}
+  .cardat .kpi{padding:10px 12px} .cardat .kpi .v{font-size:20px}
+  .cardat table{min-width:0;font-size:12.5px} .cardat tbody td,.cardat thead th{padding:7px 9px}
+  .cardat .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  /* simulador "e se?" */
+  .sim{border-left:5px solid var(--accent);margin:4px 0 8px}
+  .sim-ctl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13.5px}
+  .sim-ctl input[type=range]{flex:1;min-width:160px;accent-color:var(--accent);padding:0;background:transparent;border:0}
+  .sim-ctl input[type=number]{min-width:0;width:74px;text-align:center;font-weight:800;font-size:16px;color:var(--accent2)}
+  .sim-res{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+  .sim-pos{font-size:34px;font-weight:900;line-height:1} .sim-pos.up{color:var(--good)} .sim-pos.down{color:var(--accent)} .sim-pos.same{color:var(--accent2)}
+  .sim-txt{font-size:13px;line-height:1.55}
+  .metas{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:10px}
+  .meta{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;cursor:pointer;transition:.12s}
+  .meta:hover{border-color:var(--accent2)} .meta b{display:block;font-size:17px;color:var(--accent2)}
+  .meta.ok{border-color:var(--good)} .meta.ok b{color:var(--good)}
+  /* comparar: frente a frente */
+  .h2h td.best{color:var(--accent2);font-weight:800} .h2h td.best::before{content:"🏅 "}
+  .h2h tbody td:first-child{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  .h2h thead th{cursor:default}
+  .h2h table{min-width:0;table-layout:fixed}
+  .h2h th,.h2h td{white-space:normal;vertical-align:top;padding-left:6px;padding-right:6px}
+  .h2h thead th{font-size:10.5px;letter-spacing:0;word-break:normal;overflow-wrap:anywhere}
+  .h2h td small{display:block;color:var(--muted);font-weight:400;font-size:11px}
+  .h2h th:first-child,.h2h td:first-child{width:31%}
+  .h2h thead th{text-align:center} .h2h thead th:first-child{text-align:left}
+  .h2h tbody td{text-align:center;font-size:12.5px} .h2h tbody td:first-child{text-align:left}
+  .duelo{display:flex;align-items:center;justify-content:center;gap:16px;padding:14px;font-weight:800;font-size:15px}
+  .duelo .pl{font-size:30px;color:var(--accent2)} .duelo .x{color:var(--muted);font-size:13px}
+  .preset{font-size:11.5px;padding:4px 10px}
   /* explicação de empates */
   .emp-g{margin:0 0 14px} .emp-g:last-child{margin-bottom:0}
   .emp-t{font-size:14px;font-weight:800;color:var(--accent2);margin-bottom:6px}
@@ -704,9 +742,10 @@ function renderDia(){
     <td>${i.pf?`<span class="tag hc">${i.pf}★</span>`:`<span class="tag zero">—</span>`}</td>
   </tr>`).join("");
   el.innerHTML = `
-    <div class="card" style="margin:14px 0">
-      <label for="diaSel" style="font-size:13px;color:var(--muted)">📅 Escolha o dia:</label>
-      <select id="diaSel" style="margin-left:8px">${opts}</select>
+    <div class="card" style="margin:14px 0;display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end">
+      <div class="ctl"><label for="diaSel">📅 Escolha o dia</label>
+      <select id="diaSel">${opts}</select></div>
+      ${buscaHTML("buscaDia")}
     </div>
     <div class="kpis">
       <div class="kpi accent"><div class="v">${doDia.length}</div><div class="l">Passadas no dia</div></div>
@@ -871,7 +910,7 @@ function renderTurno(){
     <h3 class="sec">📋 Passadas por atirador</h3>
     <div class="card" style="padding:12px 16px;margin-bottom:6px">
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:0 20px">
-        ${passOrd.map(p=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)"><span>${atLink(p.nome)}</span><b>${p.n}</b></div>`).join("")}
+        ${passOrd.map(p=>`<div class="prow" style="display:flex;justify-content:space-between;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)"><span>${atLink(p.nome)}</span><b>${p.n}</b></div>`).join("")}
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:10px;padding-top:8px;border-top:2px solid var(--accent);font-weight:800;font-size:15px">
         <span>TOTAL</span><span style="color:var(--accent)">${turno.registros.length} passadas</span>
@@ -963,9 +1002,11 @@ function renderTurno(){
     <div class="controls">
       <div class="ctl"><label>Turno (mês)</label>
         <select id="turnoSel">${options}</select></div>
+      ${buscaHTML("buscaTurno")}
       <div class="ctl"><label>&nbsp;</label>
         <button class="flyerbtn" id="flyerBtn" type="button">📸 Flyer do mês</button></div>
     </div>
+    <p class="note" style="margin:-6px 2px 8px">💡 Toque no <b>cabeçalho</b> de qualquer tabela para ordenar · toque na <b>linha</b> para abrir o card do atirador · no <b>nome</b> para o perfil completo.</p>
     ${kpis}
     <h3 class="sec">Pódio</h3>
     <div class="podium">${pod}</div>
@@ -1137,6 +1178,7 @@ function renderTemp(){
     <h3 class="sec">Vitórias de turno no ano</h3>
     <div class="card chartwrap">${svgWinsBars(temp)}</div>
     <h3 class="sec">Classificação da temporada</h3>
+    <div class="controls" style="margin:6px 0 10px">${buscaHTML("buscaTemp")}</div>
     <div class="tablewrap"><table>
       <thead><tr><th>Pos.</th><th>Atirador</th><th>Vitórias</th><th>Pódios</th>
         <th>Turnos</th><th>Melhor pontuação</th></tr></thead>
@@ -1227,6 +1269,7 @@ function renderAtir(){
         <div class="kpi"><div class="v">${totalPassadasCarreira}</div><div class="l">Passadas (total)</div></div>
         <div class="kpi ${ultTend ? (ultTend.dCol>0?"field":(ultTend.dCol<0?"accent":"")) : ""}"><div class="v">${ultTend ? (ultTend.dCol>0?`▲ ${ultTend.dCol}`:(ultTend.dCol<0?`▼ ${Math.abs(ultTend.dCol)}`:"=")) : "—"}</div><div class="l">Tendência vs. mês anterior${ultTend ? ` · ${(ultTend.dPct>=0?"+":"")+ultTend.dPct.toFixed(1)} p.p. no % base` : ""} ${help("Comparação com o último turno em que você participou: posições ganhas (▲) ou perdidas (▼) e a variação do seu % base (sem handicap).")}</div></div>
       </div>
+      ${simuladorHTML(atiradorSel)}
       <h3 class="sec">Evolução na temporada</h3>
       <div class="card chartwrap">${svgLine(hist.map(h=>fmtTurno(h.turno)), hist.map(h=>h.pct_final))}</div>
       <h3 class="sec">Histórico (resultado oficial por turno)</h3>
@@ -1335,6 +1378,7 @@ function renderAtir(){
   document.getElementById("atirTurnoSel").addEventListener("change", e=>{
     atirTurnoIdx = +e.target.value; renderAtir();
   });
+  ligarSimulador(atiradorSel);
 }
 
 function renderHandicap(){
@@ -1452,11 +1496,13 @@ function renderComparar(){
 
   const fmtV = v => v==null ? "—" : (suffix==="%" ? v.toFixed(2)+"%" : String(v));
   const linhasTab = labels.map((lab,k)=>`<tr><td>${esc(lab)}</td>${series.map(s=>`<td>${fmtV(s.values[k])}</td>`).join("")}</tr>`).join("");
-  const mediaTab = `<tr class="lead"><td><b>Média</b></td>${series.map(s=>{ const vs=s.values.filter(v=>v!=null);
+  const mediaTab = `<tr class="lead nosort"><td><b>Média</b></td>${series.map(s=>{ const vs=s.values.filter(v=>v!=null);
     const m=vs.length? vs.reduce((a,b)=>a+b,0)/vs.length : null;
     return `<td><b>${m==null?"—":(suffix==="%"?m.toFixed(2)+"%":m.toFixed(1))}</b></td>`; }).join("")}</tr>`;
 
   const corpo = series.length ? `
+    ${headToHeadHTML(comparSel, perTurno)}
+    <h3 class="sec">📈 Evolução — ${({pontuacao:"pontuação (com handicap)",pratos:"pratos quebrados",perfect:"Perfect Stride",acerto:"% de acerto"})[base]||"comparação"}</h3>
     <div class="card chartwrap">${svgMultiLine(labels, series, suffix)}</div>
     <h3 class="sec">Tabela comparativa</h3>
     <div class="tablewrap"><table>
@@ -1464,9 +1510,17 @@ function renderComparar(){
       <tbody>${linhasTab}${mediaTab}</tbody></table></div>`
     : `<p class="note">Escolha ao menos 1 atirador acima.</p>`;
 
+  // atalhos: pódio do mês atual, Ponhadores do ano, limpar
+  const last = DADOS.turnos.length-1;
+  const presets = `<div style="margin:6px 0 4px">
+    <button class="chip preset" data-preset="podio">🏆 Pódio de ${esc(fmtTurno(DADOS.turnos[last].aba))}</button>
+    <button class="chip preset" data-preset="ponhadores">👑 Ponhadores do ano</button>
+    <button class="chip preset" data-preset="top5">🔥 Top 5 da temporada</button>
+    <button class="chip preset" data-preset="limpar">✕ Limpar</button></div>`;
+
   el.innerHTML = `
     <div class="controls">
-      <div class="ctl"><label>Base de comparação</label>
+      <div class="ctl"><label>Base de comparação (gráfico)</label>
         <select id="comparBaseSel">
           <option value="pontuacao" ${base==="pontuacao"?"selected":""}>Pontuação (com handicap)</option>
           <option value="pratos" ${base==="pratos"?"selected":""}>Pratos quebrados</option>
@@ -1475,10 +1529,19 @@ function renderComparar(){
         </select></div>
     </div>
     <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Atiradores (toque para incluir · até 5)</label>
+    ${presets}
     <div style="margin:8px 0 14px">${chips}</div>
     ${corpo}`;
 
   document.getElementById("comparBaseSel").addEventListener("change", e=>{ comparBase=e.target.value; renderComparar(); });
+  el.querySelectorAll(".preset").forEach(p=> p.addEventListener("click", ()=>{
+    const w = p.dataset.preset;
+    if(w==="podio") comparSel = rankingDoTurno(DADOS,last).slice(0,3).map(r=>r.atirador);
+    else if(w==="ponhadores") comparSel = [...new Set(DADOS.turnos.map((t,k)=>(rankingDoTurno(DADOS,k)[0]||{}).atirador).filter(Boolean))].slice(0,5);
+    else if(w==="top5") comparSel = tabelaTemporada(DADOS).slice(0,5).map(r=>r.atirador);
+    else comparSel = [];
+    renderComparar();
+  }));
   el.querySelectorAll(".chip").forEach(c=> c.addEventListener("click", ()=>{
     const a = c.getAttribute("data-catir");
     if(comparSel.includes(a)) comparSel = comparSel.filter(x=>x!==a);
@@ -1568,6 +1631,238 @@ function renderRegulamento(){
     <div class="regclose">Boa pontaria, boas risadas e que vença o melhor! 🎯<br>Regulamento aprovado pela diretoria do clube.</div>
   </div>`;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   INTERATIVO: simulador "e se?", frente a frente, card rápido, ordenar/buscar
+══════════════════════════════════════════════════════════════════════════ */
+// distribui um total de pratos pelos postos, proporcional ao máximo de cada um (estimativa)
+function distribuirPratos(total, pm){
+  const soma = (pm||[]).reduce((s,v)=>s+(v||0),0);
+  if(!pm || !pm.length || !soma) return [total];
+  const st = pm.map(m => Math.floor(total*(m||0)/soma));
+  let resto = total - st.reduce((s,v)=>s+v,0);
+  for(let i=0; resto>0 && i<pm.length*3; i++){ const j=i%pm.length; if(st[j] < (pm[j]||0)){ st[j]++; resto--; } }
+  return st;
+}
+// ranking do turno k como se o atirador fizesse MAIS UMA passada com `total` pratos
+function simularPassada(k, atirador, total){
+  const t = DADOS.turnos[k];
+  const extra = {atirador, total, stations: distribuirPratos(total, t.postos_max), data:"9999-12-31"};
+  const fake = Object.assign({}, DADOS, {turnos: DADOS.turnos.map((x,i)=> i===k
+    ? Object.assign({}, x, {registros:[...x.registros, extra]}) : x)});
+  return rankingDoTurno(fake, k);
+}
+function simuladorHTML(atirador){
+  const k = DADOS.turnos.length-1, t = DADOS.turnos[k];
+  const me = rankingDoTurno(DADOS,k).find(r=>r.atirador===atirador);
+  const ini = me ? Math.min(t.pratos, me.total) : Math.round(t.pratos*0.7);
+  return `
+    <h3 class="sec">🎮 Simulador "e se?" — ${esc(fmtTurno(t.aba))} ${help("Brinque com os números: escolha quantos pratos faria na PRÓXIMA passada deste mês e veja onde ficaria no ranking oficial, já com a regra de handicap aplicada (gatilho 90% e média das 3 etapas). Os postos são distribuídos proporcionalmente, então desempates por Perfect Stride/postos fechados são uma estimativa.")}</h3>
+    <div class="card sim">
+      <div class="sim-ctl"><span>Se a próxima passada de <b>${esc(titleCase(atirador))}</b> for de</span>
+        <input type="range" id="simRange" min="0" max="${t.pratos}" step="1" value="${ini}">
+        <input type="number" id="simNum" min="0" max="${t.pratos}" step="1" value="${ini}">
+        <span>pratos (de ${t.pratos})</span></div>
+      <div id="simOut"></div>
+    </div>`;
+}
+function ligarSimulador(atirador){
+  const rg = document.getElementById("simRange"), nm = document.getElementById("simNum"), out = document.getElementById("simOut");
+  if(!rg || !nm || !out) return;
+  const k = DADOS.turnos.length-1, t = DADOS.turnos[k];
+  const rkAtual = rankingDoTurno(DADOS,k), meA = rkAtual.find(r=>r.atirador===atirador);
+  const colA = meA ? meA.col : null;
+  // mínimo de pratos para alcançar cada posição (calculado uma vez)
+  const minPos = {};
+  for(let x=0;x<=t.pratos;x++){ const r = simularPassada(k,atirador,x).find(r=>r.atirador===atirador); if(r && !(r.col in minPos)) minPos[r.col]=x; }
+  const medals = {1:"🥇",2:"🥈",3:"🥉"};
+  function desenha(T){
+    T = Math.max(0, Math.min(t.pratos, Math.round(+T||0)));
+    const rkS = simularPassada(k, atirador, T), meS = rkS.find(r=>r.atirador===atirador);
+    const lider = rkS[0];
+    const d = colA==null ? null : colA - meS.col;
+    const cls = d==null ? "same" : (d>0?"up":(d<0?"down":"same"));
+    const passados = rkS.filter(r=> r.atirador!==atirador && r.col > meS.col &&
+      (rkAtual.find(a=>a.atirador===r.atirador)||{col:Infinity}).col < (colA==null?Infinity:colA));
+    const valeu = !meA || T > meA.total;   // a passada só muda a oficial se for a melhor do mês
+    let frase;
+    if(colA==null) frase = `Com <b>${T}</b> pratos entraria em <b>${meS.col}º</b>.`;
+    else if(!valeu) frase = `Com ${T} pratos não supera a sua melhor do mês (<b>${meA.total}</b>) — a passada oficial continua a mesma e a posição não muda.`;
+    else if(d>0) frase = `Com <b>${T}</b> pratos <b style="color:var(--good)">subiria ${d} posiç${d>1?"ões":"ão"}</b>${passados.length?`, passando ${passados.map(p=>esc(titleCase(p.atirador))).join(", ")}`:""}.`;
+    else if(d<0) frase = `Com <b>${T}</b> pratos <b style="color:var(--accent)">cairia ${-d} posiç${-d>1?"ões":"ão"}</b>${meS.handicap<meA.handicap?` — perderia handicap (+${meA.handicap} → ${meS.handicap?"+"+meS.handicap:"zero"}) ao passar dos 90% do líder, e a pontuação cai de ${meA.pct_final.toFixed(2)}% para ${meS.pct_final.toFixed(2)}%`:""}.`;
+    else frase = `Com <b>${T}</b> pratos a pontuação vai de ${meA.pct_final.toFixed(2)}% para <b>${meS.pct_final.toFixed(2)}%</b>, mas fica na <b>mesma posição</b>.`;
+    const metas =Object.keys(minPos).map(Number).sort((a,b)=>a-b).filter(p=> colA==null || p < colA).slice(0,6)
+      .map(p=>`<div class="meta ${T>=minPos[p]?"ok":""}" data-meta="${minPos[p]}">${medals[p]||p+"º"} ${p}º lugar<b>${minPos[p]} pratos</b></div>`).join("");
+    out.innerHTML = `
+      <div class="sim-res">
+        <div><div class="sim-pos ${cls}">${meS.col}º</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">posição projetada</div></div>
+        <div class="sim-txt">
+          ${colA==null ? `Hoje ${esc(titleCase(atirador))} ainda <b>não atirou</b> neste mês.` : `Hoje está em <b>${colA}º</b> com ${meA.total} pratos${meA.handicap?` (+${meA.handicap} HC)`:""}.`}
+          ${frase}
+          <br><span style="color:var(--muted)">Pontuação: <b style="color:var(--txt)">${meS.pct_final.toFixed(2)}%</b> · pratos que valem: ${meS.total}${meS.handicap?` · handicap <b class="tag hc">+${meS.handicap}</b>`:" · sem handicap"} · líder: ${esc(titleCase(lider.atirador))} ${lider.total}</span>
+        </div>
+      </div>
+      ${metas ? `<div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:12px">🎯 Metas — quantos pratos numa passada pra chegar em… (toque pra testar)</div><div class="metas">${metas}</div>` : (colA===1 ? `<p class="note" style="margin-bottom:0">👑 Já está em 1º — a simulação mostra se segura a liderança.</p>` : `<p class="note" style="margin-bottom:0">Com ${t.pratos} pratos ainda não dá pra subir — a média de handicap dos outros pesa mais este mês.</p>`)}`;
+    out.querySelectorAll(".meta").forEach(m=> m.addEventListener("click", ()=>{ rg.value = nm.value = m.dataset.meta; desenha(m.dataset.meta); }));
+  }
+  rg.addEventListener("input", ()=>{ nm.value = rg.value; desenha(rg.value); });
+  nm.addEventListener("input", ()=>{ rg.value = nm.value; desenha(nm.value); });
+  desenha(rg.value);
+}
+
+// ── Comparar: frente a frente (KPIs lado a lado) ──────────────────────────
+function headToHeadHTML(sel, perTurno){
+  if(!sel.length) return "";
+  const met = sel.map(a=>{
+    const hist = DADOS.turnos.map((t,k)=>perTurno[k].rkMap[a]).filter(Boolean);
+    const ult = hist[hist.length-1];
+    let melhorPass = null, passadas = 0, fechados = 0, psMax = null;
+    DADOS.turnos.forEach((t,k)=>{
+      const regs = t.registros.filter(r=>r.atirador===a); passadas += regs.length;
+      regs.forEach(r=>{ const ac = t.pratos ? r.total/t.pratos*100 : 0;
+        if(!melhorPass || ac > melhorPass.ac) melhorPass = {ac, total:r.total, pratos:t.pratos, turno:t.aba}; });
+      const b = perTurno[k].best[a]; if(b) fechados += b.postos_fechados||0;
+      const ps = perTurno[k].psMap[a]; if(ps && (psMax==null || ps.acerto > psMax)) psMax = ps.acerto;
+    });
+    const avg = f => hist.length ? hist.reduce((s,h)=>s+f(h),0)/hist.length : null;
+    return { a, turnos: hist.length, vit: hist.filter(h=>h.col===1).length, podios: hist.filter(h=>h.col<=3).length,
+      melhorCol: hist.length ? Math.min(...hist.map(h=>h.col)) : null,
+      mediaPct: avg(h=>h.pct_final), mediaBase: avg(h=>h.pct_base), melhorPass, psMax, passadas, fechados,
+      ultCol: ult ? ult.col : null, ultHc: ult ? ult.handicap : null, ultTurno: ult ? ult : null };
+  });
+  const fmtP = v => v==null ? "—" : v.toFixed(1)+"%";
+  const linhas = [
+    ["Turnos disputados", m=>m.turnos, m=>m.turnos, "max"],
+    ["Vitórias 👑", m=>m.vit, m=>m.vit, "max"],
+    ["Pódios (top 3)", m=>m.podios, m=>m.podios, "max"],
+    ["Melhor colocação", m=>m.melhorCol==null?"—":m.melhorCol+"º", m=>m.melhorCol, "min"],
+    ["Média da pontuação", m=>fmtP(m.mediaPct), m=>m.mediaPct, "max"],
+    ["Média % base (sem HC)", m=>fmtP(m.mediaBase), m=>m.mediaBase, "max"],
+    ["Melhor passada", m=>{ if(!m.melhorPass) return "—"; const [an,ms]=ordemMes(m.melhorPass.turno);
+        return `${m.melhorPass.total}/${m.melhorPass.pratos} (${m.melhorPass.ac.toFixed(0)}%)<small>${ms?MES_NOME[ms].slice(0,3):""}${an?"/"+String(an).slice(2):""}</small>`; }, m=>m.melhorPass?m.melhorPass.ac:null, "max"],
+    ["Perfect Stride (máx.)", m=>fmtP(m.psMax), m=>m.psMax, "max"],
+    ["Passadas (total)", m=>m.passadas, m=>m.passadas, "max"],
+    ["Postos fechados (oficiais)", m=>m.fechados, m=>m.fechados, "max"],
+    ["Último turno", m=>m.ultCol==null?"—":`${m.ultCol}º${m.ultHc?` · +${m.ultHc} HC`:""}`, m=>m.ultCol, "min"],
+  ];
+  const rows = linhas.map(([lab, show, val, mode])=>{
+    const vs = met.map(val); const ok = vs.filter(v=>v!=null);
+    const best = ok.length ? (mode==="max" ? Math.max(...ok) : Math.min(...ok)) : null;
+    const tie = ok.filter(v=>v===best).length === met.length && met.length>1;   // todos iguais → ninguém ganha
+    return `<tr><td>${lab}</td>${met.map((m,i)=>`<td class="${(!tie && best!=null && vs[i]===best && met.length>1)?"best":""}">${show(m)}</td>`).join("")}</tr>`;
+  }).join("");
+  // duelo direto (só com 2 selecionados): quem terminou na frente em cada mês que ambos atiraram
+  let duelo = "";
+  if(met.length===2){
+    let a=0,b=0; const meses=[];
+    DADOS.turnos.forEach((t,k)=>{ const x=perTurno[k].rkMap[met[0].a], y=perTurno[k].rkMap[met[1].a];
+      if(x && y){ if(x.col<y.col){a++; meses.push(`${fmtTurno(t.aba)}: ${titleCase(met[0].a).split(" ")[0]}`);} else {b++; meses.push(`${fmtTurno(t.aba)}: ${titleCase(met[1].a).split(" ")[0]}`);} } });
+    duelo = `<div class="card" style="margin-bottom:10px"><div class="duelo"><span>${esc(titleCase(met[0].a))}</span><span class="pl">${a}</span><span class="x">×</span><span class="pl">${b}</span><span>${esc(titleCase(met[1].a))}</span></div>
+      <div style="text-align:center;font-size:12px;color:var(--muted)">⚔️ Duelo direto — meses em que os dois atiraram${meses.length?": "+esc(meses.join(" · ")):" (nenhum em comum ainda)"}</div></div>`;
+  }
+  return `
+    <h3 class="sec">🥊 Frente a frente ${help("KPIs da temporada lado a lado. 🏅 marca quem leva a melhor em cada linha (nada é marcado quando estão empatados).")}</h3>
+    ${duelo}
+    <div class="tablewrap h2h"><table>
+      <thead><tr><th>Critério</th>${met.map(m=>`<th>${atLink(m.a)}</th>`).join("")}</tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+}
+
+// ── Card rápido do atirador (clique na linha da tabela) ───────────────────
+function abrirCard(nome, k){
+  const turnos = DADOS.turnos;
+  const participou = i => turnos[i] && turnos[i].registros.some(r=>r.atirador===nome);
+  if(k==null || !participou(k)){ k=-1; for(let i=turnos.length-1;i>=0;i--) if(participou(i)){k=i;break;} }
+  if(k<0) return abrirAtirador(nome);
+  const t = turnos[k], rk = rankingDoTurno(DADOS,k), me = rk.find(r=>r.atirador===nome);
+  const best = melhorPorAtirador(t)[nome];
+  const histK = turnos.map((x,i)=>({k:i, r:rankingDoTurno(DADOS,i).find(r=>r.atirador===nome)})).filter(h=>h.r);
+  const hist = histK.map(h=>h.r);
+  const vit = hist.filter(h=>h.col===1).length, melhorCol = Math.min(...hist.map(h=>h.col));
+  const i = histK.findIndex(h=>h.k===k), prev = i>0 ? hist[i-1] : null;
+  const tend = prev ? (prev.col-me.col>0?`<span class="tend up">▲ ${prev.col-me.col}</span>`:(prev.col-me.col<0?`<span class="tend down">▼ ${me.col-prev.col}</span>`:`<span class="tend flat">= pos.</span>`)) : `<span class="tag zero">1º turno</span>`;
+  const regs = t.registros.filter(r=>r.atirador===nome).sort((a,b)=> String(a.data||"").localeCompare(String(b.data||"")) || a.total-b.total);
+  const pm = t.postos_max||[];
+  let marcada=false;
+  const passRows = regs.map(r=>{ let pf=0; pm.forEach((m,j)=>{ if(m && (r.stations[j]||0)>=m) pf++; });
+    const of = !marcada && best && r.total===best.total && pf===best.postos_fechados; if(of) marcada=true;
+    return `<tr class="${of?"lead":""}"><td>${esc(fmtData(r.data))||"—"}</td><td style="color:var(--muted)">${r.stations.join(" · ")}</td><td><b>${r.total}</b></td><td>${of?`<span class="tag hc">✓</span>`:""}</td></tr>`; }).join("");
+  const foto = ""; // reservado
+  let ov = document.getElementById("cardModal");
+  if(!ov){ ov=document.createElement("div"); ov.id="cardModal"; ov.className="overlay"; ov.addEventListener("click", e=>{ if(e.target===ov) ov.hidden=true; }); document.body.appendChild(ov); }
+  ov.innerHTML = `<div class="modal cardat">
+    <span class="close" id="cardClose">✕</span>
+    <h2>${me.col<=3?["🥇","🥈","🥉"][me.col-1]+" ":""}${esc(titleCase(nome))}</h2>
+    <div class="sub">${esc(fmtTurno(t.aba))} · ${me.col}º lugar · ${me.pct_final.toFixed(2)}% ${tend}</div>
+    <div class="kpis">
+      <div class="kpi accent"><div class="v">${me.total}</div><div class="l">Pratos (vale)</div></div>
+      <div class="kpi"><div class="v">${me.handicap?"+"+me.handicap:"—"}</div><div class="l">Handicap</div></div>
+      <div class="kpi"><div class="v">${me.perfect}</div><div class="l">Perfect Stride</div></div>
+      <div class="kpi field"><div class="v">${vit}</div><div class="l">Vitórias (ano)</div></div>
+      <div class="kpi"><div class="v">${melhorCol}º</div><div class="l">Melhor colocação</div></div>
+      <div class="kpi"><div class="v">${hist.length}</div><div class="l">Turnos</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Passadas em ${esc(fmtTurno(t.aba))} (${regs.length})</div>
+    <div class="tablewrap"><table><thead><tr><th>Data</th><th>Postos</th><th>Pratos</th><th>Vale</th></tr></thead><tbody>${passRows}</tbody></table></div>
+    <div class="acts">
+      <button class="btn" id="cardPerfil">👤 Perfil completo</button>
+      <button class="btn ghost" id="cardSim">🎮 Simular "e se?"</button>
+      <button class="btn ghost" id="cardComp">⚖️ Comparar</button>
+    </div></div>`;
+  ov.hidden = false;
+  ov.querySelector("#cardClose").onclick = ()=> ov.hidden = true;
+  ov.querySelector("#cardPerfil").onclick = ()=>{ ov.hidden=true; atirTurnoIdx=k; abrirAtirador(nome); };
+  ov.querySelector("#cardSim").onclick = ()=>{ ov.hidden=true; atirTurnoIdx=k; abrirAtirador(nome);
+    const s=document.getElementById("simRange"); if(s) setTimeout(()=>s.closest(".sim").scrollIntoView({behavior:"smooth",block:"center"}),150); };
+  ov.querySelector("#cardComp").onclick = ()=>{ ov.hidden=true; if(!comparSel) comparSel=[]; if(!comparSel.includes(nome)) comparSel=[...comparSel.slice(-4), nome]; renderComparar(); setView("comparar"); window.scrollTo({top:0,behavior:"smooth"}); };
+}
+
+// ── Ordenar pelo cabeçalho + busca por nome (delegado: vale pra toda tabela) ──
+function valorCel(txt){
+  let s = String(txt||"").trim();
+  const dm = s.match(/^(\d{2})\/(\d{2})(?:\/(\d{4}))?/); if(dm) return +((dm[3]||"0")+dm[2]+dm[1]);
+  if(s==="—"||s==="") return null;
+  s = s.replace(/▲/g,"").replace(/▼/g,"-").replace(/[%º+]/g,"").replace(/\s*p\.p\..*$/,"").replace(",",".").trim();
+  const v = parseFloat(s); return isNaN(v) ? null : v;
+}
+document.addEventListener("click", e=>{
+  const th = e.target.closest("thead th"); if(!th || e.target.closest(".help,[data-atirador]")) return;
+  const table = th.closest("table"); if(!table || table.closest(".h2h")) return;
+  const tbody = table.tBodies[0]; if(!tbody) return;
+  const idx = [...th.parentNode.children].indexOf(th);
+  const dir = th.classList.contains("asc") ? "desc" : "asc";
+  table.querySelectorAll("thead th").forEach(x=>x.classList.remove("asc","desc")); th.classList.add(dir);
+  const fixos = [...tbody.rows].filter(r=>r.classList.contains("nosort"));
+  const rows = [...tbody.rows].filter(r=>!r.classList.contains("nosort"));
+  rows.sort((a,b)=>{ const ta=(a.cells[idx]||{}).textContent||"", tb=(b.cells[idx]||{}).textContent||"";
+    const na=valorCel(ta), nb=valorCel(tb);
+    if(na==null && nb==null) return ta.localeCompare(tb,"pt") * (dir==="asc"?1:-1);
+    if(na==null) return 1; if(nb==null) return -1;
+    const c = (na!==nb) ? na-nb : ta.localeCompare(tb,"pt"); return dir==="asc" ? c : -c; });
+  rows.forEach(r=>tbody.appendChild(r)); fixos.forEach(r=>tbody.appendChild(r));
+});
+document.addEventListener("input", e=>{
+  const inp = e.target.closest("input.busca"); if(!inp) return;
+  const q = inp.value.trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+  const sec = inp.closest("section") || document;
+  sec.querySelectorAll("tbody tr, .salto, .prow").forEach(r=>{
+    const nm = r.querySelector("[data-atirador]"); if(!nm) return;
+    const txt = nm.getAttribute("data-atirador").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+    r.classList.toggle("oculto", !!q && !txt.includes(q));
+  });
+});
+// clique na LINHA (fora do nome) → card rápido
+document.addEventListener("click", e=>{
+  if(e.target.closest("[data-atirador],.help,a,button,input,select,.h2h")) return;
+  const tr = e.target.closest("tbody tr"); if(!tr) return;
+  const nm = tr.querySelector("[data-atirador]"); if(!nm) return;
+  const sec = tr.closest("section"); let k = null;
+  if(sec && sec.id==="view-turno") k = turnoIdx;
+  else if(sec && sec.id==="view-atir") k = atirTurnoIdx;
+  else if(sec && sec.id==="view-dia" && diaSel){ k = DADOS.turnos.findIndex(t=>t.registros.some(r=>r.data===diaSel)); }
+  abrirCard(nm.getAttribute("data-atirador"), k);
+});
+const buscaHTML = (id, txt) => `<div class="ctl"><label>🔎 ${txt||"Buscar atirador"}</label><input class="busca" id="${id}" placeholder="nome…" autocomplete="off"></div>`;
 
 function renderAll(){
   document.getElementById("updated").textContent =
