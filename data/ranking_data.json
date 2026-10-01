@@ -1,5 +1,5 @@
 {
-  "gerado_em": "13/09/2026 15:44",
+  "gerado_em": "01/10/2026 16:11",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1849,6 +1849,45 @@
             21
           ],
           "data": "2026-09-13"
+        }
+      ]
+    },
+    {
+      "aba": "Outubro de 2026",
+      "ordem": [
+        2026,
+        10
+      ],
+      "pratos": 50,
+      "hc": 3,
+      "postos_max": [
+        25,
+        8,
+        9,
+        8
+      ],
+      "registros": [
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 44,
+          "stations": [
+            24,
+            7,
+            7,
+            6
+          ],
+          "data": "2026-10-01"
+        },
+        {
+          "atirador": "MARIA PUCINELLI",
+          "total": 30,
+          "stations": [
+            18,
+            2,
+            6,
+            4
+          ],
+          "data": "2026-10-01"
         }
       ]
     }
