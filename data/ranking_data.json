@@ -1,5 +1,5 @@
 {
-  "gerado_em": "02/10/2026 16:33",
+  "gerado_em": "06/10/2026 14:34",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -1998,6 +1998,28 @@
             6
           ],
           "data": "2026-10-02"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 35,
+          "stations": [
+            19,
+            7,
+            5,
+            4
+          ],
+          "data": "2026-10-06"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 41,
+          "stations": [
+            24,
+            6,
+            5,
+            6
+          ],
+          "data": "2026-10-06"
         }
       ]
     }
