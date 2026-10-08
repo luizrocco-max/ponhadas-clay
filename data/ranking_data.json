@@ -1,5 +1,5 @@
 {
-  "gerado_em": "08/10/2026 15:00",
+  "gerado_em": "08/10/2026 15:41",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2051,6 +2051,17 @@
             7,
             7,
             7
+          ],
+          "data": "2026-10-08"
+        },
+        {
+          "atirador": "MARIO PUCINELLI",
+          "total": 33,
+          "stations": [
+            16,
+            5,
+            7,
+            5
           ],
           "data": "2026-10-08"
         }
