@@ -1,5 +1,5 @@
 {
-  "gerado_em": "13/10/2026 09:08",
+  "gerado_em": "13/10/2026 09:33",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2075,6 +2075,39 @@
             6
           ],
           "data": "2026-10-09"
+        },
+        {
+          "atirador": "FERNÃO LARA MESQUITA",
+          "total": 30,
+          "stations": [
+            13,
+            5,
+            6,
+            6
+          ],
+          "data": "2026-10-10"
+        },
+        {
+          "atirador": "DANTE CARRARO",
+          "total": 35,
+          "stations": [
+            19,
+            6,
+            6,
+            4
+          ],
+          "data": "2026-10-10"
+        },
+        {
+          "atirador": "EMERSON GABRIEL",
+          "total": 35,
+          "stations": [
+            19,
+            4,
+            8,
+            4
+          ],
+          "data": "2026-10-10"
         },
         {
           "atirador": "GUILHERME VALLERINI",
