@@ -1,5 +1,5 @@
 {
-  "gerado_em": "13/10/2026 09:34",
+  "gerado_em": "13/10/2026 13:11",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2141,6 +2141,39 @@
             2
           ],
           "data": "2026-10-11"
+        },
+        {
+          "atirador": "ALEXANDRE SCHUNN",
+          "total": 35,
+          "stations": [
+            19,
+            5,
+            7,
+            4
+          ],
+          "data": "2026-10-13"
+        },
+        {
+          "atirador": "RICARDO MEIRELLES",
+          "total": 33,
+          "stations": [
+            19,
+            5,
+            5,
+            4
+          ],
+          "data": "2026-10-13"
+        },
+        {
+          "atirador": "ALEXANDRE SCHUNN",
+          "total": 31,
+          "stations": [
+            20,
+            2,
+            5,
+            4
+          ],
+          "data": "2026-10-13"
         }
       ]
     }
