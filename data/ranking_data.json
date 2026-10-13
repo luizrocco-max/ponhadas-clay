@@ -1,5 +1,5 @@
 {
-  "gerado_em": "13/10/2026 13:11",
+  "gerado_em": "13/10/2026 17:13",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2172,6 +2172,17 @@
             2,
             5,
             4
+          ],
+          "data": "2026-10-13"
+        },
+        {
+          "atirador": "ALEXANDRE SCHUNN",
+          "total": 39,
+          "stations": [
+            24,
+            4,
+            6,
+            5
           ],
           "data": "2026-10-13"
         }
