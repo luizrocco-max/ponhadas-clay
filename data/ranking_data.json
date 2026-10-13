@@ -1,5 +1,5 @@
 {
-  "gerado_em": "09/10/2026 12:51",
+  "gerado_em": "13/10/2026 09:08",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2075,6 +2075,39 @@
             6
           ],
           "data": "2026-10-09"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 44,
+          "stations": [
+            24,
+            5,
+            7,
+            8
+          ],
+          "data": "2026-10-11"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI JR",
+          "total": 27,
+          "stations": [
+            13,
+            4,
+            6,
+            4
+          ],
+          "data": "2026-10-11"
+        },
+        {
+          "atirador": "EMERSON GABRIEL",
+          "total": 28,
+          "stations": [
+            16,
+            4,
+            6,
+            2
+          ],
+          "data": "2026-10-11"
         }
       ]
     }
