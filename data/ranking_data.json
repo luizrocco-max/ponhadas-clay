@@ -1,5 +1,5 @@
 {
-  "gerado_em": "13/10/2026 17:13",
+  "gerado_em": "15/10/2026 13:14",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2185,6 +2185,50 @@
             5
           ],
           "data": "2026-10-13"
+        },
+        {
+          "atirador": "GUILHERME VALLERINI",
+          "total": 44,
+          "stations": [
+            23,
+            7,
+            8,
+            6
+          ],
+          "data": "2026-10-15"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 33,
+          "stations": [
+            16,
+            5,
+            7,
+            5
+          ],
+          "data": "2026-10-15"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 24,
+          "stations": [
+            14,
+            3,
+            1,
+            6
+          ],
+          "data": "2026-10-15"
+        },
+        {
+          "atirador": "MARIO PUCINELLI",
+          "total": 30,
+          "stations": [
+            17,
+            5,
+            5,
+            3
+          ],
+          "data": "2026-10-15"
         }
       ]
     }
