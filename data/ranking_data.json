@@ -1,5 +1,5 @@
 {
-  "gerado_em": "15/10/2026 17:30",
+  "gerado_em": "17/10/2026 11:45",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2262,6 +2262,83 @@
             6
           ],
           "data": "2026-10-15"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 43,
+          "stations": [
+            25,
+            7,
+            6,
+            5
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "DANTE CARRARO",
+          "total": 42,
+          "stations": [
+            23,
+            6,
+            8,
+            5
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "BENTO MINEIRO",
+          "total": 39,
+          "stations": [
+            22,
+            7,
+            3,
+            7
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "BRUNO IERVOLINO",
+          "total": 31,
+          "stations": [
+            14,
+            6,
+            7,
+            4
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "FERNÃO LARA MESQUITA",
+          "total": 25,
+          "stations": [
+            15,
+            4,
+            3,
+            3
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "GUILHERME MAZZONI",
+          "total": 30,
+          "stations": [
+            13,
+            5,
+            7,
+            5
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 36,
+          "stations": [
+            20,
+            5,
+            6,
+            5
+          ],
+          "data": "2026-10-17"
         }
       ]
     }
