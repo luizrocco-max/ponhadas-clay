@@ -1,5 +1,5 @@
 {
-  "gerado_em": "17/10/2026 11:45",
+  "gerado_em": "17/10/2026 15:14",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2335,6 +2335,39 @@
           "stations": [
             20,
             5,
+            6,
+            5
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "EMERSON GABRIEL",
+          "total": 31,
+          "stations": [
+            18,
+            3,
+            5,
+            5
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "LUIS H. NEVES",
+          "total": 36,
+          "stations": [
+            22,
+            4,
+            5,
+            5
+          ],
+          "data": "2026-10-17"
+        },
+        {
+          "atirador": "BRUNO VERCIANI",
+          "total": 36,
+          "stations": [
+            19,
+            6,
             6,
             5
           ],
