@@ -1,5 +1,5 @@
 {
-  "gerado_em": "28/10/2026 15:53",
+  "gerado_em": "30/10/2026 12:41",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2416,6 +2416,17 @@
             5
           ],
           "data": "2026-10-28"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 38,
+          "stations": [
+            21,
+            5,
+            5,
+            7
+          ],
+          "data": "2026-10-30"
         }
       ]
     }
