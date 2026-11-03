@@ -1,5 +1,5 @@
 {
-  "gerado_em": "30/10/2026 12:41",
+  "gerado_em": "03/11/2026 10:59",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2427,6 +2427,83 @@
             7
           ],
           "data": "2026-10-30"
+        },
+        {
+          "atirador": "FERNÃO LARA MESQUITA",
+          "total": 26,
+          "stations": [
+            14,
+            4,
+            3,
+            5
+          ],
+          "data": "2026-10-31"
+        },
+        {
+          "atirador": "EMERSON GABRIEL",
+          "total": 30,
+          "stations": [
+            19,
+            2,
+            4,
+            5
+          ],
+          "data": "2026-10-31"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 45,
+          "stations": [
+            23,
+            8,
+            7,
+            7
+          ],
+          "data": "2026-10-31"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 42,
+          "stations": [
+            24,
+            7,
+            5,
+            6
+          ],
+          "data": "2026-10-31"
+        },
+        {
+          "atirador": "RICARDO ESPIRITO SANTO",
+          "total": 24,
+          "stations": [
+            9,
+            6,
+            3,
+            6
+          ],
+          "data": "2026-11-01"
+        },
+        {
+          "atirador": "ANTONIO ESPIRITO SANTO",
+          "total": 40,
+          "stations": [
+            20,
+            7,
+            6,
+            7
+          ],
+          "data": "2026-11-01"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 46,
+          "stations": [
+            24,
+            8,
+            7,
+            7
+          ],
+          "data": "2026-11-01"
         }
       ]
     }
