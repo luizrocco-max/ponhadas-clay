@@ -1,5 +1,5 @@
 {
-  "gerado_em": "06/11/2026 12:26",
+  "gerado_em": "06/11/2026 15:00",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2675,6 +2675,28 @@
             6
           ],
           "data": "2026-11-05"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 32,
+          "stations": [
+            16,
+            6,
+            7,
+            3
+          ],
+          "data": "2026-11-06"
+        },
+        {
+          "atirador": "RICARDO LANDSKRON",
+          "total": 32,
+          "stations": [
+            19,
+            7,
+            2,
+            4
+          ],
+          "data": "2026-11-06"
         }
       ]
     }
