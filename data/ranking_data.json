@@ -1,5 +1,5 @@
 {
-  "gerado_em": "06/11/2026 15:24",
+  "gerado_em": "07/11/2026 14:12",
   "turnos": [
     {
       "aba": "Julho de 2026",
@@ -2697,6 +2697,39 @@
             4
           ],
           "data": "2026-11-06"
+        },
+        {
+          "atirador": "EMERSON GABRIEL",
+          "total": 23,
+          "stations": [
+            13,
+            3,
+            5,
+            2
+          ],
+          "data": "2026-11-07"
+        },
+        {
+          "atirador": "LUIZ H. COKE",
+          "total": 32,
+          "stations": [
+            16,
+            6,
+            4,
+            6
+          ],
+          "data": "2026-11-07"
+        },
+        {
+          "atirador": "RENATO POLIZZI",
+          "total": 36,
+          "stations": [
+            17,
+            7,
+            6,
+            6
+          ],
+          "data": "2026-11-07"
         }
       ]
     }
